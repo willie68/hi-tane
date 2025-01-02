@@ -3,13 +3,13 @@ hardware implementation of the game "talk and nobody explodes"
 
 German only
 
-Hier beschreibe ich die Entwicklung meiner HArdware variante des Spiels "talk and nobody explodes".
+Hier beschreibe ich die Entwicklung meiner Hardware variante des Spiels "talk and nobody explodes".
 Ziel dieses Spiels ist eine "Bombenentschärfung". 
 
 # Einleitung
 
 Hallo Bob, 
-stell dir vor du bist ein einem Raum eingeschlossen und hast leider nur einen rudimentären Kontakt zur Außenwelt. D.h. du kannst nur über ein WalkieTalkie mit deinen Kollegen, Peter und Justus, Kontakt aufnehmen. Und neben dir steht ein Koffer mit einer tickenden Bombe. Du hast 60 min Zeit die Bombe zu entschärfen. Das Gute daran, deine Kollegen draußen haben eine Anleitung zur Entschärfung gefunden. Nun müsst ihr zusammen die Bombe entschärfen, wichtig ist das ihr redet. Du beschreibst was du siehst und deine Kollegen versuchen die richtigen Kniffe zur Entschärfung zu finden.
+stell dir vor du bist ein einem Raum eingeschlossen und hast leider nur einen rudimentären Kontakt zur Außenwelt. D.h. du kannst nur über ein WalkieTalkie mit deinen Kollegen, Peter und Justus (im weiteren PJ), Kontakt aufnehmen. Und neben dir steht ein Koffer mit einer tickenden Bombe. Du hast 60 min Zeit die Bombe zu entschärfen. Das Gute daran, deine Kollegen draußen haben eine Anleitung zur Entschärfung gefunden. Nun müsst ihr zusammen die Bombe entschärfen, wichtig ist das ihr redet. Du beschreibst was du siehst und deine Kollegen versuchen die richtigen Kniffe zur Entschärfung zu finden.
 
 # Hardware
 
@@ -55,12 +55,20 @@ Als Controller dient ein Arduino mit folgender Peripherie:
 
 Basis ist eine 8x8 große LED Matrix.
 
-In diesem wird ein nicht sichtbares Labyrinth durch 2 feststehende LEDs gekennzeichnet. Auch der Start- und Zielpunkt werden angezeigt. Diese Informationen übergibst du an Peter und Justus. Die müssen nun das richtige Labyrinth identifizieren und Bob erklären wie er vom Startpunkt zu seinem Ziel kommt.
+In diesem wird ein nicht sichtbares Labyrinth durch 2 feststehende LEDs gekennzeichnet. Auch der Start- und Zielpunkt werden angezeigt. Diese Informationen übergibst du an PJ. Die müssen nun das richtige Labyrinth identifizieren und Bob erklären wie er vom Startpunkt zu seinem Ziel kommt.
 
 ## Wires: entferne die richtigen Kabel
 
+Bob sieht vor sich ein paar Kabel auf einem Steckfeld. Welche und wie viele Kabel muss er nun entfernen, um die Bombe zu entschärfen. PJ versuchen anhand der Erklärung von Bob die richtigen Kabel zu finden.
+
 ## Simon says: ähnlich unserem Senso
+
+In 3 Spielstufen geben die Taster eine Blinkreihenfolge ab. Bob muss diese an PJ übermitteln. Die können nun in der Anleitung die richtige Antwort darauf finden. Bob muss diese dann eingeben. Das Blöde ist nur, Bob hat nix zum Schreiben...
 
 ## Password: finde das richtige Passwort
 
+Bob muss ein Passwort knacken. Anhand der möglichen Buchstaben pro Stelle ergibt sich nur 1 mögliches Passwort. Findet es.
+
 ## Keypad: Höre und Antworte
+
+Beim Aktivieren ertönt eine Morsecode. Dieser muss dechiffriert werden und ergibt dann eine 5-stellige Pin. Bob muss diese dann eingeben.
