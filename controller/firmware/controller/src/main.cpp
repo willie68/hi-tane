@@ -49,6 +49,9 @@ const uint32_t GREEN = pixel.Color(0, 0xff, 0);
 // Tone
 const uint8_t BEEP_PIN = 12;
 
+const uint8_t COM_PIN = 11;
+HTCOM htcom;
+
 // --- forward-declared function prototypes:
 void showTime(int act);
 // Prints out button state
@@ -64,12 +67,15 @@ void generateSerialNumber();
 void generateIndicators();
 void printStatusLine();
 void initGame();
+void resetStrikes();
+void showStrikes();
 
-String serialNumber = "LS5GH7";
+serial_t serialNumber = {'E', 'L', '5', 'E', 'R', '7'};
 uint8_t indicators[3];
 uint32_t color = BLUE;
 long start;
 char buffer[30];
+bool strikes[3];
 
 void timerIsr()
 {
@@ -80,6 +86,8 @@ void timerIsr()
 
 void setup()
 {
+  Serial.begin(115200);
+  Serial.println("init");
   pinMode(LED_BUILTIN, OUTPUT);
   display.clear();
   display.setSegments(TTD, 1, 0);
@@ -97,7 +105,6 @@ void setup()
   timer.initialize(TIMER_NOTIFY_US);
   timer.attachInterrupt(timerIsr);
   start = millis();
-  Serial.begin(115200);
   randomSeed(analogRead(0));
 
   while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) // colums, rows, characters size
@@ -110,6 +117,10 @@ void setup()
   Serial.println(COM);
 
   initGame();
+//  htcom = HTCOM(COM_PIN, 44);
+  htcom = HTCOM();
+  htcom.attach(COM_PIN, 44);
+  htcom.set_SerialNumber(serialNumber);
 }
 
 void initGame()
@@ -119,38 +130,34 @@ void initGame()
   generateIndicators();
 
   printStatusLine();
+
+  resetStrikes();
 }
 
-uint8_t count = 0;
+long count = 0;
 
 void loop()
 {
+  htcom.poll();
   delay(10);
   count++;
   int act = MAX_TIME - ((millis() - start) / 1000);
   showTime(act);
 
   uint8_t pos = count % 3;
-  switch (pos)
+  if (count > 100)
   {
-  case 0:
-    pixel.setPixelColor(0, GREEN);
-    pixel.setPixelColor(1, RED);
-    pixel.setPixelColor(2, BLUE);
-    break;
-  case 1:
-    pixel.setPixelColor(0, BLUE);
-    pixel.setPixelColor(1, GREEN);
-    pixel.setPixelColor(2, RED);
-    break;
-  case 2:
-    pixel.setPixelColor(0, RED);
-    pixel.setPixelColor(1, BLUE);
-    pixel.setPixelColor(2, GREEN);
-    break;
+    strikes[0] = true;
   }
-
-  pixel.show();
+  if (count > 200)
+  {
+    strikes[1] = true;
+  }
+  if (count > 300)
+  {
+    strikes[2] = true;
+  }
+  showStrikes();
   printClickEncoderButtonState();
   printClickEncoderValue();
   printClickEncoderCount();
@@ -163,7 +170,7 @@ void generateSerialNumber()
   a = random(26) + 'A';
   serialNumber[1] = a;
 
-  a = random(10) + '1';
+  a = random(10) + '0';
   serialNumber[2] = a;
 
   a = random(26) + 'A';
@@ -171,10 +178,14 @@ void generateSerialNumber()
   a = random(26) + 'A';
   serialNumber[4] = a;
 
-  a = random(10) + '1';
+  a = random(10) + '0';
   serialNumber[5] = a;
   Serial.print("Serialnumber is: ");
-  Serial.println(serialNumber);
+
+  strncpy(buffer, serialNumber, 6);
+  buffer[6] = 0x00;
+
+  Serial.println(buffer);
 }
 
 void generateIndicators()
@@ -211,7 +222,9 @@ void printStatusLine()
 {
   clearRow(3);
   lcd.print("S:");
-  lcd.print(serialNumber);
+  strncpy(buffer, serialNumber, 6);
+  buffer[6] = 0x00;
+  lcd.print(buffer);
   lcd.print(" ");
 
   for (uint8_t x = 0; x < sizeof(indicators); x++)
@@ -331,4 +344,27 @@ void beep()
   tone(BEEP_PIN, 440, 100);
   delay(100);
   pinMode(BEEP_PIN, INPUT);
+}
+
+void resetStrikes()
+{
+  for (uint8_t x = 0; x < sizeof(strikes); x++)
+  {
+    strikes[x] = false;
+  }
+}
+
+void showStrikes()
+{
+  for (uint8_t x = 0; x < sizeof(strikes); x++)
+  {
+    pixel.setPixelColor(x, GREEN);
+    if (strikes[x])
+    {
+      pixel.setPixelColor(x, RED);
+      lcd.setCursor(10+x,0);
+      lcd.print('*');
+    }
+  }
+  pixel.show();
 }

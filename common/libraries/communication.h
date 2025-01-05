@@ -4,11 +4,12 @@
 #ifndef communication_h
 #define communication_h
 
-using serial_t = char[6] ;
+using serial_t = char[6];
 
 class HTCOM
 {
 public:
+    HTCOM(uint8_t pin, uint8_t id);
     HTCOM();
 
     void attach(uint8_t pin, uint8_t id);

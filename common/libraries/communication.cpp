@@ -3,24 +3,29 @@
 
 HTCOM::HTCOM()
 {
-    this->bus = PJONSoftwareBitBang();
+    bus = PJONSoftwareBitBang();
+}
+
+HTCOM::HTCOM(uint8_t pin, uint8_t id)
+{
+    bus = PJONSoftwareBitBang();
+    attach(pin, id);
 }
 
 void HTCOM::attach(uint8_t pin, uint8_t id)
 {
-    this->bus.set_id(id);
-    this->bus.strategy.set_pin(pin);
-    this->bus.begin();
-    this->bus.send_repeatedly(44, "B", 1, 1000000); // Send B to device 44 every second
+    bus.set_id(id);
+    bus.strategy.set_pin(pin);
+    bus.begin();
 }
 
-void HTCOM::set_SerialNumber(serial_t serialnumber)
+void HTCOM::set_SerialNumber(serial_t srn)
 {
-    strncpy(this->serialnumber, serialnumber, 6);
-    this->bus.send(PJON_BROADCAST, this->serialnumber, 6);
+    strncpy(serialnumber, srn, 6);
+    bus.send(PJON_BROADCAST, serialnumber, 6);
 }
 
 void HTCOM::poll()
 {
-    this->bus.update();
+    bus.update();
 };
