@@ -141,6 +141,7 @@ void loop()
   lcd.home();
   lcd.print(act);
   lcd.setCursor(0,3);
+  lcd.print("SN ");
   lcd.print(serialNumber);
 }
 
