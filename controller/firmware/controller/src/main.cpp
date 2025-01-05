@@ -47,9 +47,8 @@ const uint32_t GREEN = pixel.Color(0, 0xff, 0);
 // Tone
 const uint8_t BEEP_PIN = 12;
 
-// forward functions
-void showTime(int act);
 // --- forward-declared function prototypes:
+void showTime(int act);
 // Prints out button state
 void printClickEncoderButtonState();
 // Prints turn information (turn status, direction, Acceleration value)
@@ -60,8 +59,12 @@ void clearRow(uint8_t row);
 void beep();
 void dblBeep();
 void generateSerialNumber();
+void generateIndicators();
+void printStatusLine();
+void initGame();
 
-String serialNumber ="LS5GH7";
+String serialNumber = "LS5GH7";
+uint8_t indicators[3];
 uint32_t color = BLUE;
 long start;
 
@@ -94,8 +97,6 @@ void setup()
   Serial.begin(115200);
   randomSeed(analogRead(0));
 
-  generateSerialNumber();
-
   while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) // colums, rows, characters size
   {
     Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal."));
@@ -104,6 +105,15 @@ void setup()
 
   lcd.clear();
   Serial.print(COM);
+
+  initGame();
+}
+
+void initGame()
+{
+  generateSerialNumber();
+
+  generateIndicators();
 }
 
 uint8_t count = 0;
@@ -142,17 +152,16 @@ void loop()
   printClickEncoderCount();
   lcd.home();
   lcd.print(act);
-  lcd.setCursor(0,3);
-  lcd.print("SN ");
-  lcd.print(serialNumber);
+  printStatusLine();
 }
 
-void generateSerialNumber() {
+void generateSerialNumber()
+{
   char a = random(26) + 'A';
   serialNumber[0] = a;
   a = random(26) + 'A';
   serialNumber[1] = a;
- 
+
   a = random(10) + '1';
   serialNumber[2] = a;
 
@@ -160,11 +169,48 @@ void generateSerialNumber() {
   serialNumber[3] = a;
   a = random(26) + 'A';
   serialNumber[4] = a;
- 
+
   a = random(10) + '1';
   serialNumber[5] = a;
   Serial.print("Serialnumber is: ");
   Serial.println(serialNumber);
+}
+
+void generateIndicators()
+{
+  uint8_t indCount = random(4);
+  for (uint8_t x = 0; x < 3; x++)
+  {
+    indicators[x] = 0;
+    if (x < indCount)
+    {
+      indicators[x] = random(INDICATOR_COUNT) + 1;
+    }
+  }
+
+  for (uint8_t x = 0; x < sizeof(indicators); x++)
+  {
+    Serial.print(indicators[x]);
+    Serial.print(" ");
+    Serial.print(INDICATORNAMES[x]);
+  }
+}
+
+void printStatusLine()
+{
+  clearRow(3);
+  lcd.print("SN ");
+  lcd.print(serialNumber);
+  Serial.print(" ");
+
+  for (uint8_t x = 0; x < sizeof(indicators); x++)
+  {
+    if (indicators[x] > 0)
+    {
+      lcd.print(INDICATORNAMES[x]);
+      lcd.print(" ");
+    }
+  }
 }
 
 void showTime(int act)
