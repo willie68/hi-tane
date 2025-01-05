@@ -146,17 +146,17 @@ void loop()
 }
 
 void generateSerialNumber() {
-  char a = random(26) + 'a';
+  char a = random(26) + 'A';
   serialNumber[0] = a;
-  a = random(26) + 'a';
+  a = random(26) + 'A';
   serialNumber[1] = a;
  
   a = random(10) + '1';
   serialNumber[2] = a;
 
-  a = random(26) + 'a';
+  a = random(26) + 'A';
   serialNumber[3] = a;
-  a = random(26) + 'a';
+  a = random(26) + 'A';
   serialNumber[4] = a;
  
   a = random(10) + '1';
