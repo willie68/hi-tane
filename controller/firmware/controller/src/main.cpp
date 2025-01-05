@@ -5,6 +5,7 @@
 #include <timerOne.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include "communication.h"
 
 // Display
 #define CLK 2
@@ -102,6 +103,7 @@ void setup()
   }
 
   lcd.clear();
+  Serial.print(COM);
 }
 
 uint8_t count = 0;
