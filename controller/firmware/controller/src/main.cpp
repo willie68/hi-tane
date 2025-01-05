@@ -58,7 +58,9 @@ void printClickEncoderCount();
 void clearRow(uint8_t row);
 void beep();
 void dblBeep();
+void generateSerialNumber();
 
+String serialNumber ="LS5GH7";
 uint32_t color = BLUE;
 long start;
 
@@ -89,6 +91,9 @@ void setup()
   timer.attachInterrupt(timerIsr);
   start = millis();
   Serial.begin(115200);
+  randomSeed(analogRead(0));
+
+  generateSerialNumber();
 
   while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) // colums, rows, characters size
   {
@@ -135,6 +140,28 @@ void loop()
   printClickEncoderCount();
   lcd.home();
   lcd.print(act);
+  lcd.setCursor(0,3);
+  lcd.print(serialNumber);
+}
+
+void generateSerialNumber() {
+  char a = random(26) + 'a';
+  serialNumber[0] = a;
+  a = random(26) + 'a';
+  serialNumber[1] = a;
+ 
+  a = random(10) + '1';
+  serialNumber[2] = a;
+
+  a = random(26) + 'a';
+  serialNumber[3] = a;
+  a = random(26) + 'a';
+  serialNumber[4] = a;
+ 
+  a = random(10) + '1';
+  serialNumber[5] = a;
+  Serial.print("Serialnumber is: ");
+  Serial.println(serialNumber);
 }
 
 void showTime(int act)
