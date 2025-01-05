@@ -1,35 +1,24 @@
-#define COM  1
+#define COM 1
+#include <PJONSoftwareBitBang.h>
 
-const uint8_t INDICATOR_COUNT = 11;
+#ifndef communication_h
+#define communication_h
 
-// defining the flags
-enum INDICATOR {
-    SND = 1,
-    CLR,
-    CAR, 
-    IND,
-    FRQ,
-    SIG, 
-    NSA, 
-    MSA,
-    TRN,
-    BOB, 
-    FRK
+using serial_t = char[6] ;
+
+class HTCOM
+{
+public:
+    HTCOM();
+
+    void attach(uint8_t pin, uint8_t id);
+    void poll();
+
+    void set_SerialNumber(serial_t serialnumber);
+
+protected:
+    PJONSoftwareBitBang bus;
+    serial_t serialnumber;
 };
 
-const char nn[] PROGMEM = "NN"; 
-const char snd[] PROGMEM = "SND"; 
-const char clr[] PROGMEM = "CLR"; 
-const char car[] PROGMEM = "CAR"; 
-const char ind[] PROGMEM = "IND"; 
-const char frq[] PROGMEM = "FRQ";   
-const char sig[] PROGMEM = "SIG"; 
-const char nsa[] PROGMEM = "NSA"; 
-const char msa[] PROGMEM = "MSA"; 
-const char trn[] PROGMEM = "TRN"; 
-const char bob[] PROGMEM = "BOB"; 
-const char frk[] PROGMEM = "FRK";
-
-const char* const INDICATORNAMES[] PROGMEM = { 
-nn, snd, clr, car, ind, frq, sig, nsa, msa, trn, bob, frk
-};
+#endif

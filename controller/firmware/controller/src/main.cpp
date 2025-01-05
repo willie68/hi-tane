@@ -5,6 +5,8 @@
 #include <timerOne.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#define debug
+#include "indicators.h"
 #include "communication.h"
 
 // Display
@@ -67,6 +69,7 @@ String serialNumber = "LS5GH7";
 uint8_t indicators[3];
 uint32_t color = BLUE;
 long start;
+char buffer[30];
 
 void timerIsr()
 {
@@ -104,7 +107,7 @@ void setup()
   }
 
   lcd.clear();
-  Serial.print(COM);
+  Serial.println(COM);
 
   initGame();
 }
@@ -114,18 +117,19 @@ void initGame()
   generateSerialNumber();
 
   generateIndicators();
+
+  printStatusLine();
 }
 
 uint8_t count = 0;
 
 void loop()
 {
-  digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-  delay(100);
+  delay(10);
   count++;
   int act = MAX_TIME - ((millis() - start) / 1000);
   showTime(act);
-  Serial.println(act);
+
   uint8_t pos = count % 3;
   switch (pos)
   {
@@ -150,9 +154,6 @@ void loop()
   printClickEncoderButtonState();
   printClickEncoderValue();
   printClickEncoderCount();
-  lcd.home();
-  lcd.print(act);
-  printStatusLine();
 }
 
 void generateSerialNumber()
@@ -178,8 +179,14 @@ void generateSerialNumber()
 
 void generateIndicators()
 {
-  uint8_t indCount = random(4);
-  for (uint8_t x = 0; x < 3; x++)
+  uint8_t indCount = random(1, 4);
+#ifdef debug
+  Serial.print("ind: ");
+  Serial.print(indCount);
+  Serial.println();
+#endif
+
+  for (uint8_t x = 0; x < sizeof(indicators); x++)
   {
     indicators[x] = 0;
     if (x < indCount)
@@ -187,54 +194,65 @@ void generateIndicators()
       indicators[x] = random(INDICATOR_COUNT) + 1;
     }
   }
-
+#ifdef debug
   for (uint8_t x = 0; x < sizeof(indicators); x++)
   {
-    Serial.print(indicators[x]);
+    uint8_t idx = indicators[x];
+    strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
+    Serial.print(idx);
     Serial.print(" ");
-    Serial.print(INDICATORNAMES[x]);
+    Serial.println(buffer);
   }
+  Serial.println();
+#endif
 }
 
 void printStatusLine()
 {
   clearRow(3);
-  lcd.print("SN ");
+  lcd.print("S:");
   lcd.print(serialNumber);
-  Serial.print(" ");
+  lcd.print(" ");
 
   for (uint8_t x = 0; x < sizeof(indicators); x++)
   {
     if (indicators[x] > 0)
     {
-      lcd.print(INDICATORNAMES[x]);
+      uint8_t idx = indicators[x];
+      strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
+      lcd.print(buffer);
       lcd.print(" ");
     }
   }
 }
 
+int saveTime = 0;
 void showTime(int act)
 {
-  lcd.print(" ");
-  bool neg = act < 0;
-  int t = abs(act);
-  byte sec = t % 60;
-  byte min = (t - sec) / 60;
-  if (neg)
+  if (act != saveTime)
   {
-    lcd.print("-");
-    display.setSegments(MND, 1, 0);
-    lcd.print(min);
-    display.showNumberDec(min, false, 1, 1);
+    saveTime = act;
+    lcd.setCursor(15, 0);
+    bool neg = act < 0;
+    int t = abs(act);
+    byte sec = t % 60;
+    byte min = (t - sec) / 60;
+    if (neg)
+    {
+      lcd.print("-");
+      display.setSegments(MND, 1, 0);
+      lcd.print(min);
+      display.showNumberDec(min, false, 1, 1);
+    }
+    else
+    {
+      lcd.print(min);
+      display.showNumberDec(min, false, 2, 0);
+    }
+    lcd.print(":");
+    lcd.print(sec);
+    display.showNumberDec(sec, true, 2, 2);
   }
-  else
-  {
-    lcd.print(min);
-    display.showNumberDec(min, false, 2, 0);
-  }
-  lcd.print(":");
-  lcd.print(sec);
-  display.showNumberDec(sec, true, 2, 2);
 }
 
 void printClickEncoderButtonState()
