@@ -117,7 +117,7 @@ void setup()
   Serial.println(COM);
 
   initGame();
-//  htcom = HTCOM(COM_PIN, 44);
+  //  htcom = HTCOM(COM_PIN, 44);
   htcom = HTCOM();
   htcom.attach(COM_PIN, 44);
   htcom.set_SerialNumber(serialNumber);
@@ -259,7 +259,7 @@ void showTime(int act)
     else
     {
       lcd.print(min);
-      display.showNumberDec(min, false, 2, 0);
+      display.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
     }
     lcd.print(":");
     lcd.print(sec);
@@ -361,7 +361,7 @@ void showStrikes()
     if (strikes[x])
     {
       pixel.setPixelColor(x, RED);
-      lcd.setCursor(10+x,0);
+      lcd.setCursor(10 + x, 0);
       lcd.print('*');
     }
   }
