@@ -144,7 +144,6 @@ void loop()
   int act = MAX_TIME - ((millis() - start) / 1000);
   showTime(act);
 
-  uint8_t pos = count % 3;
   if (count > 100)
   {
     strikes[0] = true;
