@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "controller/firmware/controller"
+		},
+		{
+			"path": "common/libraries"
+		},
+		{
+			"name": "wires",
+			"path": "module-wires/firmware/wires"
+		}
+	],
+	"settings": {}
+}

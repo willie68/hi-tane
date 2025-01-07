@@ -51,7 +51,7 @@ void initGame()
 
   bool invalid = true;
   while (invalid) {
-    invalid = !panel.init();
+    invalid = !panel.init(true); //TODO setting the sn from HTCOM
     if (invalid) {
       delay(1000);
       Serial.println(F("invalid wire configuration"));
