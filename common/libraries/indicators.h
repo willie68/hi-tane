@@ -1,5 +1,5 @@
-#ifndef indicators_h
-#define indicators_h
+#ifndef INDICATORS_H
+#define INDICATORS_H
 const uint8_t INDICATOR_COUNT = 11;
 
 // defining the flags

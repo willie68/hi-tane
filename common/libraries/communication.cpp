@@ -29,3 +29,7 @@ void HTCOM::poll()
 {
     bus.update();
 };
+
+void HTCOM::sendError(const void *msg) {
+    bus.send(ID_CONTROLLER, msg, 40);
+}

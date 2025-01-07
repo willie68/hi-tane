@@ -1,8 +1,13 @@
+
+#ifndef COMMUNICATION_H
+#define COMMUNICATION_H
 #define COM 1
+
+#include <Arduino.h>
 #include <PJONSoftwareBitBang.h>
 
-#ifndef communication_h
-#define communication_h
+#define ID_CONTROLLER 44
+#define ID_WIRES      45
 
 using serial_t = char[6];
 
@@ -16,6 +21,8 @@ public:
     void poll();
 
     void set_SerialNumber(serial_t serialnumber);
+
+    void sendError(const void *msg);
 
 protected:
     PJONSoftwareBitBang bus;

@@ -13,8 +13,6 @@
 #define CLK 2
 #define DIO 3
 
-// RGB LED
-#define LED_PIN 4
 
 // 7-Segment LED Display
 const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
@@ -41,6 +39,7 @@ const uint8_t ROWS = 4;
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
 // RGB LED
+#define LED_PIN 4
 Adafruit_NeoPixel pixel(3, LED_PIN, NEO_GRB + NEO_KHZ800);
 const uint32_t RED = pixel.Color(0xff, 0, 0);
 const uint32_t BLUE = pixel.Color(0, 0, 0xff);
@@ -119,7 +118,7 @@ void setup()
   initGame();
   //  htcom = HTCOM(COM_PIN, 44);
   htcom = HTCOM();
-  htcom.attach(COM_PIN, 44);
+  htcom.attach(COM_PIN, ID_CONTROLLER);
   htcom.set_SerialNumber(serialNumber);
 }
 
