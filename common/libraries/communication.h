@@ -23,6 +23,8 @@ public:
     void set_SerialNumber(serial_t serialnumber);
 
     void sendError(const void *msg);
+    void sendDisarmed();
+    void sendStrike();
 
 protected:
     PJONSoftwareBitBang bus;

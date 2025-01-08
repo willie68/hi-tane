@@ -33,3 +33,11 @@ void HTCOM::poll()
 void HTCOM::sendError(const void *msg) {
     bus.send(ID_CONTROLLER, msg, 40);
 }
+
+void HTCOM::sendDisarmed() {
+    bus.send(ID_CONTROLLER, "wires: disarmed", 16);
+}
+
+void HTCOM::sendStrike() {
+    bus.send(ID_CONTROLLER, "wires: strike", 14);
+}

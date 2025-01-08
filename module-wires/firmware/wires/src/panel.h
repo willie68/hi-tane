@@ -9,6 +9,7 @@ public:
     Panel();
     bool init(bool is_sn_last_digit_odd);
 
+    bool changed();
     bool isDisarmed();
     bool isStriken();
 
