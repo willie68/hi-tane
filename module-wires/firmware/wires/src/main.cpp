@@ -6,6 +6,9 @@
 #include "communication.h"
 #include <panel.h>
 
+// ---- forward declarations
+void showTime(int act);
+
 // RGB LED
 #define LED_PIN 4
 Adafruit_NeoPixel pixel(3, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -52,9 +55,10 @@ void setup()
 
 void loop()
 {
+  htcom.poll();
+
   if (moduleState == DISARMED)
   {
-    delay(1000);
     pixel.setPixelColor(0, PX_GREEN);
   }
   else if (panel.isDisarmed() && moduleState == ARMED)
@@ -87,6 +91,8 @@ void loop()
     }
   }
   pixel.show();
+
+  showTime(htcom.getGameTime());
 }
 
 void initGame()
@@ -98,6 +104,7 @@ void initGame()
   while (invalid)
   {
     invalid = !panel.init(true); // TODO setting the sn from HTCOM
+    invalid = false;
     if (invalid)
     {
       delay(1000);
@@ -108,4 +115,34 @@ void initGame()
 
   pixel.setPixelColor(0, PX_RED);
   pixel.show();
+}
+
+int saveTime = 0;
+void showTime(int act)
+{
+  if (act != saveTime)
+  {
+    saveTime = act;
+    bool neg = act < 0;
+    int t = abs(act);
+    byte sec = t % 60;
+    byte min = (t - sec) / 60;
+    if (neg)
+    {
+      Serial.print("-");
+      if (min <= 0)
+        Serial.print("0");
+      Serial.print(min);
+    }
+    else
+    {
+      if (min <= 0)
+        Serial.print("0");
+      Serial.print(min);
+    }
+    Serial.print(":");
+      if (sec <= 0)
+        Serial.print("0");
+    Serial.println(sec);
+  }
 }

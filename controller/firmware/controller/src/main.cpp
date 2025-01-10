@@ -13,7 +13,6 @@
 #define CLK 2
 #define DIO 3
 
-
 // 7-Segment LED Display
 const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
 const uint8_t MND[] = {SEG_G};
@@ -65,6 +64,7 @@ void dblBeep();
 void generateSerialNumber();
 void generateIndicators();
 void printStatusLine();
+void printWelcome();
 void initGame();
 void resetStrikes();
 void showStrikes();
@@ -128,9 +128,11 @@ void initGame()
 
   generateIndicators();
 
+  resetStrikes();
+
   printStatusLine();
 
-  resetStrikes();
+  printWelcome();
 }
 
 long count = 0;
@@ -138,9 +140,9 @@ long count = 0;
 void loop()
 {
   htcom.poll();
-  delay(10);
+
   count++;
-  int act = MAX_TIME - ((millis() - start) / 1000);
+  int act = MAX_TIME - int(((millis() - start) / 1000L));
   showTime(act);
 
   if (count > 100)
@@ -243,6 +245,9 @@ void showTime(int act)
   if (act != saveTime)
   {
     saveTime = act;
+
+    htcom.sendHearbeat(act, 0x0000);
+
     lcd.setCursor(15, 0);
     bool neg = act < 0;
     int t = abs(act);
@@ -252,15 +257,21 @@ void showTime(int act)
     {
       lcd.print("-");
       display.setSegments(MND, 1, 0);
+      if (min <= 0)
+        lcd.print("0");
       lcd.print(min);
       display.showNumberDec(min, false, 1, 1);
     }
     else
     {
+      if (min <= 0)
+        lcd.print("0");
       lcd.print(min);
       display.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
     }
     lcd.print(":");
+    if (sec <= 0)
+      lcd.print("0");
     lcd.print(sec);
     display.showNumberDec(sec, true, 2, 2);
   }
@@ -365,4 +376,12 @@ void showStrikes()
     }
   }
   pixel.show();
+}
+
+void printWelcome()
+{
+  lcd.setCursor(0, 0);
+  lcd.print(F("HI-Tane"));
+  lcd.setCursor(0, 1);
+  lcd.print(F("Welcome"));
 }
