@@ -16,9 +16,12 @@ public:
     bool actualHasWire();
     Wire actual();
 
+    int getValue();
+
 private:
     byte pin;
     Wire installed;
+    int value;
 };
 
 #endif

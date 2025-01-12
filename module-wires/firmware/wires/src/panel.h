@@ -13,6 +13,8 @@ public:
     bool isDisarmed();
     bool isStriken();
 
+    void printPlugs();
+
 private:
     bool sn_last_digit_odd;
     Plug *plugs;

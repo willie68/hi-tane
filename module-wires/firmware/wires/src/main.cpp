@@ -11,7 +11,7 @@ void showTime(int act);
 
 // RGB LED
 #define LED_PIN 4
-Adafruit_NeoPixel pixel(3, LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixel(1, LED_PIN, NEO_RGB + NEO_KHZ800);
 const uint32_t PX_BLACK = pixel.Color(0, 0, 0);
 const uint32_t PX_RED = pixel.Color(0xff, 0, 0);
 const uint32_t PX_BLUE = pixel.Color(0, 0, 0xff);
@@ -42,6 +42,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("init");
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
   pixel.setPixelColor(0, PX_BLUE);
   pixel.show();
@@ -115,6 +116,7 @@ void initGame()
 
   pixel.setPixelColor(0, PX_RED);
   pixel.show();
+  panel.printPlugs();
 }
 
 int saveTime = 0;
@@ -141,8 +143,8 @@ void showTime(int act)
       Serial.print(min);
     }
     Serial.print(":");
-      if (sec <= 0)
-        Serial.print("0");
+    if (sec <= 0)
+      Serial.print("0");
     Serial.println(sec);
   }
 }

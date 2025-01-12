@@ -35,6 +35,7 @@ HTCOM::HTCOM(uint8_t pin, uint8_t id)
 
 void HTCOM::attach(uint8_t pin, uint8_t id)
 {
+    gametime = 3600;
     bus.set_id(id);
     bus.strategy.set_pin(pin);
     bus.set_receiver(receiver_function);

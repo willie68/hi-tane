@@ -4,24 +4,33 @@
 
 Plug::Plug(byte pin)
 {
-    this->pin = pin;
+  this->pin = pin;
 
-    installed = actual();
+  installed = actual();
 }
 
-bool Plug::hasWire() {
+bool Plug::hasWire()
+{
   return installed.color != WIRECOLORS::NONE;
 };
 
-bool Plug::actualHasWire() {
+bool Plug::actualHasWire()
+{
   return actual().color != WIRECOLORS::NONE;
 };
 
-Wire Plug::initial() {
-    return installed;
+Wire Plug::initial()
+{
+  return installed;
 };
 
-Wire Plug::actual() {
-  int value = analogRead(pin);
-  return GetWireFromADV(value);  
+Wire Plug::actual()
+{
+  value = analogRead(pin);
+  return getWireFromADV(value);
 };
+
+int Plug::getValue()
+{
+  return value;
+}

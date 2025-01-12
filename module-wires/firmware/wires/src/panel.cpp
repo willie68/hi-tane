@@ -217,3 +217,14 @@ bool Panel::isStriken()
     }
     return false;
 }
+
+void Panel::printPlugs() {
+    for (byte x = 0; x < PLUG_COUNT; x++)
+    {
+        Serial.print(x);
+        plugs[x].hasWire() ? Serial.print("* ") : Serial.print("  ");
+        Serial.print(WireNames[plugs[x].actual().color]);
+        Serial.println();
+    }
+
+}
