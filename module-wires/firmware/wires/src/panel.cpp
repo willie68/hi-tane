@@ -46,18 +46,23 @@ bool Panel::init(bool is_sn_last_digit_odd)
     {
     case 3:
         defusePlug = get3WireDefusePlug();
+        Serial.print(F("3 wire "));
         break;
     case 4:
         defusePlug = get4WireDefusePlug();
+        Serial.print(F("4 wire "));
         break;
     case 5:
         defusePlug = get5WireDefusePlug();
+        Serial.print(F("5 wire "));
         break;
     case 6:
         defusePlug = get6WireDefusePlug();
+        Serial.print(F("6 wire "));
         break;
     };
-
+    Serial.print(F("defuse plug: "));
+    Serial.println(defusePlug);
     return true;
 }
 
@@ -199,7 +204,7 @@ byte Panel::countColor(WIRECOLORS color)
 
 bool Panel::isDisarmed()
 {
-    if ((defusePlug < PLUG_INVALID) && plugs[defusePlug].actualHasWire())
+    if ((defusePlug < PLUG_INVALID) && !plugs[defusePlug].actualHasWire())
     {
         return true;
     }
@@ -226,5 +231,4 @@ void Panel::printPlugs() {
         Serial.print(WireNames[plugs[x].actual().color]);
         Serial.println();
     }
-
 }

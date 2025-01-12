@@ -27,7 +27,7 @@ const byte WIRE_COLOR_COUNT = 8;
 
 const Wire WIRE_NONE = {NONE, 0, 20};
 const Wire WIRE_RED = {RED, 900, 960};
-const Wire WIRE_WHITE = {WHITE, 740, 790};
+const Wire WIRE_WHITE = {WHITE, 760, 810};
 const Wire WIRE_BLUE = {BLUE, 590, 620};
 const Wire WIRE_YELLOW = {YELLOW, 430, 490};
 const Wire WIRE_BLACK = {BLACK, 300, 360};

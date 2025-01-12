@@ -17,6 +17,8 @@ const uint32_t PX_RED = pixel.Color(0xff, 0, 0);
 const uint32_t PX_BLUE = pixel.Color(0, 0, 0xff);
 const uint32_t PX_GREEN = pixel.Color(0, 0xff, 0);
 const uint32_t PX_YELLOW = pixel.Color(0xff, 0xff, 0);
+const uint32_t PX_WHITE = pixel.Color(0xff, 0xff, 0xff);
+const uint32_t PX_BROWN = pixel.Color(0x5b, 0x3a, 0x29);
 
 const byte COM_PIN = 11;
 HTCOM htcom;
@@ -54,9 +56,18 @@ void setup()
   moduleState = ARMED;
 }
 
+MODULE_STATE saveState = MODULE_STATE::INIT;
+
 void loop()
 {
+
   htcom.poll();
+  if (saveState != moduleState)
+  {
+    Serial.print(F("Module state:"));
+    Serial.println(moduleState);
+    saveState = moduleState;
+  }
 
   if (moduleState == DISARMED)
   {
@@ -71,6 +82,7 @@ void loop()
   else if (panel.isStriken() && moduleState == ARMED)
   {
     moduleState = STRIKED;
+    Serial.print(F("strike "));
     htcom.sendStrike();
     pixel.setPixelColor(0, PX_RED);
   }
