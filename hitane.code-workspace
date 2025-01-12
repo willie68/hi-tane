@@ -9,6 +9,9 @@
 		{
 			"name": "wires",
 			"path": "module-wires/firmware/wires"
+		},
+		{
+			"path": "module-maze/firmware/maze"
 		}
 	],
 	"settings": {}
