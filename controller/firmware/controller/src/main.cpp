@@ -119,7 +119,7 @@ void setup()
   //  htcom = HTCOM(COM_PIN, 44);
   htcom = HTCOM();
   htcom.attach(COM_PIN, ID_CONTROLLER);
-  htcom.set_SerialNumber(serialNumber);
+  htcom.setCtrlSerialNumber(serialNumber);
 }
 
 void initGame()

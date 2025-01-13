@@ -43,7 +43,7 @@ void HTCOM::attach(uint8_t pin, uint8_t id)
     bus.begin();
 }
 
-void HTCOM::set_SerialNumber(serial_t srn)
+void HTCOM::setCtrlSerialNumber(serial_t srn)
 {
     strncpy(serialnumber, srn, 6);
     bus.send(PJON_BROADCAST, serialnumber, 6);
@@ -65,7 +65,13 @@ void HTCOM::sendHearbeat(word countdown, word flags)
     buf[4] = flags & 0x00FF;
     buf[5] = strikes;
 
+    sendAll(&buf);
+}
+
+void HTCOM::sendAll(const void *buf)
+{
     bus.send(ID_WIRES, buf, 6);
+    bus.send(ID_MAZE, buf, 6);
 }
 
 void HTCOM::sendError(const void *msg)
@@ -83,9 +89,25 @@ void HTCOM::sendStrike()
     bus.send(ID_CONTROLLER, "wires: strike", 14);
 }
 
-void HTCOM::setStrikes(byte strikes)
+
+void HTCOM::setCtlrStrikes(byte strikes)
 {
     this->strikes = strikes;
+}
+
+void HTCOM::setCtrlDifficulty(byte difficulty)
+{
+    this->difficulty = difficulty;
+
+    byte buf[6];
+    buf[0] = CMD_GAMESETTINGS;
+    buf[1] = this->difficulty;
+    buf[2] = 0;
+    buf[3] = 0;
+    buf[4] = 0;
+    buf[5] = 0;
+
+    sendAll(&buf);
 }
 
 byte HTCOM::getStrikes()

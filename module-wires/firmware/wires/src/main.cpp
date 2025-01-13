@@ -25,7 +25,7 @@ HTCOM htcom;
 
 Panel panel;
 
-enum MODULE_STATE
+enum ModuleState
 {
   INIT,
   ARMED,
@@ -33,7 +33,7 @@ enum MODULE_STATE
   DISARMED
 };
 
-MODULE_STATE moduleState;
+ModuleState moduleState;
 
 // --- forward functions
 void initGame();
@@ -56,7 +56,7 @@ void setup()
   moduleState = ARMED;
 }
 
-MODULE_STATE saveState = MODULE_STATE::INIT;
+ModuleState saveState = ModuleState::INIT;
 
 void loop()
 {

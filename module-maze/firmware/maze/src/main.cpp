@@ -2,36 +2,23 @@
 #include <Adafruit_NeoPixel.h>
 
 #define debug
+#define wokwi
 #include "indicators.h"
-#include "communication.h"
 #include <mazes.h>
+#include "game.h"
 
 // ---- forward declarations
 void showTime(int act);
 
 // RGB LED
 #define LED_PIN 4
-Adafruit_NeoPixel pixel(1, LED_PIN, NEO_RGB + NEO_KHZ800);
-const uint32_t PX_BLACK = pixel.Color(0, 0, 0);
-const uint32_t PX_RED = pixel.Color(0xff, 0, 0);
-const uint32_t PX_BLUE = pixel.Color(0, 0, 0xff);
-const uint32_t PX_GREEN = pixel.Color(0, 0xff, 0);
-const uint32_t PX_YELLOW = pixel.Color(0xff, 0xff, 0);
-const uint32_t PX_WHITE = pixel.Color(0xff, 0xff, 0xff);
-const uint32_t PX_BROWN = pixel.Color(0x5b, 0x3a, 0x29);
+#define COM_PIN 11
+// Game framework
+Game game;
 
-const byte COM_PIN = 11;
-HTCOM htcom;
-
-enum MODULE_STATE
-{
-  INIT,
-  ARMED,
-  STRIKED,
-  DISARMED
-};
-
-MODULE_STATE moduleState;
+#define MATRIX_PIN 5
+const byte MATRIX_LED_COUNT = 36;
+Adafruit_NeoPixel matrix(MATRIX_LED_COUNT, MATRIX_PIN, NEO_GRB + NEO_KHZ800);
 
 Maze maze;
 
@@ -40,79 +27,42 @@ void initGame();
 
 void setup()
 {
-  moduleState = INIT;
   Serial.begin(115200);
   Serial.println("init");
+
+  game = Game();
+  game.init(ModuleTag::MAZE, LED_PIN, COM_PIN);
+  game.setState(ModuleState::INIT);
+
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LED_PIN, OUTPUT);
-
-  pixel.setPixelColor(0, PX_BLUE);
-  pixel.show();
-
-  htcom = HTCOM();
-  htcom.attach(COM_PIN, ID_WIRES);
+  pinMode(MATRIX_PIN, OUTPUT);
 
   initGame();
-  moduleState = ARMED;
+  game.setState(ModuleState::ARMED);
 }
-
-MODULE_STATE saveState = MODULE_STATE::INIT;
 
 void loop()
 {
+  game.poll();
 
-  htcom.poll();
-  if (saveState != moduleState)
+  if (maze.isDisarmed() && game.isState(ModuleState::ARMED))
   {
-    Serial.print(F("Module state:"));
-    Serial.println(moduleState);
-    saveState = moduleState;
+    game.setState(ModuleState::DISARMED);
   }
-
-  if (moduleState == DISARMED)
+  else if (maze.isStriken() && game.isState(ModuleState::ARMED))
   {
-    pixel.setPixelColor(0, PX_GREEN);
+    game.setState(ModuleState::STRIKED);
   }
-  else if (maze.isDisarmed() && moduleState == ARMED)
+  else if (game.isState(ModuleState::STRIKED) && !maze.isStriken())
   {
-    moduleState = DISARMED;
-    htcom.sendDisarmed();
-    pixel.setPixelColor(0, PX_GREEN);
-  }
-  else if (maze.isStriken() && moduleState == ARMED)
-  {
-    moduleState = STRIKED;
-    Serial.print(F("strike "));
-    htcom.sendStrike();
-    pixel.setPixelColor(0, PX_RED);
-  }
-  else if ((moduleState == STRIKED) && !maze.isStriken())
-  {
-    moduleState = ARMED;
-    pixel.setPixelColor(0, PX_RED);
+    game.setState(ModuleState::ARMED);
   }
 
-  if (moduleState == STRIKED)
-  {
-    if ((millis() % 250) < 125)
-    {
-      pixel.setPixelColor(0, PX_RED);
-    }
-    else
-    {
-      pixel.setPixelColor(0, PX_BLACK);
-    }
-  }
-  pixel.show();
-
-  showTime(htcom.getGameTime());
+  showTime(game.getGameTime());
 }
 
 void initGame()
 {
-  pixel.setPixelColor(0, PX_BLUE);
-  pixel.show();
-
   bool invalid = true;
   while (invalid)
   {
@@ -121,13 +71,43 @@ void initGame()
     if (invalid)
     {
       delay(1000);
-      Serial.println(F("invalid wire configuration"));
-      htcom.sendError("wires: invalid configuration");
+      Serial.println(F("invalid maze configuration"));
+      game.sendError("maze: invalid configuration");
     }
   }
 
-  pixel.setPixelColor(0, PX_RED);
-  pixel.show();
+  for (byte x = 0; x < MATRIX_LED_COUNT; x++)
+  {
+    matrix.setPixelColor(x, PX_YELLOW);
+    matrix.show();
+    delay(10);
+  }
+
+  MarkerT marker = maze.getMarker();
+  Serial.print("mrk: ");
+  Serial.print(marker.marker[0]);
+  Serial.print(", ");
+  Serial.print(marker.marker[1]);
+  Serial.println();
+  
+  byte pl = maze.getPlayer();
+  byte gl = maze.getGoal();
+  for (byte x = 0; x < MATRIX_LED_COUNT; x++)
+  {
+    delay(10);
+    matrix.setPixelColor(x, PX_BLACK);
+    if (x == pl) {
+      matrix.setPixelColor(x, PX_WHITE);
+    }
+    if (x == gl) {
+      matrix.setPixelColor(x, PX_RED);
+    }
+    if ((x == marker.marker[0]) || (x == marker.marker[1]))
+    {
+      matrix.setPixelColor(x, PX_YELLOW);
+    }
+    matrix.show();
+  }
 }
 
 int saveTime = 0;

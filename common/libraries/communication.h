@@ -8,13 +8,15 @@
 
 #define ID_CONTROLLER 44
 #define ID_WIRES 45
+#define ID_MAZE 46
 
 using serial_t = char[6];
 
 enum COMMANDS
 {
     CMD_HEARTBEAT = 1,
-    CMD_STRIKE
+    CMD_STRIKE,
+    CMD_GAMESETTINGS
 };
 
 class HTCOM
@@ -26,7 +28,6 @@ public:
     void attach(uint8_t pin, uint8_t id);
     void poll();
 
-    void set_SerialNumber(serial_t serialnumber);
 
     void sendHearbeat(word countdown, word flags);
 
@@ -39,7 +40,9 @@ public:
     byte getStrikes();
 
     // Controller only functions
-    void setStrikes(byte strikes);
+    void setCtlrStrikes(byte strikes);
+    void setCtrlSerialNumber(serial_t serialnumber);
+    void setCtrlDifficulty(byte difficulty);
 
     // internal use only
     void receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info);
@@ -50,6 +53,9 @@ protected:
     int gametime;
     word flags;
     byte strikes;
+    byte difficulty;
+
+    void sendAll(const void *buf);
 };
 
 #endif

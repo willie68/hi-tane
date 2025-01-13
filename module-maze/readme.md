@@ -10,17 +10,11 @@
 
 
 
-Finde das korrekte Labyrinth anhand der runden
+Finde das korrekte Labyrinth anhand der gelben Markierungen.
 
-Markierungen.
+Der Entschärfer muss das weiße Licht mithilfe der Pfeiltasten zum roten Licht navigieren.
 
-Der Entschärfer muss das weiße Licht mithilfe der
-
-Pfeiltasten zum roten Dreieck navigieren.
-
-Warnung: Überquere nicht die Linien. Diese Linien sind
-
-auf der Bombe unsichtbar!
+Warnung: Überquere nicht die Linien. Diese Linien sind auf der Bombe unsichtbar!
 
 # Hardware
 
