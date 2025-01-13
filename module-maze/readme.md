@@ -8,8 +8,6 @@
 
 *Hat jemand dieses Labyrinth aus einem Brettspiel geklaut?*
 
-
-
 Finde das korrekte Labyrinth anhand der gelben Markierungen.
 
 Der Entschärfer muss das weiße Licht mithilfe der Pfeiltasten zum roten Licht navigieren.
