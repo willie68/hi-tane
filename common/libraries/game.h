@@ -1,3 +1,10 @@
+// game 
+// this class abstracts the hitane game from the odule site.
+// it will manage the game state, status led, module tag
+// the module itself can get information about the game itself,
+// like parts about the difficulty, serialnumber, game time, 
+// central game strikes, communication with the controller...
+
 #ifndef GAME_H
 #define GAME_H
 
@@ -10,8 +17,8 @@ using serial_t = char[6];
 
 const uint32_t PX_BLACK = Adafruit_NeoPixel::Color(0, 0, 0);
 const uint32_t PX_RED = Adafruit_NeoPixel::Color(0xff, 0, 0);
-const uint32_t PX_BLUE = Adafruit_NeoPixel::Color(0, 0, 0xff);
 const uint32_t PX_GREEN = Adafruit_NeoPixel::Color(0, 0xff, 0);
+const uint32_t PX_BLUE = Adafruit_NeoPixel::Color(0, 0, 0xff);
 const uint32_t PX_YELLOW = Adafruit_NeoPixel::Color(0xff, 0xff, 0);
 const uint32_t PX_WHITE = Adafruit_NeoPixel::Color(0xff, 0xff, 0xff);
 const uint32_t PX_BROWN = Adafruit_NeoPixel::Color(0x5b, 0x3a, 0x29);
@@ -41,9 +48,10 @@ enum Difficulty
 class Game
 {
 public:
+    Game(ModuleTag moduleTag, byte pinStatusLED, byte pinCom);
     Game();
 
-    void init(ModuleTag moduleTag, byte pinStatusLED, byte pinCom);
+    void init();
     bool hasIndicator(INDICATOR ind);
     bool isSerialnumberOdd();
     word getGameTime();
@@ -59,6 +67,9 @@ public:
 
     void poll();
 private:
+    ModuleTag tag;
+    byte LED;
+    byte Com;
     Adafruit_NeoPixel pixel;
     ModuleState state;
     HTCOM htcom;

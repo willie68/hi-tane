@@ -1,23 +1,30 @@
 #include "game.h"
 #include <Adafruit_NeoPixel.h>
 
+Game::Game(ModuleTag moduleTag, byte pinStatusLED, byte pinCom)
+{
+    tag = moduleTag;
+    LED = pinStatusLED;
+    Com = pinCom;
+};
+
 Game::Game()
 {
     state = ModuleState::INIT;
+    tag = ModuleTag::WIRES;
+    LED = 4;
+    Com = 11;
 };
 
-void Game::init(ModuleTag moduleTag, byte pinStatusLED, byte pinCom)
+void Game::init()
 {
-    Serial.print("status pin ");
-    Serial.println(pinStatusLED);
-
-    pinMode(pinStatusLED, OUTPUT);
-    pixel = Adafruit_NeoPixel(1, pinStatusLED, NEO_GRB + NEO_KHZ800);
+    pinMode(LED, OUTPUT);
+    pixel = Adafruit_NeoPixel(1, LED, NEO_GRB + NEO_KHZ800);
     pixel.setPixelColor(0, PX_GREEN);
     pixel.show();
 
     htcom = HTCOM();
-    htcom.attach(pinCom, moduleTag);
+    htcom.attach(Com, tag);
 
     setState(ModuleState::INIT);
 };
@@ -81,7 +88,8 @@ bool Game::isState(ModuleState state)
     return this->state == state;
 };
 
-void Game::sendError(const void *msg) {
+void Game::sendError(const void *msg)
+{
     htcom.sendError(msg);
 }
 

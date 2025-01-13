@@ -14,7 +14,7 @@ void showTime(int act);
 #define LED_PIN 4
 #define COM_PIN 11
 // Game framework
-Game game;
+Game game(ModuleTag::MAZE, LED_PIN, COM_PIN);
 
 #define MATRIX_PIN 5
 const byte MATRIX_LED_COUNT = 36;
@@ -29,9 +29,6 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("init");
-
-  game = Game();
-  game.init(ModuleTag::MAZE, LED_PIN, COM_PIN);
   game.setState(ModuleState::INIT);
 
   pinMode(LED_BUILTIN, OUTPUT);
@@ -96,15 +93,15 @@ void initGame()
   {
     delay(10);
     matrix.setPixelColor(x, PX_BLACK);
+    if ((x == marker.marker[0]) || (x == marker.marker[1]))
+    {
+      matrix.setPixelColor(x, PX_YELLOW);
+    }
     if (x == pl) {
       matrix.setPixelColor(x, PX_WHITE);
     }
     if (x == gl) {
       matrix.setPixelColor(x, PX_RED);
-    }
-    if ((x == marker.marker[0]) || (x == marker.marker[1]))
-    {
-      matrix.setPixelColor(x, PX_YELLOW);
     }
     matrix.show();
   }
