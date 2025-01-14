@@ -12,6 +12,9 @@
 		},
 		{
 			"path": "module-maze/firmware/maze"
+		},
+		{
+			"path": "../PedalTimer/src/PedalTimer"
 		}
 	],
 	"settings": {}

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Adafruit_NeoPixel.h>
+#include <avdweb_Switch.h>
 
 #define debug
 #define wokwi
@@ -9,6 +10,8 @@
 
 // ---- forward declarations
 void showTime(int act);
+void btnpoll();
+void showBoard(bool smo);
 
 // RGB LED
 #define LED_PIN 4
@@ -19,6 +22,12 @@ Game game(ModuleTag::MAZE, LED_PIN, COM_PIN);
 #define MATRIX_PIN 5
 const byte MATRIX_LED_COUNT = 36;
 Adafruit_NeoPixel matrix(MATRIX_LED_COUNT, MATRIX_PIN, NEO_GRB + NEO_KHZ800);
+
+Switch btn = Switch(6);  // Button north
+Switch bte = Switch(7);  // Button east
+Switch bts = Switch(8);  // Button south
+Switch btw = Switch(9);  // Button west
+Switch btm = Switch(10); // Button middle
 
 Maze maze;
 
@@ -38,24 +47,72 @@ void setup()
   game.setState(ModuleState::ARMED);
 }
 
+unsigned long showMarkerOnly = 0;
+bool strike = false;
+
 void loop()
 {
   game.poll();
+  btnpoll();
 
-  if (maze.isDisarmed() && game.isState(ModuleState::ARMED))
+  bool strike = false;
+  if (btn.singleClick())
+    strike = maze.plN();
+  if (bte.singleClick())
+    strike = maze.plE();
+  if (bts.singleClick())
+    strike = maze.plS();
+  if (btw.singleClick())
+    strike = maze.plW();
+  if (btm.singleClick())
+    showMarkerOnly = millis() + 5000;
+
+  if (maze.isSolved() && game.isState(ModuleState::ARMED))
   {
-    game.setState(ModuleState::DISARMED);
+    game.setSolved();
   }
-  else if (maze.isStriken() && game.isState(ModuleState::ARMED))
+  else if (strike && game.isState(ModuleState::ARMED))
   {
-    game.setState(ModuleState::STRIKED);
+    game.setStrike();
   }
-  else if (game.isState(ModuleState::STRIKED) && !maze.isStriken())
+  else if (game.isState(ModuleState::STRIKED) && !strike)
   {
     game.setState(ModuleState::ARMED);
   }
 
+  bool showMarks = showMarkerOnly > millis();
+  showBoard(showMarks);
   showTime(game.getGameTime());
+}
+
+void showBoard(bool smo)
+{
+  MarkerT marker = maze.getMarker();
+  byte pl = maze.getPlayer();
+  byte gl = maze.getGoal();
+  for (byte x = 0; x < MATRIX_LED_COUNT; x++)
+  {
+    matrix.setPixelColor(x, PX_BLACK);
+    if ((x == marker.marker[0]) || (x == marker.marker[1]))
+    {
+      matrix.setPixelColor(x, PX_YELLOW);
+    }
+    if (!smo)
+    {
+      if (x == pl)
+      {
+        matrix.setPixelColor(x, PX_WHITE);
+      }
+      if (x == gl)
+      {
+        if (maze.isSolved())
+          matrix.setPixelColor(x, PX_GREEN);
+        else
+          matrix.setPixelColor(x, PX_RED);
+      }
+    }
+  }
+  matrix.show();
 }
 
 void initGame()
@@ -86,7 +143,7 @@ void initGame()
   Serial.print(", ");
   Serial.print(marker.marker[1]);
   Serial.println();
-  
+
   byte pl = maze.getPlayer();
   byte gl = maze.getGoal();
   for (byte x = 0; x < MATRIX_LED_COUNT; x++)
@@ -97,10 +154,12 @@ void initGame()
     {
       matrix.setPixelColor(x, PX_YELLOW);
     }
-    if (x == pl) {
+    if (x == pl)
+    {
       matrix.setPixelColor(x, PX_WHITE);
     }
-    if (x == gl) {
+    if (x == gl)
+    {
       matrix.setPixelColor(x, PX_RED);
     }
     matrix.show();
@@ -135,4 +194,13 @@ void showTime(int act)
       Serial.print("0");
     Serial.println(sec);
   }
+}
+
+void btnpoll()
+{
+  btn.poll();
+  bte.poll();
+  btm.poll();
+  bts.poll();
+  btw.poll();
 }

@@ -103,18 +103,22 @@ const MazeDef mazedefs[DEF_COUNT] = {
       {EW, NEW, NW, ES, NSW, E},
       {EW, EW, EW, NW, NE, ESW},
       {SW, ES, SW, ES, SW, NES}},
-     {0x21, 0x05}}};
+     {0x21, 0x04}}};
 
 struct Maze
 {
 public:
   bool init();
 
-  bool isDisarmed();
-  bool isStriken();
+  bool isSolved();
   MarkerT getMarker();
   byte getPlayer();
   byte getGoal();
+
+  bool plN();
+  bool plE();
+  bool plS();
+  bool plW();
 
 private:
   MazeDef field;

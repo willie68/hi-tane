@@ -31,14 +31,9 @@ bool Maze::init()
     return true;
 }
 
-bool Maze::isDisarmed()
+bool Maze::isSolved()
 {
-    return false;
-}
-
-bool Maze::isStriken()
-{
-    return false;
+    return ((player.x == goal.x) && (player.y == goal.y));
 }
 
 byte Maze::pos2index(Position p)
@@ -78,7 +73,8 @@ byte Maze::getDistance()
     byte y = player.y;
     byte dist = 0;
 
-    while (!recurDist(x, y, 0, &dist));
+    while (!recurDist(x, y, 0, &dist))
+        ;
 
     return dist;
 }
@@ -138,3 +134,52 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
     }
     return false;
 }
+
+bool Maze::plN()
+{
+    if ((player.y > 0) && (field.maze[player.y][player.x] & N) == 0)
+    {
+        player.y -= 1;
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+};
+bool Maze::plE()
+{
+    if ((player.x < 5) && (field.maze[player.y][player.x] & E) == 0)
+    {
+        player.x += 1;
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+};
+bool Maze::plS()
+{
+    if ((player.y < 5) && (field.maze[player.y][player.x] & S) == 0)
+    {
+        player.y += 1;
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+};
+bool Maze::plW()
+{
+    if ((player.x > 0) && (field.maze[player.y][player.x] & W) == 0)
+    {
+        player.x -= 1;
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+};

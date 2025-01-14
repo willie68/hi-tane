@@ -43,9 +43,13 @@ word Game::getGameTime()
 };
 
 void Game::setStrike() {
+    Serial.println("STRIKE");
+    setState(ModuleState::STRIKED);
 };
 
 void Game::setSolved() {
+    Serial.println("SOLVED");
+    setState(ModuleState::DISARMED);
 };
 
 bool Game::isGameDifficulty(Difficulty difficulty)
