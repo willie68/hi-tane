@@ -17,3 +17,4 @@ Warnung: Überquere nicht die Linien. Diese Linien sind auf der Bombe unsichtbar
 # Hardware
 
 ![mazes](./research/mazes.jpg)
+

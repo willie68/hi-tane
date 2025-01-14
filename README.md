@@ -1,10 +1,12 @@
 # hi-tane
-hardware implementation of the game "talk and nobody explodes"
+hardware implementation of the game "keep talk and nobody explodes"
 
 German only
 
-Hier beschreibe ich die Entwicklung meiner Hardware variante des Spiels "talk and nobody explodes".
-Ziel dieses Spiels ist eine "Bombenentschärfung". 
+Hier beschreibe ich die Entwicklung meiner Hardware variante des Spiels "keep talk and nobody explodes".
+Ziel dieses Spiels ist eine "Bombenentschärfung".  Das ganze ist als Geburtstagsgeschenk an meine Frau gedacht. 
+
+Eingebaut in einen kleinen Koffer. 
 
 # Einleitung
 
@@ -13,13 +15,13 @@ stell dir vor du bist ein einem Raum eingeschlossen und hast leider nur einen ru
 
 # Hardware
 
-Das Spiel ist eigentlich im original ein Handy Spiel, ich habe aber dieses schöne Repository auf github gefunden, daß mir ein kleinwenig als Stütze dient. https://heathbar.github.io/keep-talking/
+Das Spiel ist eigentlich im original ein Handy Spiel, ich habe aber dieses schöne Repository auf github gefunden, dass mir ein klein wenig als Stütze dient. https://heathbar.github.io/keep-talking/
 
-Aufgebaut besteht das Spiel aus einem zentralen Controller, der die Steuerung der Module und die Zeitmessung übernimmt. NEbenher zählt er auch die Fehlversuche. Die einzelnen Module sind als eigenständige Einhaiten aufgebaut, die über ein Busdsystem mit dem zentralen Controller kommunizieren.
+Aufgebaut besteht das Spiel aus einem zentralen Controller, der die Steuerung der Module und die Zeitmessung übernimmt. Nebenher zählt er auch die Fehlversuche. Die einzelnen Module sind als eigenständige Einheiten aufgebaut, die über ein Bussystem mit dem zentralen Controller kommunizieren.
 
 Folgende Module sind geplant:
 
-- 8x8 Maze: finde den Weg zum Ausgang
+- 6x6 Maze: finde den Weg zum Ausgang
 - Wires: entferne die richtigen Kabel
 - Simon says: ähnlich unserem Senso
 - Password: finde das richtige Passwort
@@ -27,9 +29,13 @@ Folgende Module sind geplant:
 
 ## Allgemein
 
-Das ganze Spiel ist in einem Koffer eingebaut. Als Stromversorgung dient ein 18450 Akku. Der Controller mit den Stike LEDS, Lautsprecher, CoundDown Anzeige und 16x2 Display mit Encoder ist im Deckel montiert.
+Das ganze Spiel ist in einem Koffer eingebaut. Als Stromversorgung dient ein 18650 Akku. Der Controller mit den Strike LEDS, Lautsprecher, CoundDown Anzeige und 20x4 Display mit Encoder ist im Deckel montiert.
 
-Die Spielmodule sind in einem Rahmen im eigentlichen Fach montiert und können dort ersetzt werden. Dadurch ist es möglich, verschiedenen Module zu verwenden. 
+Die Spielmodule sind in einem Rahmen im eigentlichen Fach montiert und können dort ersetzt werden. Dadurch ist es möglich, verschiedenen Module zu verwenden. Derzeit hat der Rahmen platz für 6 Module. 
+
+Alles zum Drucken findest du hier: https://www.tinkercad.com/users/fKoj7udgQYq-wklaas
+
+
 
 ## Controller
 
@@ -44,18 +50,18 @@ Der Controller koordiniert verschiedenen Dinge des Spiels:
   - Anzahl der gelösten Rätsel
 - Ermittlung der Module: der Controller ermittelt zunächst welche Module montiert sind. Anhand dieser Liste kann er dann entscheiden, wieviel Zeit tatsächlich dem Entschärfer zur Verfügung gestellt wird.
 
-Als Controller dient ein Arduino mit folgender Peripherie:
+Als Controller dient ein Arduino Nano mit folgender Peripherie:
 
-- 16x2 Display mit Encoder zum Einstellen und Abrufen verschiedener Parameter
+- 20x4 Display mit Encoder zum Einstellen und Abrufen verschiedener Parameter
 - Ein Lautsprecher als Beeper, später evtl. ein MP3 Modul
 - ein 4-stelliges 7-Segmant Display für die Spielzeitanzeige
 - 3 Dual-Color oder RGB LEDs als Strikecounter
 
-## 8x8 Maze: finde den Weg zum Ausgang
+## 6x6 Maze: finde den Weg zum Ausgang
 
-Basis ist eine 8x8 große LED Matrix.
+Basis ist eine 6x6 große RGB LED Matrix.
 
-In diesem wird ein nicht sichtbares Labyrinth durch 2 feststehende LEDs gekennzeichnet. Auch der Start- und Zielpunkt werden angezeigt. Diese Informationen übergibst du an PJ. Die müssen nun das richtige Labyrinth identifizieren und Bob erklären wie er vom Startpunkt zu seinem Ziel kommt.
+In diesem wird ein nicht sichtbares Labyrinth durch 2 feststehende gelbe Marker gekennzeichnet. Auch der Start (weiß)- und Zielpunkt (rot) werden angezeigt. Diese Informationen übergibst du an PJ. Die müssen nun das richtige Labyrinth identifizieren und Bob erklären wie er vom Startpunkt zu seinem Ziel kommt.
 
 ## Wires: entferne die richtigen Kabel
 
