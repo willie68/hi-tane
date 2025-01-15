@@ -44,7 +44,7 @@ void setup()
   pinMode(MATRIX_PIN, OUTPUT);
 
   initGame();
-  game.setState(ModuleState::ARMED);
+  game.arm();
 }
 
 unsigned long showMarkerOnly = 0;
@@ -163,36 +163,6 @@ void initGame()
       matrix.setPixelColor(x, PX_RED);
     }
     matrix.show();
-  }
-}
-
-int saveTime = 0;
-void showTime(int act)
-{
-  if (act != saveTime)
-  {
-    saveTime = act;
-    bool neg = act < 0;
-    int t = abs(act);
-    byte sec = t % 60;
-    byte min = (t - sec) / 60;
-    if (neg)
-    {
-      Serial.print("-");
-      if (min <= 0)
-        Serial.print("0");
-      Serial.print(min);
-    }
-    else
-    {
-      if (min <= 0)
-        Serial.print("0");
-      Serial.print(min);
-    }
-    Serial.print(":");
-    if (sec <= 0)
-      Serial.print("0");
-    Serial.println(sec);
   }
 }
 

@@ -55,6 +55,7 @@ public:
     bool hasIndicator(INDICATOR ind);
     bool isSerialnumberOdd();
     word getGameTime();
+    void arm();
     void setStrike();
     void setSolved();
     bool isGameDifficulty(Difficulty difficulty);
@@ -66,10 +67,14 @@ public:
     void setPixelColor(uint32_t color);
 
     void poll();
+
+    // output game time for debug to serial
+    void showTime();
 private:
     ModuleTag tag;
     byte LED;
     byte Com;
+    word saveTime;
     Adafruit_NeoPixel pixel;
     ModuleState state;
     HTCOM htcom;

@@ -15,6 +15,13 @@
 		},
 		{
 			"path": "../PedalTimer/src/PedalTimer"
+		},
+		{
+			"name": "password",
+			"path": "module-password/password"
+		},
+		{
+			"path": "module-password/utils"
 		}
 	],
 	"settings": {}

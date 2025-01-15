@@ -42,6 +42,11 @@ word Game::getGameTime()
     return 3600;
 };
 
+void Game::arm() {
+    Serial.println("ARMED");
+    setState(ModuleState::ARMED);
+}
+
 void Game::setStrike() {
     Serial.println("STRIKE");
     setState(ModuleState::STRIKED);
@@ -118,4 +123,34 @@ void Game::poll()
         }
         pixel.show();
     }
+}
+
+void Game::showTime()
+{
+  word  act = getGameTime();
+  if (act != saveTime)
+  {
+    saveTime = act;
+    bool neg = act < 0;
+    int t = abs(act);
+    byte sec = t % 60;
+    byte min = (t - sec) / 60;
+    if (neg)
+    {
+      Serial.print("-");
+      if (min <= 0)
+        Serial.print("0");
+      Serial.print(min);
+    }
+    else
+    {
+      if (min <= 0)
+        Serial.print("0");
+      Serial.print(min);
+    }
+    Serial.print(":");
+    if (sec <= 0)
+      Serial.print("0");
+    Serial.println(sec);
+  }
 }
