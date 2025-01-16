@@ -9,7 +9,7 @@
 #include "game.h"
 
 // ---- forward declarations
-void showTime(int act);
+void initGame();
 void btnpoll();
 void showBoard(bool smo);
 
@@ -30,9 +30,6 @@ Switch btw = Switch(9);  // Button west
 Switch btm = Switch(10); // Button middle
 
 Maze maze;
-
-// --- forward functions
-void initGame();
 
 void setup()
 {
@@ -82,7 +79,7 @@ void loop()
 
   bool showMarks = showMarkerOnly > millis();
   showBoard(showMarks);
-  showTime(game.getGameTime());
+  game.showTime();
 }
 
 void showBoard(bool smo)

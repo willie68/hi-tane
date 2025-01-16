@@ -101,7 +101,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         found = recurDist(x, y - 1, N, dist);
         if (found)
         {
-            *dist += 1;
+            *dist++;
             return true;
         }
     }
@@ -110,7 +110,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         found = recurDist(x + 1, y, E, dist);
         if (found)
         {
-            *dist += 1;
+            *dist++;
             return true;
         }
     }
@@ -119,7 +119,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         found = recurDist(x, y + 1, S, dist);
         if (found)
         {
-            *dist += 1;
+            *dist++;
             return true;
         }
     }
@@ -128,7 +128,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         found = recurDist(x - 1, y, W, dist);
         if (found)
         {
-            *dist += 1;
+            *dist++;
             return true;
         }
     }
@@ -139,7 +139,7 @@ bool Maze::plN()
 {
     if ((player.y > 0) && (field.maze[player.y][player.x] & N) == 0)
     {
-        player.y -= 1;
+        player.y--;
         return false;
     }
     else
@@ -151,7 +151,7 @@ bool Maze::plE()
 {
     if ((player.x < 5) && (field.maze[player.y][player.x] & E) == 0)
     {
-        player.x += 1;
+        player.x++;
         return false;
     }
     else
@@ -163,7 +163,7 @@ bool Maze::plS()
 {
     if ((player.y < 5) && (field.maze[player.y][player.x] & S) == 0)
     {
-        player.y += 1;
+        player.y++;
         return false;
     }
     else
@@ -175,7 +175,7 @@ bool Maze::plW()
 {
     if ((player.x > 0) && (field.maze[player.y][player.x] & W) == 0)
     {
-        player.x -= 1;
+        player.x--;
         return false;
     }
     else
