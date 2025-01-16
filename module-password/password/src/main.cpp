@@ -17,7 +17,7 @@ bool answerCorrect();
 #define LED_PIN 4
 #define COM_PIN 11
 // Game framework
-Game game(ModuleTag::MAZE, LED_PIN, COM_PIN);
+Game game(ModuleTag::PASSWORD, LED_PIN, COM_PIN);
 
 // U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8x8(U8G2_R0); ///* clock=A5*/ 19, /* data=A4*/ 18);
 // U8G2_SSD1306_128X32_UNIVISION_1_HW_I2C u8x8(U8G2_R0, 255, 19, 18); ///* clock=A5*/ 19, /* data=A4*/ 18);
@@ -74,6 +74,7 @@ void initGame(byte wd)
   Serial.println(alpha3);
   Serial.println(alpha4);
   Serial.println(input);
+  game.arm();
 }
 
 bool changed;
@@ -138,7 +139,8 @@ void loop()
     if (game.isState(ModuleState::STRIKED))
     {
       u8x8.drawString(0, 0, "STRIKE");
-      for(byte i = 0; i < 60; i++) {
+      for (byte i = 0; i < 60; i++)
+      {
         game.poll();
         delay(50);
       }

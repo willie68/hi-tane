@@ -22,6 +22,10 @@
 		},
 		{
 			"path": "module-password/utils"
+		},
+		{
+			"name": "morse",
+			"path": "module-morse/morse"
 		}
 	],
 	"settings": {}

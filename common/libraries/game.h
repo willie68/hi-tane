@@ -35,7 +35,9 @@ enum ModuleTag
 {
     CONTROLLER = 44,
     WIRES = 45,
-    MAZE = 46
+    MAZE = 46,
+    PASSWORD = 47,
+    MORSE = 48
 };
 
 enum Difficulty
