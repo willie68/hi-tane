@@ -101,7 +101,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         found = recurDist(x, y - 1, N, dist);
         if (found)
         {
-            *dist++;
+            (*dist)++;
             return true;
         }
     }
@@ -110,7 +110,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         found = recurDist(x + 1, y, E, dist);
         if (found)
         {
-            *dist++;
+            (*dist)++;
             return true;
         }
     }
@@ -119,7 +119,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         found = recurDist(x, y + 1, S, dist);
         if (found)
         {
-            *dist++;
+            (*dist)++;
             return true;
         }
     }
@@ -128,7 +128,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         found = recurDist(x - 1, y, W, dist);
         if (found)
         {
-            *dist++;
+            (*dist)++;
             return true;
         }
     }
