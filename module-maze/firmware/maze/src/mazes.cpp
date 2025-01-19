@@ -43,7 +43,7 @@ byte Maze::pos2index(Position p)
 
 byte Maze::pos2index(byte x, byte y)
 {
-    return x + y * 6;
+    return 9 + x + (y * 8);
 }
 
 MarkerT Maze::getMarker()

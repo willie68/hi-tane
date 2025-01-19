@@ -20,7 +20,7 @@ void showBoard(bool smo);
 Game game(ModuleTag::MAZE, LED_PIN, COM_PIN);
 
 #define MATRIX_PIN 5
-const byte MATRIX_LED_COUNT = 36;
+const byte MATRIX_LED_COUNT = 64;
 Adafruit_NeoPixel matrix(MATRIX_LED_COUNT, MATRIX_PIN, NEO_GRB + NEO_KHZ800);
 
 Switch btn = Switch(6);  // Button north
@@ -90,6 +90,10 @@ void showBoard(bool smo)
   for (byte x = 0; x < MATRIX_LED_COUNT; x++)
   {
     matrix.setPixelColor(x, PX_BLACK);
+    if ((x < 9) || (x > 54) || (x == 15) || (x == 16) || (x == 23) || (x == 24) || (x == 31) || (x == 32) || (x == 39) || (x == 40) || (x == 47) || (x == 48))
+    {
+      matrix.setPixelColor(x, PX_BLUE);
+    }
     if ((x == marker.marker[0]) || (x == marker.marker[1]))
     {
       matrix.setPixelColor(x, PX_YELLOW);
