@@ -18,14 +18,14 @@
 		},
 		{
 			"name": "password",
-			"path": "module-password/password"
+			"path": "module-password/firmware/password"
 		},
 		{
 			"path": "module-password/utils"
 		},
 		{
 			"name": "morse",
-			"path": "module-morse/morse"
+			"path": "module-morse/firmware/morse"
 		}
 	],
 	"settings": {}
