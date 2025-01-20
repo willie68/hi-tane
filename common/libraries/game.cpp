@@ -4,7 +4,7 @@
 Game::Game(ModuleTag moduleTag, byte pinStatusLED, byte pinCom)
 {
     tag = moduleTag;
-    LED = pinStatusLED;
+    StatusLED = pinStatusLED;
     Com = pinCom;
 };
 
@@ -12,19 +12,19 @@ Game::Game()
 {
     state = ModuleState::INIT;
     tag = ModuleTag::WIRES;
-    LED = 4;
+    StatusLED = 4;
     Com = 11;
 };
 
 void Game::init()
 {
-    pinMode(LED, OUTPUT);
-    pixel = Adafruit_NeoPixel(1, LED, NEO_GRB + NEO_KHZ800);
-    pixel.setPixelColor(0, PX_GREEN);
-    pixel.show();
+    pinMode(StatusLED, OUTPUT);
+    pixel = new Adafruit_NeoPixel(1, StatusLED, NEO_GRB + NEO_KHZ800);
+    pixel->setPixelColor(0, PX_GREEN);
+    pixel->show();
 
-    htcom = HTCOM();
-    htcom.attach(Com, tag);
+    htcom = new HTCOM();
+    htcom->attach(Com, tag);
 
     setState(ModuleState::INIT);
 };
@@ -82,11 +82,11 @@ void Game::setState(ModuleState state)
         setPixelColor(PX_RED);
         break;
     case STRIKED:
-        htcom.sendStrike();
+        htcom->sendStrike();
         setPixelColor(PX_RED);
         break;
     case DISARMED:
-        htcom.sendDisarmed();
+        htcom->sendDisarmed();
         setPixelColor(PX_GREEN);
         break;
     }
@@ -99,29 +99,29 @@ bool Game::isState(ModuleState state)
 
 void Game::sendError(const void *msg)
 {
-    htcom.sendError(msg);
+    htcom->sendError(msg);
 }
 
 void Game::setPixelColor(uint32_t color)
 {
-    pixel.setPixelColor(0, color);
-    pixel.show();
+    pixel->setPixelColor(0, color);
+    pixel->show();
 }
 
 void Game::poll()
 {
-    htcom.poll();
+    htcom->poll();
     if (state == ModuleState::STRIKED)
     {
         if ((millis() % 250) < 125)
         {
-            pixel.setPixelColor(0, PX_RED);
+            pixel->setPixelColor(0, PX_RED);
         }
         else
         {
-            pixel.setPixelColor(0, PX_BLACK);
+            pixel->setPixelColor(0, PX_BLACK);
         }
-        pixel.show();
+        pixel->show();
     }
 }
 

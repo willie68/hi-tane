@@ -92,7 +92,7 @@ void showBoard(bool smo)
     matrix.setPixelColor(x, PX_BLACK);
     if ((x < 9) || (x > 54) || (x == 15) || (x == 16) || (x == 23) || (x == 24) || (x == 31) || (x == 32) || (x == 39) || (x == 40) || (x == 47) || (x == 48))
     {
-      matrix.setPixelColor(x, PX_BLUE);
+      matrix.setPixelColor(x, PX_LOWWHITE);
     }
     if ((x == marker.marker[0]) || (x == marker.marker[1]))
     {
@@ -131,6 +131,7 @@ void initGame()
     }
   }
 
+  game.init();
   for (byte x = 0; x < MATRIX_LED_COUNT; x++)
   {
     matrix.setPixelColor(x, PX_YELLOW);
