@@ -1,26 +1,20 @@
 #include <Arduino.h>
 #include <mazes.h>
-
+#include <tools.h>
+#define debug
 void MazeField::load(Difficulty difficulty, byte idx)
 {
-    #ifdef debug
-    Serial.print("MazeField: diff");
-    Serial.print(difficulty);
-    Serial.print("field: ");
-    Serial.println(idx);
-    #endif
-    this->hard = false;
-    this->dim = 6;
+    hard = false;
+    dim = 6;
     if (difficulty != Difficulty::HARD)
     {
-        strcpy_P(field6, (MazeDef6x6 *)pgm_read_word(&(mazedefs[idx])));
-        this->field6 = ;
+        memcpy_P(&field6, &(mazedefs[idx]), sizeof(MazeDef6x6));
     }
     else
     {
-        this->field8 = mazedefs8[idx];
-        this->dim = 8;
-        this->hard = true;
+        memcpy_P(&field8, &(mazedefs8[idx]), sizeof(MazeDef8x8));
+        dim = 8;
+        hard = true;
     }
 };
 
@@ -42,25 +36,23 @@ byte MazeField::getValue(byte x, byte y)
     return field6.maze[y][x];
 };
 
-byte MazeField::getDim() {
+byte MazeField::getDim()
+{
     return dim;
 };
 
-Maze::Maze() {
-    Serial.println(F("Maze::"));
+Maze::Maze()
+{
 }
 
 bool Maze::init(Difficulty difficulty)
 {
     this->difficulty = difficulty;
-    Serial.println(F("Maze::init"));
     randomSeed(analogRead(0));
     byte idx = random(DEF_COUNT);
     field = MazeField();
     field.load(difficulty, idx);
 
-    Serial.print("b:");
-    Serial.print(idx);
     byte distance = 0;
     byte minDist = 8;
     byte maxDist = 10;
@@ -74,23 +66,13 @@ bool Maze::init(Difficulty difficulty)
         minDist = 10;
         maxDist = 40;
     }
-    while ((distance < maxDist) && (distance >= minDist))
+    while ((distance >= maxDist) || (distance < minDist))
     {
         player.x = random(0, field.getDim());
         player.y = random(0, field.getDim());
         goal.x = random(0, field.getDim());
         goal.y = random(0, field.getDim());
-        Serial.print("p.x: ");
-        Serial.print(player.x);
-        Serial.print(", p.y: ");
-        Serial.print(player.y);
-        Serial.print(", g.x: ");
-        Serial.print(goal.x);
-        Serial.print(", g.y: ");
-        Serial.println(goal.y);
         distance = getDistance();
-        Serial.print("dist: ");
-        Serial.println(distance);
     }
     return true;
 }
@@ -149,18 +131,8 @@ byte Maze::getDistance()
 
 bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
 {
-#ifdef debug
-    Serial.print("x: ");
-    Serial.print(x);
-    Serial.print(", y: ");
-    Serial.print(y);
-    Serial.println();
-#endif
     if ((x == goal.x) && (y == goal.y))
     {
-#ifdef debug
-        Serial.println(" goal");
-#endif
         return true;
     }
     bool found = false;
@@ -219,7 +191,7 @@ bool Maze::plN()
 
 bool Maze::plE()
 {
-    if ((player.x < 5) && (field.getValue(player.x, player.y) & E) == 0)
+    if ((player.x < (field.getDim()-1)) && (field.getValue(player.x, player.y) & E) == 0)
     {
         player.x++;
         return false;
@@ -232,7 +204,7 @@ bool Maze::plE()
 
 bool Maze::plS()
 {
-    if ((player.y < 5) && (field.getValue(player.x, player.y) & S) == 0)
+    if ((player.y < (field.getDim()-1)) && (field.getValue(player.x, player.y) & S) == 0)
     {
         player.y++;
         return false;

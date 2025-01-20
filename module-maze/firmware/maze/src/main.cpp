@@ -34,7 +34,6 @@ Maze maze;
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("init");
   
   game.setState(ModuleState::INIT);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -125,12 +124,12 @@ void showBoard(bool smo)
 
 void initGame()
 {
-  Serial.println("main#initGame");
   game.init();
+  game.setGameDifficulty(Difficulty::SIMPLE);
+  
   bool invalid = true;
   while (invalid)
   {
-    Serial.println("maze#init");
     invalid = !maze.init(game.getGameDifficulty()); // TODO setting the sn from HTCOM
     invalid = false;
     if (invalid)
@@ -149,11 +148,6 @@ void initGame()
   }
 
   MarkerT marker = maze.getMarker();
-  Serial.print("mrk: ");
-  Serial.print(marker.marker[0]);
-  Serial.print(", ");
-  Serial.print(marker.marker[1]);
-  Serial.println();
 
   byte pl = maze.getPlayer();
   byte gl = maze.getGoal();

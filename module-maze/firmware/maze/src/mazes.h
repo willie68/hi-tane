@@ -114,7 +114,7 @@ const MazeDef6x6 mazedefs[DEF_COUNT] PROGMEM = {
      {0x21, 0x04}}};
 
 const MazeDef8x8 mazedefs8[DEF_COUNT] PROGMEM = {
-    {{{NW, NS, NES, N, NS, NS, NS, NE},
+    {{{NW, NS, NES, NW, NS, NS, NES, NE},
       {W, N, NS, E, NW, NS, NES, EW},
       {EW, EW, NW, ES, SW, NS, N, E},
       {EW, EW, SW, NE, NW, NS, E, EW},
@@ -127,25 +127,25 @@ const MazeDef8x8 mazedefs8[DEF_COUNT] PROGMEM = {
       {W, NS, N, NES, NW, N, NES, EW},
       {EW, NW, ES, NW, ES, SW, NE, EW},
       {EW, EW, NW, ES, NW, NS, 0, E},
-      {EW, W, ES, NW, ES, NEW, EW, EW},
-      {EW, EW, NEW, EW, NW, ES, EW, EW},
+      {ESW, W, ES, NW, ES, NEW, EW, EW},
+      {NEW, EW, NEW, EW, NW, ES, EW, EW},
       {W, ES, SW, ES, W, NS, ES, ESW},
       {ESW, SW, NS, NS, N, NS, NS, NES}},
      {0x24, 0x52}},
-    {{{NW, NS, NS, NS, NS, NE, NSW, NE},
+    {{{NSW, NS, NS, NS, NS, NE, NSW, NE},
       {W, N, NS, NE, NEW, NW, NE, EW},
       {EW, ESW, NEW, EW, SW, ES, EW, EW},
       {ESW, NW, E, EW, NW, NE, EW, EW},
       {NEW, EW, EW, EW, EW, EW, EW, EW},
       {EW, EW, SW, ES, EW, EW, W, E},
       {EW, S, NS, NS, ES, SW, ES, EW},
-      {SW, S, NS, NS, NEW, NSW, NS, ES}},
+      {SW, S, NS, NS, NES, NSW, NS, ES}},
      {0x44, 0x64}},
     {{{NW, NS, NS, NS, NE, NSW, N, NE},
       {EW, NW, NE, NSW, S, NS, E, EW},
       {EW, EW, EW, NW, NS, NS, E, EW},
-      {ESW, EW, SW, ES, NW, NES, EW, EW},
-      {NEW, EW, NSW, NS, S, NS, E, EW},
+      {ESW, EW, SW, ES, NW, NES, EW, ESW},
+      {NEW, EW, NSW, NS, S, NS, E, NEW},
       {EW, W, NS, NS, NS, NE, EW, EW},
       {EW, SW, NS, NE, NSW, ES, EW, EW},
       {SW, NS, NS, S, NES, NSW, S, ES}},
@@ -166,15 +166,15 @@ const MazeDef8x8 mazedefs8[DEF_COUNT] PROGMEM = {
       {EW, SW, NE, NW, E, EW, NEW, EW},
       {W, N, ES, ESW, EW, SW, 0, E},
       {EW, SW, NS, NS, E, NSW, ES, EW},
-      {SW, NS, NES, NSW, S, NS, NS, ES}},
+      {SW, NS, NES, NSW, S, NS, NES, ESW}},
      {0x51, 0x35}},
     {{{NW, NS, NS, NE, NSW, NS, NS, NE},
       {EW, NW, S, NS, NE, NW, N, ES},
       {EW, EW, NW, NE, SW, ES, EW, NEW},
       {EW, SW, ES, NW, NES, NW, ES, EW},
       {ESW, NW, NE, W, NS, ES, NEW, EW},
-      {W, EW, ESW, SW, NS, NE, W, E},
-      {EW, SW, NS, NS, NS, S, ES, EW},
+      {W, EW, ESW, SW, NS, NE, W, ES},
+      {EW, SW, NS, NS, NS, S, ES, NEW},
       {SW, NS, NS, NS, NS, NS, NS, ES}},
      {0x21, 0x26}},
     {{{NEW, NEW, NSW, NS, NS, NS, N, NE},
@@ -235,6 +235,8 @@ private:
   Position player, goal;
 
   Difficulty difficulty;
+
+
   byte getDistance();
 
   bool recurDist(byte x, byte y, byte dir, byte *dist);
