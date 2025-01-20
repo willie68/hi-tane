@@ -48,7 +48,7 @@ struct MazeDef8x8
 
 const byte DEF_COUNT = 9;
 
-const MazeDef6x6 mazedefs[DEF_COUNT] = {
+const MazeDef6x6 mazedefs[DEF_COUNT] PROGMEM = {
     {{{NW, NS, NE, NW, NS, NES},
       {EW, NW, ES, SW, NS, NE},
       {EW, SW, NE, NW, NS, E},
@@ -113,7 +113,7 @@ const MazeDef6x6 mazedefs[DEF_COUNT] = {
       {SW, ES, SW, ES, SW, NES}},
      {0x21, 0x04}}};
 
-const MazeDef8x8 mazedefs8[DEF_COUNT] = {
+const MazeDef8x8 mazedefs8[DEF_COUNT] PROGMEM = {
     {{{NW, NS, NES, N, NS, NS, NS, NE},
       {W, N, NS, E, NW, NS, NES, EW},
       {EW, EW, NW, ES, SW, NS, N, E},

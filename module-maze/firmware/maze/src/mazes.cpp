@@ -13,7 +13,8 @@ void MazeField::load(Difficulty difficulty, byte idx)
     this->dim = 6;
     if (difficulty != Difficulty::HARD)
     {
-        this->field6 = mazedefs[idx];
+        strcpy_P(field6, (MazeDef6x6 *)pgm_read_word(&(mazedefs[idx])));
+        this->field6 = ;
     }
     else
     {
