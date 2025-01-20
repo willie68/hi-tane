@@ -14,6 +14,7 @@ Game::Game()
     tag = ModuleTag::WIRES;
     StatusLED = 4;
     Com = 11;
+    difficulty = Difficulty::HARD;
 };
 
 void Game::init()
@@ -42,24 +43,37 @@ word Game::getGameTime()
     return 3600;
 };
 
-void Game::arm() {
+void Game::arm()
+{
     Serial.println("ARMED");
     setState(ModuleState::ARMED);
 }
 
-void Game::setStrike() {
+void Game::setStrike()
+{
     Serial.println("STRIKE");
     setState(ModuleState::STRIKED);
 };
 
-void Game::setSolved() {
+void Game::setSolved()
+{
     Serial.println("SOLVED");
     setState(ModuleState::DISARMED);
 };
 
+void Game::setGameDifficulty(Difficulty difficulty)
+{
+    this->difficulty = difficulty;
+}
+
+Difficulty Game::getGameDifficulty()
+{
+    return difficulty;
+}
+
 bool Game::isGameDifficulty(Difficulty difficulty)
 {
-    return difficulty == Difficulty::SIMPLE;
+    return this->difficulty == difficulty;
 };
 
 void Game::setState(ModuleState state)
@@ -71,7 +85,6 @@ void Game::setState(ModuleState state)
         Serial.println(state);
     }
 #endif
-
     this->state = state;
     switch (state)
     {
@@ -127,30 +140,30 @@ void Game::poll()
 
 void Game::showTime()
 {
-  word  act = getGameTime();
-  if (act != saveTime)
-  {
-    saveTime = act;
-    bool neg = act < 0;
-    int t = abs(act);
-    byte sec = t % 60;
-    byte min = (t - sec) / 60;
-    if (neg)
+    word act = getGameTime();
+    if (act != saveTime)
     {
-      Serial.print("-");
-      if (min <= 0)
-        Serial.print("0");
-      Serial.print(min);
+        saveTime = act;
+        bool neg = act < 0;
+        int t = abs(act);
+        byte sec = t % 60;
+        byte min = (t - sec) / 60;
+        if (neg)
+        {
+            Serial.print("-");
+            if (min <= 0)
+                Serial.print("0");
+            Serial.print(min);
+        }
+        else
+        {
+            if (min <= 0)
+                Serial.print("0");
+            Serial.print(min);
+        }
+        Serial.print(":");
+        if (sec <= 0)
+            Serial.print("0");
+        Serial.println(sec);
     }
-    else
-    {
-      if (min <= 0)
-        Serial.print("0");
-      Serial.print(min);
-    }
-    Serial.print(":");
-    if (sec <= 0)
-      Serial.print("0");
-    Serial.println(sec);
-  }
 }

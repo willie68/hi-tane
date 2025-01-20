@@ -1,20 +1,84 @@
 #include <Arduino.h>
 #include <mazes.h>
 
-bool Maze::init()
+void MazeField::load(Difficulty difficulty, byte idx)
 {
+    #ifdef debug
+    Serial.print("MazeField: diff");
+    Serial.print(difficulty);
+    Serial.print("field: ");
+    Serial.println(idx);
+    #endif
+    this->hard = false;
+    this->dim = 6;
+    if (difficulty != Difficulty::HARD)
+    {
+        this->field6 = mazedefs[idx];
+    }
+    else
+    {
+        this->field8 = mazedefs8[idx];
+        this->dim = 8;
+        this->hard = true;
+    }
+};
+
+MarkerT MazeField::getMarker()
+{
+    if (hard)
+    {
+        return field8.marker;
+    }
+    return field6.marker;
+};
+
+byte MazeField::getValue(byte x, byte y)
+{
+    if (hard)
+    {
+        return field8.maze[y][x];
+    }
+    return field6.maze[y][x];
+};
+
+byte MazeField::getDim() {
+    return dim;
+};
+
+Maze::Maze() {
+    Serial.println(F("Maze::"));
+}
+
+bool Maze::init(Difficulty difficulty)
+{
+    this->difficulty = difficulty;
+    Serial.println(F("Maze::init"));
     randomSeed(analogRead(0));
     byte idx = random(DEF_COUNT);
-    field = mazedefs[idx];
+    field = MazeField();
+    field.load(difficulty, idx);
+
     Serial.print("b:");
     Serial.print(idx);
     byte distance = 0;
-    while (distance < 10)
+    byte minDist = 8;
+    byte maxDist = 10;
+    if (difficulty == Difficulty::MEDIUM)
     {
-        player.x = random(0, 5);
-        player.y = random(0, 5);
-        goal.x = random(0, 5);
-        goal.y = random(0, 5);
+        minDist = 10;
+        maxDist = 12;
+    }
+    else if (difficulty == Difficulty::HARD)
+    {
+        minDist = 10;
+        maxDist = 40;
+    }
+    while ((distance < maxDist) && (distance >= minDist))
+    {
+        player.x = random(0, field.getDim());
+        player.y = random(0, field.getDim());
+        goal.x = random(0, field.getDim());
+        goal.y = random(0, field.getDim());
         Serial.print("p.x: ");
         Serial.print(player.x);
         Serial.print(", p.y: ");
@@ -26,7 +90,6 @@ bool Maze::init()
         distance = getDistance();
         Serial.print("dist: ");
         Serial.println(distance);
-        delay(1000);
     }
     return true;
 }
@@ -43,6 +106,10 @@ byte Maze::pos2index(Position p)
 
 byte Maze::pos2index(byte x, byte y)
 {
+    if (difficulty == Difficulty::HARD)
+    {
+        return x + (y * 8);
+    }
     return 9 + x + (y * 8);
 }
 
@@ -51,7 +118,7 @@ MarkerT Maze::getMarker()
     MarkerT mark;
     for (byte x = 0; x < 2; x++)
     {
-        mark.marker[x] = pos2index(((field.marker.marker[x] & 0xF0) >> 4), (field.marker.marker[x] & 0x0F));
+        mark.marker[x] = pos2index(((field.getMarker().marker[x] & 0xF0) >> 4), (field.getMarker().marker[x] & 0x0F));
     }
     return mark;
 }
@@ -96,7 +163,8 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
         return true;
     }
     bool found = false;
-    if (((field.maze[y][x] & N) == 0) && (dir != S))
+    byte value = field.getValue(x, y);
+    if (((value & N) == 0) && (dir != S))
     {
         found = recurDist(x, y - 1, N, dist);
         if (found)
@@ -105,7 +173,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
             return true;
         }
     }
-    if (((field.maze[y][x] & E) == 0) && (dir != W))
+    if (((value & E) == 0) && (dir != W))
     {
         found = recurDist(x + 1, y, E, dist);
         if (found)
@@ -114,7 +182,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
             return true;
         }
     }
-    if (((field.maze[y][x] & S) == 0) && (dir != N))
+    if (((value & S) == 0) && (dir != N))
     {
         found = recurDist(x, y + 1, S, dist);
         if (found)
@@ -123,7 +191,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
             return true;
         }
     }
-    if (((field.maze[y][x] & W) == 0) && (dir != E))
+    if (((value & W) == 0) && (dir != E))
     {
         found = recurDist(x - 1, y, W, dist);
         if (found)
@@ -137,7 +205,7 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
 
 bool Maze::plN()
 {
-    if ((player.y > 0) && (field.maze[player.y][player.x] & N) == 0)
+    if ((player.y > 0) && (field.getValue(player.x, player.y) & N) == 0)
     {
         player.y--;
         return false;
@@ -147,9 +215,10 @@ bool Maze::plN()
         return true;
     }
 };
+
 bool Maze::plE()
 {
-    if ((player.x < 5) && (field.maze[player.y][player.x] & E) == 0)
+    if ((player.x < 5) && (field.getValue(player.x, player.y) & E) == 0)
     {
         player.x++;
         return false;
@@ -159,9 +228,10 @@ bool Maze::plE()
         return true;
     }
 };
+
 bool Maze::plS()
 {
-    if ((player.y < 5) && (field.maze[player.y][player.x] & S) == 0)
+    if ((player.y < 5) && (field.getValue(player.x, player.y) & S) == 0)
     {
         player.y++;
         return false;
@@ -171,9 +241,10 @@ bool Maze::plS()
         return true;
     }
 };
+
 bool Maze::plW()
 {
-    if ((player.x > 0) && (field.maze[player.y][player.x] & W) == 0)
+    if ((player.x > 0) && (field.getValue(player.x, player.y) & W) == 0)
     {
         player.x--;
         return false;

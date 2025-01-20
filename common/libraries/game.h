@@ -61,6 +61,8 @@ public:
     void arm();
     void setStrike();
     void setSolved();
+
+    Difficulty getGameDifficulty();
     bool isGameDifficulty(Difficulty difficulty);
     void setState(ModuleState state);
     bool isState(ModuleState state);
@@ -73,6 +75,7 @@ public:
 
     // output game time for debug to serial
     void showTime();
+    void setGameDifficulty(Difficulty difficulty);
 private:
     ModuleTag tag;
     byte StatusLED;
@@ -81,5 +84,6 @@ private:
     Adafruit_NeoPixel *pixel;
     ModuleState state;
     HTCOM *htcom;
+    Difficulty difficulty;
 };
 #endif

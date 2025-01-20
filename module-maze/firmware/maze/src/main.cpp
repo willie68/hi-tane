@@ -35,12 +35,13 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("init");
+  
   game.setState(ModuleState::INIT);
-
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(MATRIX_PIN, OUTPUT);
 
   initGame();
+
   game.arm();
 }
 
@@ -90,7 +91,13 @@ void showBoard(bool smo)
   for (byte x = 0; x < MATRIX_LED_COUNT; x++)
   {
     matrix.setPixelColor(x, PX_BLACK);
-    if ((x < 9) || (x > 54) || (x == 15) || (x == 16) || (x == 23) || (x == 24) || (x == 31) || (x == 32) || (x == 39) || (x == 40) || (x == 47) || (x == 48))
+    if (((x < 9) || (x > 54) ||
+         (x == 15) || (x == 16) ||
+         (x == 23) || (x == 24) ||
+         (x == 31) || (x == 32) ||
+         (x == 39) || (x == 40) ||
+         (x == 47) || (x == 48)) &&
+        !game.isGameDifficulty(Difficulty::HARD))
     {
       matrix.setPixelColor(x, PX_LOWWHITE);
     }
@@ -118,10 +125,13 @@ void showBoard(bool smo)
 
 void initGame()
 {
+  Serial.println("main#initGame");
+  game.init();
   bool invalid = true;
   while (invalid)
   {
-    invalid = !maze.init(); // TODO setting the sn from HTCOM
+    Serial.println("maze#init");
+    invalid = !maze.init(game.getGameDifficulty()); // TODO setting the sn from HTCOM
     invalid = false;
     if (invalid)
     {
@@ -131,7 +141,6 @@ void initGame()
     }
   }
 
-  game.init();
   for (byte x = 0; x < MATRIX_LED_COUNT; x++)
   {
     matrix.setPixelColor(x, PX_YELLOW);
