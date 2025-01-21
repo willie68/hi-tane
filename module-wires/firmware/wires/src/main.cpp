@@ -23,7 +23,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("init");
   pinMode(LED_BUILTIN, OUTPUT);
-  game.setState(ModuleState::INIT);
+  game.init();
 
   initGame();
   game.arm();
@@ -31,7 +31,6 @@ void setup()
 
 void loop()
 {
-
   game.poll();
   if (panel.isDisarmed() && game.isState(ModuleState::ARMED))
   {

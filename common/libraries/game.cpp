@@ -1,5 +1,6 @@
 #include "game.h"
 #include <Adafruit_NeoPixel.h>
+#include <debug.h>
 
 Game::Game(ModuleTag moduleTag, byte pinStatusLED, byte pinCom)
 {
@@ -23,6 +24,7 @@ void Game::init()
     pixel = new Adafruit_NeoPixel(1, StatusLED, NEO_GRB + NEO_KHZ800);
     pixel->setPixelColor(0, PX_BLACK);
     pixel->show();
+    pixel->setBrightness(127);
 
     htcom = new HTCOM();
     htcom->attach(Com, tag);
@@ -43,21 +45,18 @@ word Game::getGameTime()
     return 3600;
 };
 
-void Game::arm()
-{
-    Serial.println("ARMED");
+void Game::arm() {
+    dbgOutLn(F("ARMED"));
     setState(ModuleState::ARMED);
 }
 
-void Game::setStrike()
-{
-    Serial.println("STRIKE");
+void Game::setStrike() {
+    dbgOutLn(F("STRIKE"));
     setState(ModuleState::STRIKED);
 };
 
-void Game::setSolved()
-{
-    Serial.println("SOLVED");
+void Game::setSolved() {
+    dbgOutLn(F("SOLVED"));
     setState(ModuleState::DISARMED);
 };
 
@@ -103,6 +102,7 @@ void Game::setState(ModuleState state)
         setPixelColor(PX_GREEN);
         break;
     }
+
 };
 
 bool Game::isState(ModuleState state)
@@ -167,3 +167,4 @@ void Game::showTime()
         Serial.println(sec);
     }
 }
+
