@@ -51,6 +51,7 @@ void loop()
 
 void initGame()
 {
+  game.init();
   bool invalid = true;
   while (invalid)
   {

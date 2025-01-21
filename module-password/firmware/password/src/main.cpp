@@ -57,6 +57,7 @@ void setup()
 
 void initGame(byte wd)
 {
+  game.init();
   byte off = wd * 6;
   strcpy_P(answer, (char *)pgm_read_word(&(pwd[off + 0])));
   strcpy_P(alpha0, (char *)pgm_read_word(&(pwd[off + 1])));

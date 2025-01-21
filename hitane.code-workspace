@@ -1,9 +1,11 @@
 {
 	"folders": [
 		{
+			"name": "controller",
 			"path": "controller/firmware/controller"
 		},
 		{
+			"name": "libraries",
 			"path": "common/libraries"
 		},
 		{
@@ -11,21 +13,23 @@
 			"path": "module-wires/firmware/wires"
 		},
 		{
+			"name": "maze",
 			"path": "module-maze/firmware/maze"
-		},
-		{
-			"path": "../PedalTimer/src/PedalTimer"
 		},
 		{
 			"name": "password",
 			"path": "module-password/firmware/password"
 		},
 		{
+			"name": "morse",
+			"path": "module-morse/firmware/morse"
+		},
+		{
+			"name": "utils",
 			"path": "module-password/utils"
 		},
 		{
-			"name": "morse",
-			"path": "module-morse/firmware/morse"
+			"path": "../PJON"
 		}
 	],
 	"settings": {}

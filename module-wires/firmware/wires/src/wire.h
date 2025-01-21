@@ -35,12 +35,10 @@ const Wire WIRE_GREEN = {GREEN, 150, 180};
 const Wire WIRE_BROWN = {BROWN, 30, 60};
 
 const Wire Wires[WIRE_COLOR_COUNT] = {
-    WIRE_NONE, WIRE_RED, WIRE_WHITE, WIRE_BLUE, WIRE_YELLOW, WIRE_BLACK, WIRE_GREEN, WIRE_BROWN
-};
+    WIRE_NONE, WIRE_RED, WIRE_WHITE, WIRE_BLUE, WIRE_YELLOW, WIRE_BLACK, WIRE_GREEN, WIRE_BROWN};
 
 const String WireNames[WIRE_COLOR_COUNT] = {
-    "nn","red","white","blue","yellow","black","green", "brown"
-};
+    "nn", "red", "white", "blue", "yellow", "black", "green", "brown"};
 
 Wire getWireFromADV(int value);
 

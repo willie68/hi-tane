@@ -23,7 +23,7 @@ void setup()
 
 void initGame()
 {
-
+  game.init();
   game.arm();
 }
 

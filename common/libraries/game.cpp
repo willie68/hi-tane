@@ -21,7 +21,7 @@ void Game::init()
 {
     pinMode(StatusLED, OUTPUT);
     pixel = new Adafruit_NeoPixel(1, StatusLED, NEO_GRB + NEO_KHZ800);
-    pixel->setPixelColor(0, PX_GREEN);
+    pixel->setPixelColor(0, PX_BLACK);
     pixel->show();
 
     htcom = new HTCOM();
