@@ -21,7 +21,7 @@ const uint32_t PX_GREEN = Adafruit_NeoPixel::Color(0, 0xff, 0);
 const uint32_t PX_BLUE = Adafruit_NeoPixel::Color(0, 0, 0xff);
 const uint32_t PX_YELLOW = Adafruit_NeoPixel::Color(0xff, 0xff, 0);
 const uint32_t PX_WHITE = Adafruit_NeoPixel::Color(0xff, 0xff, 0xff);
-const uint32_t PX_LOWWHITE = Adafruit_NeoPixel::Color(0x40, 0x40, 0x40);
+const uint32_t PX_LOWWHITE = Adafruit_NeoPixel::Color(0x20, 0x20, 0x20);
 const uint32_t PX_BROWN = Adafruit_NeoPixel::Color(0x5b, 0x3a, 0x29);
 
 enum ModuleState

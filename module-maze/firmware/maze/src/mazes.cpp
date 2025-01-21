@@ -90,9 +90,9 @@ byte Maze::pos2index(byte x, byte y)
 {
     if (difficulty == Difficulty::HARD)
     {
-        return x + (y * 8);
+        return (7 - x) + (y * 8);
     }
-    return 9 + x + (y * 8);
+    return 9 + (5 - x) + (y * 8);
 }
 
 MarkerT Maze::getMarker()
@@ -180,6 +180,7 @@ bool Maze::plN()
     if ((player.y > 0) && (field.getValue(player.x, player.y) & N) == 0)
     {
         player.y--;
+        printPlayer();
         return false;
     }
     else
@@ -190,9 +191,10 @@ bool Maze::plN()
 
 bool Maze::plE()
 {
-    if ((player.x < (field.getDim()-1)) && (field.getValue(player.x, player.y) & E) == 0)
+    if ((player.x < (field.getDim() - 1)) && (field.getValue(player.x, player.y) & E) == 0)
     {
         player.x++;
+        printPlayer();
         return false;
     }
     else
@@ -203,9 +205,10 @@ bool Maze::plE()
 
 bool Maze::plS()
 {
-    if ((player.y < (field.getDim()-1)) && (field.getValue(player.x, player.y) & S) == 0)
+    if ((player.y < (field.getDim() - 1)) && (field.getValue(player.x, player.y) & S) == 0)
     {
         player.y++;
+        printPlayer();
         return false;
     }
     else
@@ -219,6 +222,7 @@ bool Maze::plW()
     if ((player.x > 0) && (field.getValue(player.x, player.y) & W) == 0)
     {
         player.x--;
+        printPlayer();
         return false;
     }
     else
@@ -226,3 +230,13 @@ bool Maze::plW()
         return true;
     }
 };
+
+void Maze::printPlayer()
+{
+    Serial.print("ply: ");
+    Serial.print(player.x);
+    Serial.print(" / ");
+    Serial.print(player.y);
+    Serial.print(" = ");
+    Serial.println(pos2index(player.x, player.y));
+}

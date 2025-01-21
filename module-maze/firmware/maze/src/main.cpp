@@ -12,6 +12,7 @@
 void initGame();
 void btnpoll();
 void showBoard(bool smo);
+void showSmile(bool ok);
 
 // RGB LED
 #define LED_PIN 4
@@ -34,14 +35,16 @@ Maze maze;
 void setup()
 {
   Serial.begin(115200);
-  
+
   game.setState(ModuleState::INIT);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(MATRIX_PIN, OUTPUT);
-
+  matrix.setBrightness(64);
   initGame();
 
   game.arm();
+  matrix.setBrightness(0x20);
+  matrix.show();
 }
 
 unsigned long showMarkerOnly = 0;
@@ -67,10 +70,22 @@ void loop()
   if (maze.isSolved() && game.isState(ModuleState::ARMED))
   {
     game.setSolved();
+    showSmile(true);
+    for (byte x = 100; x > 0; x--)
+    {
+      game.poll();
+      delay(10);
+    }
   }
   else if (strike && game.isState(ModuleState::ARMED))
   {
     game.setStrike();
+    showSmile(false);
+    for (byte x = 100; x > 0; x--)
+    {
+      game.poll();
+      delay(10);
+    }
   }
   else if (game.isState(ModuleState::STRIKED) && !strike)
   {
@@ -78,8 +93,50 @@ void loop()
   }
 
   bool showMarks = showMarkerOnly > millis();
-  showBoard(showMarks);
+  if (!game.isState(ModuleState::DISARMED))
+  {
+    showBoard(showMarks);
+  }
+
   game.showTime();
+}
+
+byte SM_OK[] = {0x3C, 0x42, 0xA5, 0x81, 0xA5, 0x99, 0x42, 0x3C};
+byte SM_NOK[] = {0x3C, 0x42, 0xA5, 0x81, 0x99, 0xA5, 0x42, 0x3C};
+
+void showSmile(bool ok)
+{
+  matrix.clear();
+  for (byte y = 0; y < 8; y++)
+  {
+    for (byte x = 0; x < 8; x++)
+    {
+      byte value = 0;
+      if (ok)
+      {
+        value = SM_OK[y];
+      }
+      else
+      {
+        value = SM_NOK[y];
+      }
+      if ((value & (1 << x)) > 0)
+      {
+        if (ok)
+        {
+          matrix.setPixelColor(maze.pos2index(x, y), PX_GREEN);
+        }
+        else
+        {
+          matrix.setPixelColor(maze.pos2index(x, y), PX_RED);
+        }
+      }
+    }
+  }
+  if (ok) {
+    matrix.setBrightness(0x10);
+  }
+  matrix.show();
 }
 
 void showBoard(bool smo)
@@ -125,8 +182,8 @@ void showBoard(bool smo)
 void initGame()
 {
   game.init();
-  game.setGameDifficulty(Difficulty::SIMPLE);
-  
+  game.setGameDifficulty(Difficulty::HARD);
+
   bool invalid = true;
   while (invalid)
   {
@@ -140,34 +197,12 @@ void initGame()
     }
   }
 
+  matrix.setBrightness(0x10);
   for (byte x = 0; x < MATRIX_LED_COUNT; x++)
   {
     matrix.setPixelColor(x, PX_YELLOW);
     matrix.show();
     delay(10);
-  }
-
-  MarkerT marker = maze.getMarker();
-
-  byte pl = maze.getPlayer();
-  byte gl = maze.getGoal();
-  for (byte x = 0; x < MATRIX_LED_COUNT; x++)
-  {
-    delay(10);
-    matrix.setPixelColor(x, PX_BLACK);
-    if ((x == marker.marker[0]) || (x == marker.marker[1]))
-    {
-      matrix.setPixelColor(x, PX_YELLOW);
-    }
-    if (x == pl)
-    {
-      matrix.setPixelColor(x, PX_WHITE);
-    }
-    if (x == gl)
-    {
-      matrix.setPixelColor(x, PX_RED);
-    }
-    matrix.show();
   }
 }
 

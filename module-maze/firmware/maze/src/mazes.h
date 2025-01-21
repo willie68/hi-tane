@@ -227,6 +227,7 @@ public:
   bool plS();
   bool plW();
 
+  byte pos2index(byte x, byte y);
 private:
   MazeField field;
   byte startPos;
@@ -242,7 +243,8 @@ private:
   bool recurDist(byte x, byte y, byte dir, byte *dist);
 
   byte pos2index(Position p);
-  byte pos2index(byte x, byte y);
+
+  void printPlayer();
 };
 
 #endif
