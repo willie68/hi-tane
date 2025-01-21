@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <mazes.h>
-#include <tools.h>
-#define debug
+
 void MazeField::load(Difficulty difficulty, byte idx)
 {
     hard = false;
