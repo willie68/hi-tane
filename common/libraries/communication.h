@@ -28,18 +28,15 @@ public:
     void attach(uint8_t pin, uint8_t id);
     void poll();
 
-
-    void sendHearbeat(word countdown, word flags);
-
+    // module functions
     void sendError(const void *msg);
     void sendDisarmed();
     void sendStrike();
-
     int getGameTime();
-
     byte getStrikes();
 
     // Controller only functions
+    void sendHearbeat(word countdown, word flags);
     void setCtlrStrikes(byte strikes);
     void setCtrlSerialNumber(serial_t serialnumber);
     void setCtrlDifficulty(byte difficulty);
