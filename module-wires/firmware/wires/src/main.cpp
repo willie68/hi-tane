@@ -23,7 +23,6 @@ void setup()
   Serial.begin(115200);
   Serial.println("init");
   pinMode(LED_BUILTIN, OUTPUT);
-  game.init();
 
   initGame();
   game.arm();

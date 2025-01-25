@@ -23,8 +23,8 @@ void Game::init()
     pinMode(StatusLED, OUTPUT);
     pixel = new Adafruit_NeoPixel(1, StatusLED, NEO_RGB + NEO_KHZ800);
     pixel->setPixelColor(0, PX_BLACK);
-    pixel->show();
     pixel->setBrightness(127);
+    pixel->show();
 
     htcom = new HTCOM();
     htcom->attach(Com, tag);
@@ -102,7 +102,6 @@ void Game::setState(ModuleState state)
         setPixelColor(PX_GREEN);
         break;
     }
-
 };
 
 bool Game::isState(ModuleState state)
