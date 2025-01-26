@@ -1,5 +1,5 @@
 // game 
-// this class abstracts the hitane game from the odule site.
+// this class abstracts the hitane game from the module site.
 // it will manage the game state, status led, module tag
 // the module itself can get information about the game itself,
 // like parts about the difficulty, serialnumber, game time, 

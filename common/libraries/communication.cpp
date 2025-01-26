@@ -55,7 +55,7 @@ void HTCOM::poll()
     bus.update();
 };
 
-void HTCOM::sendHearbeat(word countdown, word flags)
+void HTCOM::sendCtrlHearbeat(word countdown, word flags)
 {
     byte buf[6];
     buf[0] = CMD_HEARTBEAT;
@@ -89,7 +89,6 @@ void HTCOM::sendStrike()
     bus.send(ID_CONTROLLER, "wires: strike", 14);
 }
 
-
 void HTCOM::setCtlrStrikes(byte strikes)
 {
     this->strikes = strikes;
@@ -98,7 +97,25 @@ void HTCOM::setCtlrStrikes(byte strikes)
 void HTCOM::setCtrlDifficulty(byte difficulty)
 {
     this->difficulty = difficulty;
+}
 
+void HTCOM::setCtrlBrightness(byte brightness)
+{
+    this->brightness = brightness;
+}
+
+byte HTCOM::getStrikes()
+{
+    return this->strikes;
+}
+
+int HTCOM::getGameTime()
+{
+    return gametime;
+}
+
+void HTCOM::sendGameSettings()
+{
     byte buf[6];
     buf[0] = CMD_GAMESETTINGS;
     buf[1] = this->difficulty;
@@ -110,12 +127,29 @@ void HTCOM::setCtrlDifficulty(byte difficulty)
     sendAll(&buf);
 }
 
-byte HTCOM::getStrikes()
+void HTCOM::sendAmbientSettings()
 {
-    return this->strikes;
+
+    byte buf[6];
+    buf[0] = CMD_AMBIENTSETTINGS;
+    buf[1] = this->brightness;
+    buf[2] = 0;
+    buf[3] = 0;
+    buf[4] = 0;
+    buf[5] = 0;
+
+    sendAll(&buf);
 }
 
-int HTCOM::getGameTime()
+void HTCOM::setCtrlError(byte error) {
+    lastError = error;
+}
+
+bool HTCOM::hasCtrlError()
 {
-    return gametime;
+    return hasError;
+}
+byte HTCOM::getCtrlError()
+{
+    return lastError;
 }
