@@ -8,6 +8,9 @@
 #define debug
 #include "indicators.h"
 #include "communication.h"
+#include <game.h>
+
+#define Version "V0.1"
 
 // Display
 #define CLK 2
@@ -64,17 +67,22 @@ void dblBeep();
 void generateSerialNumber();
 void generateIndicators();
 void printStatusLine();
+void printHeader(bool withVersion);
 void printWelcome();
 void initGame();
 void resetStrikes();
 void showStrikes();
+void startGame();
 
 serial_t serialNumber = {'E', 'L', '5', 'E', 'R', '7'};
 uint8_t indicators[3];
+bool indicatorsActive[3];
 uint32_t color = BLUE;
 long start;
 char buffer[30];
 bool strikes[3];
+Difficulty difficulty = Difficulty::SIMPLE;
+bool started, paused;
 
 void timerIsr()
 {
@@ -103,12 +111,12 @@ void setup()
 
   timer.initialize(TIMER_NOTIFY_US);
   timer.attachInterrupt(timerIsr);
-  start = millis();
+  start = 0;
   randomSeed(analogRead(0));
 
   while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) // colums, rows, characters size
   {
-    Serial.println(F("PCF8574 is not connected or lcd pins declaration is wrong. Only pins numbers: 4,5,6,16,11,12,13,14 are legal."));
+    Serial.println(F("PCF8574 not connected or lcd pins is wrong."));
     delay(5000);
   }
 
@@ -116,14 +124,18 @@ void setup()
   Serial.println(COM);
 
   initGame();
-  //  htcom = HTCOM(COM_PIN, 44);
-  htcom = HTCOM();
-  htcom.attach(COM_PIN, ID_CONTROLLER);
-  htcom.setCtrlSerialNumber(serialNumber);
+
+  htcom.setCtrlError(1);
 }
 
 void initGame()
 {
+  started = false;
+  paused = false;
+
+  printHeader(true);
+  printWelcome();
+
   generateSerialNumber();
 
   generateIndicators();
@@ -132,35 +144,70 @@ void initGame()
 
   printStatusLine();
 
-  printWelcome();
+  //  htcom = HTCOM(COM_PIN, 44);
+  htcom = HTCOM();
+  htcom.attach(COM_PIN, ID_CONTROLLER);
+  htcom.setCtrlSerialNumber(serialNumber);
+  htcom.setCtrlDifficulty(difficulty);
 }
 
 long count = 0;
+
+// menu line to display, with save var
+byte line = 0;
+byte sline = 255;
+
+// save error number
+byte serr = 0;
 
 void loop()
 {
   htcom.poll();
 
-  count++;
-  int act = MAX_TIME - int(((millis() - start) / 1000L));
-  showTime(act);
+  if (started && !(paused))
+  {
+    count++;
+    int act = MAX_TIME - int(((millis() - start) / 1000L));
+    showTime(act);
+  }
+  if (htcom.hasCtrlError())
+  {
+    byte err = htcom.getCtrlError();
+    if (serr != err)
+    {
+      serr = err;
+      clearRow(2);
+      strcpy_P(buffer, (char *)pgm_read_word(&(ERROR_MESSAGES[err])));
+      lcd.print(buffer);
+    }
+  }
+  if (!started)
+  {
+    if (line != sline)
+    {
+      sline = line;
+      clearRow(1);
+      lcd.setCursor(0, 1);
+      switch (sline)
+      {
+      case 0:
+        lcd.print(F("start Game?"));
+        break;
+      }
+    }
+  }
 
-  if (count > 100)
-  {
-    strikes[0] = true;
-  }
-  if (count > 200)
-  {
-    strikes[1] = true;
-  }
-  if (count > 300)
-  {
-    strikes[2] = true;
-  }
   showStrikes();
-  printClickEncoderButtonState();
-  printClickEncoderValue();
-  printClickEncoderCount();
+  //  printClickEncoderButtonState();
+  //  printClickEncoderValue();
+  //  printClickEncoderCount();
+}
+
+void startGame()
+{
+  started = true;
+  start = millis();
+  resetStrikes();
 }
 
 void generateSerialNumber()
@@ -203,6 +250,7 @@ void generateIndicators()
     if (x < indCount)
     {
       indicators[x] = random(INDICATOR_COUNT) + 1;
+      indicatorsActive[x] = random(2) == 0;
     }
   }
 #ifdef debug
@@ -221,20 +269,25 @@ void generateIndicators()
 void printStatusLine()
 {
   clearRow(3);
-  lcd.print("S:");
   strncpy(buffer, serialNumber, 6);
   buffer[6] = 0x00;
   lcd.print(buffer);
-  lcd.print(" ");
 
   for (uint8_t x = 0; x < sizeof(indicators); x++)
   {
     if (indicators[x] > 0)
     {
       uint8_t idx = indicators[x];
+      lcd.print(" ");
+      if (indicatorsActive[x])
+      {
+        lcd.print(char(0x23));
+      }
+      else
+      {
+      }
       strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
       lcd.print(buffer);
-      lcd.print(" ");
     }
   }
 }
@@ -246,7 +299,7 @@ void showTime(int act)
   {
     saveTime = act;
 
-    htcom.sendHearbeat(act, 0x0000);
+    htcom.sendCtrlHearbeat(act, 0x0000);
 
     lcd.setCursor(15, 0);
     bool neg = act < 0;
@@ -378,10 +431,16 @@ void showStrikes()
   pixel.show();
 }
 
-void printWelcome()
+void printHeader(bool withVersion)
 {
   lcd.setCursor(0, 0);
-  lcd.print(F("HI-Tane"));
+  lcd.print(F("HI-Tane "));
+  if (withVersion)
+    lcd.print(F(Version));
+}
+
+void printWelcome()
+{
   lcd.setCursor(0, 1);
   lcd.print(F("Welcome"));
 }

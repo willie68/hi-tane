@@ -12,11 +12,18 @@
 
 using serial_t = char[6];
 
+const char e_nn[] PROGMEM = "";
+const char e_we[] PROGMEM = "wires: invalid wire";
+
+const char *const ERROR_MESSAGES[] PROGMEM = {
+    e_nn, e_we};
+
 enum COMMANDS
 {
     CMD_HEARTBEAT = 1,
     CMD_STRIKE,
-    CMD_GAMESETTINGS
+    CMD_GAMESETTINGS,
+    CMD_AMBIENTSETTINGS
 };
 
 class HTCOM
@@ -36,10 +43,18 @@ public:
     byte getStrikes();
 
     // Controller only functions
-    void sendHearbeat(word countdown, word flags);
+    void sendCtrlHearbeat(word countdown, word flags);
     void setCtlrStrikes(byte strikes);
     void setCtrlSerialNumber(serial_t serialnumber);
     void setCtrlDifficulty(byte difficulty);
+    void setCtrlBrightness(byte brightness);
+
+    void sendGameSettings();
+    void sendAmbientSettings();
+
+    bool hasCtrlError();
+    byte getCtrlError();
+    void setCtrlError(byte error);
 
     // internal use only
     void receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info);
@@ -51,6 +66,9 @@ protected:
     word flags;
     byte strikes;
     byte difficulty;
+    byte brightness;
+    bool hasError;
+    byte lastError;
 
     void sendAll(const void *buf);
 };
