@@ -9,8 +9,9 @@
 #include "indicators.h"
 #include "communication.h"
 #include <game.h>
+#include <serialnumber.h>
 
-#define Version "V0.1"
+#define Version "V0.1 " // always add an space at the end
 
 // Display
 #define CLK 2
@@ -55,12 +56,7 @@ HTCOM htcom;
 
 // --- forward-declared function prototypes:
 void showTime(int act);
-// Prints out button state
-void printClickEncoderButtonState();
-// Prints turn information (turn status, direction, Acceleration value)
-void printClickEncoderValue();
-// Prints accumulated turn information
-void printClickEncoderCount();
+
 void clearRow(uint8_t row);
 void beep();
 void dblBeep();
@@ -73,15 +69,18 @@ void initGame();
 void resetStrikes();
 void showStrikes();
 void startGame();
+void setBrightness();
+void showMenu();
+void setDifficulty();
 
-serial_t serialNumber = {'E', 'L', '5', 'E', 'R', '7'};
-uint8_t indicators[3];
-bool indicatorsActive[3];
+Indicators indicators;
+SerialNumber snr;
 uint32_t color = BLUE;
 long start;
 char buffer[30];
 bool strikes[3];
 Difficulty difficulty = Difficulty::SIMPLE;
+Difficulty sdiff = Difficulty::SIMPLE;
 bool started, paused;
 
 void timerIsr()
@@ -147,18 +146,21 @@ void initGame()
   //  htcom = HTCOM(COM_PIN, 44);
   htcom = HTCOM();
   htcom.attach(COM_PIN, ID_CONTROLLER);
-  htcom.setCtrlSerialNumber(serialNumber);
+  htcom.setCtrlSerialNumber(snr.Get());
   htcom.setCtrlDifficulty(difficulty);
 }
 
-long count = 0;
-
 // menu line to display, with save var
-byte line = 0;
+int8_t line = 0;
 byte sline = 255;
 
 // save error number
 byte serr = 0;
+
+bool cmdStartGame = true;
+
+byte brightness = 15;
+byte sbr = 0;
 
 void loop()
 {
@@ -166,7 +168,6 @@ void loop()
 
   if (started && !(paused))
   {
-    count++;
     int act = MAX_TIME - int(((millis() - start) / 1000L));
     showTime(act);
   }
@@ -183,18 +184,7 @@ void loop()
   }
   if (!started)
   {
-    if (line != sline)
-    {
-      sline = line;
-      clearRow(1);
-      lcd.setCursor(0, 1);
-      switch (sline)
-      {
-      case 0:
-        lcd.print(F("start Game?"));
-        break;
-      }
-    }
+    showMenu();
   }
 
   showStrikes();
@@ -203,92 +193,232 @@ void loop()
   //  printClickEncoderCount();
 }
 
+void showMenu()
+{
+  if (line != sline)
+  {
+    sline = line;
+    clearRow(1);
+    lcd.setCursor(0, 1);
+    switch (sline)
+    {
+    case 0:
+      lcd.print(F("start Game? yes"));
+      lcd.setCursor(12, 1);
+      lcd.cursor();
+      lcd.noBlink();
+      break;
+    case 1:
+      lcd.print(F("Difficulty:"));
+      lcd.setCursor(12, 1);
+      strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
+      lcd.print(buffer);
+      lcd.setCursor(12, 1);
+      lcd.cursor();
+      lcd.noBlink();
+      break;
+    case 2:
+      lcd.print(F("Brigthness:"));
+      lcd.setCursor(12, 1);
+      lcd.print(brightness);
+      lcd.print(" ");
+      lcd.setCursor(12, 1);
+      lcd.cursor();
+      lcd.noBlink();
+      break;
+    }
+  }
+  switch (sline)
+  {
+  case 0:
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      clearRow(1);
+      lcd.noCursor();
+      lcd.noBlink();
+      startGame();
+    }
+    break;
+  case 1:
+    if (difficulty != sdiff)
+    {
+      sdiff = difficulty;
+      lcd.setCursor(12, 1);
+      strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
+      lcd.print(buffer);
+    }
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      setDifficulty();
+      lcd.setCursor(12, 1);
+      lcd.noBlink();
+    }
+    break;
+  case 2:
+    if (brightness != sbr)
+    {
+      sbr = brightness;
+      lcd.setCursor(12, 1);
+      lcd.print(brightness);
+      lcd.print(" ");
+      lcd.setCursor(12, 1);
+    }
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      setBrightness();
+      lcd.setCursor(12, 1);
+      lcd.noBlink();
+    }
+    break;
+  }
+  int16_t value = clickEnc.getIncrement();
+  if (value != 0)
+  {
+    value > 0 ? line++ : line--;
+    if (line > 2)
+      line = 2;
+    if (line < 0)
+      line = 0;
+  }
+}
+
+void setDifficulty()
+{
+  lcd.setCursor(12, 1);
+  lcd.blink();
+  sbr = 0;
+  bool ok = false;
+  while (!ok)
+  {
+    htcom.poll();
+    int16_t value = clickEnc.getIncrement();
+    if (value != 0)
+    {
+      value > 0 ? nextDiff(difficulty) : prevDiff(difficulty);
+    }
+    if (difficulty != sdiff)
+    {
+      sdiff = difficulty;
+      strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
+      lcd.setCursor(12, 1);
+      lcd.print(buffer);
+      lcd.setCursor(12, 1);
+    }
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      htcom.setCtrlDifficulty(difficulty);
+      ok = true;
+    }
+  }
+  lcd.noBlink();
+}
+
+void setBrightness()
+{
+  lcd.setCursor(12, 1);
+  lcd.blink();
+  sbr = 0;
+  bool ok = false;
+  while (!ok)
+  {
+    htcom.poll();
+    int16_t value = clickEnc.getIncrement();
+    if (value != 0)
+    {
+      value > 0 ? brightness++ : brightness--;
+      if (brightness > 15)
+        brightness = 15;
+      if (brightness < 1)
+        brightness = 1;
+    }
+    if (brightness != sbr)
+    {
+      sbr = brightness;
+      lcd.setCursor(12, 1);
+      lcd.print(brightness);
+      lcd.print(" ");
+      lcd.setCursor(12, 1);
+    }
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      htcom.setCtrlBrightness(brightness);
+      ok = true;
+    }
+  }
+  lcd.noBlink();
+}
+
 void startGame()
 {
+  dblBeep();
+  resetStrikes();
+  htcom.setCtlrStrikes(strikes);
+  htcom.setCtrlDifficulty(difficulty);
+  htcom.sendGameSettings();
+  clearRow(0);
+  printHeader(false);
   started = true;
   start = millis();
-  resetStrikes();
 }
 
 void generateSerialNumber()
 {
-  char a = random(26) + 'A';
-  serialNumber[0] = a;
-  a = random(26) + 'A';
-  serialNumber[1] = a;
-
-  a = random(10) + '0';
-  serialNumber[2] = a;
-
-  a = random(26) + 'A';
-  serialNumber[3] = a;
-  a = random(26) + 'A';
-  serialNumber[4] = a;
-
-  a = random(10) + '0';
-  serialNumber[5] = a;
+  snr.Generate();
   Serial.print("Serialnumber is: ");
-
-  strncpy(buffer, serialNumber, 6);
-  buffer[6] = 0x00;
-
+  snr.String(buffer);
   Serial.println(buffer);
 }
 
 void generateIndicators()
 {
-  uint8_t indCount = random(1, 4);
+  byte indCount = random(1, 4);
 #ifdef debug
   Serial.print("ind: ");
   Serial.print(indCount);
   Serial.println();
 #endif
 
-  for (uint8_t x = 0; x < sizeof(indicators); x++)
+  for (byte x = 0; x < indCount; x++)
   {
-    indicators[x] = 0;
-    if (x < indCount)
-    {
-      indicators[x] = random(INDICATOR_COUNT) + 1;
-      indicatorsActive[x] = random(2) == 0;
-    }
+    indicators.Add(random(INDICATOR_COUNT) + 1, random(2) == 0);
   }
 #ifdef debug
-  for (uint8_t x = 0; x < sizeof(indicators); x++)
+  for (byte x = 0; x < indicators.Count(); x++)
   {
-    uint8_t idx = indicators[x];
+    byte idx = indicators.Get(x);
     strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
     Serial.print(idx);
     Serial.print(" ");
+    if (indicators.IsActive(x))
+    {
+      Serial.print("#");
+    }
     Serial.println(buffer);
   }
-  Serial.println();
+  Serial.println(indicators.Compress(), BIN);
+  htcom.setCtrlIndicators(indicators.Compress());
 #endif
 }
 
 void printStatusLine()
 {
   clearRow(3);
-  strncpy(buffer, serialNumber, 6);
-  buffer[6] = 0x00;
+  snr.String(buffer);
   lcd.print(buffer);
 
-  for (uint8_t x = 0; x < sizeof(indicators); x++)
+  for (byte x = 0; x < indicators.Count(); x++)
   {
-    if (indicators[x] > 0)
+    byte idx = indicators.Get(x);
+    lcd.print(" ");
+    if (indicators.IsActive(x))
     {
-      uint8_t idx = indicators[x];
-      lcd.print(" ");
-      if (indicatorsActive[x])
-      {
-        lcd.print(char(0x23));
-      }
-      else
-      {
-      }
-      strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
-      lcd.print(buffer);
+      lcd.print(char(0x23));
     }
+    else
+    {
+    }
+    strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
+    lcd.print(buffer);
   }
 }
 
@@ -299,7 +429,7 @@ void showTime(int act)
   {
     saveTime = act;
 
-    htcom.sendCtrlHearbeat(act, 0x0000);
+    htcom.sendCtrlHearbeat(act);
 
     lcd.setCursor(15, 0);
     bool neg = act < 0;
@@ -437,6 +567,9 @@ void printHeader(bool withVersion)
   lcd.print(F("HI-Tane "));
   if (withVersion)
     lcd.print(F(Version));
+
+  strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
+  lcd.print(buffer[0]);
 }
 
 void printWelcome()

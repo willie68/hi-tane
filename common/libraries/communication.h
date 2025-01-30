@@ -10,8 +10,6 @@
 #define ID_WIRES 45
 #define ID_MAZE 46
 
-using serial_t = char[6];
-
 const char e_nn[] PROGMEM = "";
 const char e_we[] PROGMEM = "wires: invalid wire";
 
@@ -43,12 +41,13 @@ public:
     byte getStrikes();
 
     // Controller only functions
-    void sendCtrlHearbeat(word countdown, word flags);
-    void setCtlrStrikes(byte strikes);
-    void setCtrlSerialNumber(serial_t serialnumber);
+    void setCtlrStrikes(bool strikes[]);
+    void setCtrlSerialNumber(uint32_t srn);
     void setCtrlDifficulty(byte difficulty);
     void setCtrlBrightness(byte brightness);
+    void setCtrlIndicators(word inds);
 
+    void sendCtrlHearbeat(word countdown);
     void sendGameSettings();
     void sendAmbientSettings();
 
@@ -61,14 +60,14 @@ public:
 
 protected:
     PJONSoftwareBitBang bus;
-    serial_t serialnumber;
     int gametime;
-    word flags;
+    word inds;
     byte strikes;
     byte difficulty;
     byte brightness;
     bool hasError;
     byte lastError;
+    uint32_t snr;
 
     void sendAll(const void *buf);
 };

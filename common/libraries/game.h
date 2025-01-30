@@ -1,8 +1,8 @@
-// game 
+// game
 // this class abstracts the hitane game from the module site.
 // it will manage the game state, status led, module tag
 // the module itself can get information about the game itself,
-// like parts about the difficulty, serialnumber, game time, 
+// like parts about the difficulty, serialnumber, game time,
 // central game strikes, communication with the controller...
 
 #ifndef GAME_H
@@ -45,8 +45,35 @@ enum Difficulty
 {
     SIMPLE = 1,
     MEDIUM,
-    HARD
+    HARD,
+    NUM_DIFF
 };
+
+const char gm_simple[] PROGMEM = "SIMPLE";
+const char gm_medium[] PROGMEM = "MEDIUM";
+const char gm_hard[] PROGMEM = "HARD  ";
+const char gm_num[] PROGMEM = "      ";
+const char *const GAMEMODE_NAMES[] PROGMEM = {gm_simple, gm_medium, gm_hard, gm_num};
+
+void nextDiff(Difficulty &diff)
+{
+    int idx = static_cast<int>(diff);
+    idx++;
+    if (idx == HARD) {
+        idx--;
+    }
+    diff = static_cast<Difficulty>(idx);
+}
+
+void prevDiff(Difficulty &diff)
+{
+    int idx = static_cast<int>(diff);
+    idx--;
+    if (idx <0) {
+        idx = 0;
+    }
+    diff = static_cast<Difficulty>(idx);
+}
 
 class Game
 {
@@ -76,6 +103,9 @@ public:
     // output game time for debug to serial
     void showTime();
     void setGameDifficulty(Difficulty difficulty);
+
+    bool hasIndicator(INDICATOR indicator, bool active);
+
 private:
     ModuleTag tag;
     byte StatusLED;
@@ -85,5 +115,6 @@ private:
     ModuleState state;
     HTCOM *htcom;
     Difficulty difficulty;
+    Indicators indicators;
 };
 #endif
