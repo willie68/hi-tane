@@ -38,7 +38,8 @@ enum ModuleTag
     WIRES = 45,
     MAZE = 46,
     PASSWORD = 47,
-    MORSE = 48
+    MORSE = 48,
+    SIMON = 49
 };
 
 enum Difficulty
@@ -55,25 +56,8 @@ const char gm_hard[] PROGMEM = "HARD  ";
 const char gm_num[] PROGMEM = "      ";
 const char *const GAMEMODE_NAMES[] PROGMEM = {gm_simple, gm_medium, gm_hard, gm_num};
 
-void nextDiff(Difficulty &diff)
-{
-    int idx = static_cast<int>(diff);
-    idx++;
-    if (idx == HARD) {
-        idx--;
-    }
-    diff = static_cast<Difficulty>(idx);
-}
-
-void prevDiff(Difficulty &diff)
-{
-    int idx = static_cast<int>(diff);
-    idx--;
-    if (idx <0) {
-        idx = 0;
-    }
-    diff = static_cast<Difficulty>(idx);
-}
+void nextDiff(Difficulty &diff);
+void prevDiff(Difficulty &diff);
 
 class Game
 {

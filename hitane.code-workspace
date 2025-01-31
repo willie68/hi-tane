@@ -30,6 +30,9 @@
 		},
 		{
 			"path": "../PJON"
+		},
+		{
+			"path": "module-simon/firmware/simon"
 		}
 	],
 	"settings": {}

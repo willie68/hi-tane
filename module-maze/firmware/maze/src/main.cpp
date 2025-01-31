@@ -5,8 +5,8 @@
 #define debug
 #define wokwi
 #include "indicators.h"
-#include <mazes.h>
 #include "game.h"
+#include <mazes.h>
 
 // ---- forward declarations
 void initGame();

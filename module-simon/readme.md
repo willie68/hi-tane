@@ -25,41 +25,17 @@ Grün
 
 Wenn die Seriennummer einen Vokal enthält:
 
-|                   |              | Rot<br/>blinkend | Blau<br/>blinkend | Grün<br/>blinkend | Gelb<br/>blinkend |
-| ----------------- | ------------ | ---------------- | ----------------- | ----------------- | ----------------- |
-|                   | Keine Fehler | Blau             | Rot               | Gelb              | Grün              |
-| Drücke<br/>Taste: | 1 Fehler     | Gelb             | Grün              | Blau              | Rot               |
-|                   | 2 Fehler     | Grün             | Rot               | Gelb              | Blau              |
+|               |              | Rot blinkend | Blau blinkend | Grün blinkend | Gelb blinkend |
+| ------------- | ------------ | ------------ | ------------- | ------------- | ------------- |
+|               | Keine Fehler | Blau         | Rot           | Gelb          | Grün          |
+| Drücke Taste: | 1 Fehler     | Gelb         | Grün          | Blau          | Rot           |
+|               | 2 Fehler     | Grün         | Rot           | Gelb          | Blau          |
 
+Wenn die Seriennummer keinen Vokal enthält:	
 
+|               |              | Rot blinkend | Blau blinkend | Grün blinkend | Gelb blinkend |
+| ------------- | ------------ | ------------ | ------------- | ------------- | ------------- |
+|               | Keine Fehler | Blau         | Gelb          | Grün          | Rot           |
+| Drücke Taste: | 1 Fehler     | Rot          | Blau          | Gelb          | Grün          |
+|               | 2 Fehler     | Gelb         | Grün          | Blau          | Rot           |
 
-​			
-
-
-
- 
-
-   
-
- 
-
-Wenn die Seriennummer keinen Vokal enthält:
-
-Rot
-blinkend
-
-Blau
-blinkend
-
-Grün
-blinkend
-
-Gelb
-blinkend
-
-Drücke
-Taste:
-
-Keine Fehler Blau Gelb Grün Rot
-1 Fehler Rot Blau Gelb Grün
-2 Fehler Gelb Grün Blau Rot
