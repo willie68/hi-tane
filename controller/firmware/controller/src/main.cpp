@@ -456,13 +456,13 @@ void showTime(int act)
     }
     else
     {
-      if (min <= 0)
+      if (min <= 9)
         lcd.print("0");
       lcd.print(min);
       display.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
     }
     lcd.print(":");
-    if (sec <= 0)
+    if (sec <= 9)
       lcd.print("0");
     lcd.print(sec);
     display.showNumberDec(sec, true, 2, 2);

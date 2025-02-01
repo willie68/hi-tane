@@ -6,12 +6,16 @@
 #include <Arduino.h>
 #include <PJONSoftwareBitBang.h>
 
-#define ID_CONTROLLER 44
-#define ID_WIRES 45
-#define ID_MAZE 46
-#define ID_SIMON 47
-#define ID_PASSWORD 48
-#define ID_MORSE 49
+enum MODULEIDS
+{
+    ID_CONTROLLER = 44,
+    ID_WIRES = 45,
+    ID_MAZE = 46,
+    ID_SIMON = 47,
+    ID_PASSWORD = 48,
+    ID_MORSE = 49,
+    ID_MAX_MODULES = 50
+};
 
 const char e_nn[] PROGMEM = "";
 const char e_we[] PROGMEM = "wires: invalid wire";
@@ -88,7 +92,7 @@ protected:
     byte sndbuf[8];
     byte recbuf[8];
 
-    void sendAll(const void *buf, byte size);
+    void sendAll(const void *buf, byte size, bool once);
 };
 
 #endif

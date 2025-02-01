@@ -63,7 +63,7 @@ bool Game::isSerialnumberOdd()
 };
 word Game::getGameTime()
 {
-    return 3600;
+    return htcom->getGameTime();
 };
 
 void Game::arm() {
@@ -177,12 +177,12 @@ void Game::showTime()
         }
         else
         {
-            if (min <= 0)
+            if (min <= 9)
                 Serial.print("0");
             Serial.print(min);
         }
         Serial.print(":");
-        if (sec <= 0)
+        if (sec <= 9)
             Serial.print("0");
         Serial.println(sec);
     }

@@ -11,9 +11,8 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
 
 void HTCOM::receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info)
 {
-    dbgOut("ht: receive");
-    byte cmd = payload[0];
-    switch (cmd)
+    dbgOutLn("ht: rec");
+    switch (payload[0])
     {
     case CMD_HEARTBEAT:
         gametime = (payload[1] << 8) + payload[2];
@@ -22,8 +21,17 @@ void HTCOM::receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &i
     case CMD_ERROR:
         setCtrlError(payload[2]);
         break;
-    default:
+    case CMD_AMBIENTSETTINGS:
+        brightness = (payload[1]);
         break;
+    case CMD_GAMESETTINGS:
+        difficulty = payload[1];
+        inds = payload[2] +payload[3] << 8 ;
+        snr = payload[4] + (paylod[5] << 8) + (paylod[6] << 16)
+        break;
+    default:
+        dbgOut("unkown: ");
+        dbgOutLn2(payload[0], HEX) break;
     };
 };
 
@@ -71,19 +79,27 @@ void HTCOM::sendCtrlHearbeat(word countdown)
     sndbuf[2] = countdown & 0x00FF;
     sndbuf[3] = strikes;
 
-    sendAll(&sndbuf, 4);
+    sendAll(&sndbuf, 4, false);
 }
 
-void HTCOM::sendAll(const void *buf, byte size)
+void HTCOM::sendAll(const void *buf, byte size, bool once = false)
 {
-    if (moduleID != ID_WIRES)
-        bus.send(ID_WIRES, buf, size);
-    if (moduleID != ID_MAZE)
-        bus.send(ID_MAZE, buf, size);
-    if (moduleID != ID_SIMON)
-        bus.send(ID_SIMON, buf, size);
-    if (moduleID != ID_CONTROLLER)
-        bus.send(ID_CONTROLLER, buf, size);
+    byte mod = ID_CONTROLLER;
+    while (mod < ID_MAX_MODULES)
+    {
+        if (moduleID != mod)
+        {
+            if (once)
+            {
+                bus.send_packet(mod, buf, size);
+            }
+            else
+            {
+                bus.send(mod, buf, size);
+            }
+        }
+        mod++;
+    }
 }
 
 void HTCOM::sendError(byte err)
@@ -163,8 +179,8 @@ void HTCOM::sendGameSettings()
 {
     sndbuf[0] = CMD_GAMESETTINGS;
     sndbuf[1] = this->difficulty;
-    sndbuf[2] = inds >> 8;
-    sndbuf[3] = inds & 0x00FF;
+    sndbuf[2] = inds & 0x00FF;
+    sndbuf[3] = inds >> 8;
     sndbuf[4] = snr & 0xff;
     sndbuf[5] = (snr >> 8) & 0xff;
     sndbuf[6] = (snr >> 16) & 0xff;
@@ -197,6 +213,7 @@ bool HTCOM::hasCtrlError()
 {
     return hasError;
 }
+
 byte HTCOM::getCtrlError()
 {
     return lastError;

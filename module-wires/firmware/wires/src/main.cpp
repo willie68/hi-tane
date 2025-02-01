@@ -31,19 +31,21 @@ void setup()
 void loop()
 {
   game.poll();
-  if (panel.isDisarmed() && game.isState(ModuleState::ARMED))
+  if (game.isState(ModuleState::ARMED))
   {
-    game.setSolved();
-  }
-  else if (panel.isStriken() && game.isState(ModuleState::ARMED))
-  {
-    game.setStrike();
+    if (panel.isDisarmed())
+    {
+      game.setSolved();
+    }
+    else if (panel.isStriken())
+    {
+      game.setStrike();
+    }
   }
   else if (!panel.isStriken() && game.isState(ModuleState::STRIKED))
   {
     game.setState(ModuleState::ARMED);
   }
-
   game.showTime();
 }
 
@@ -58,7 +60,8 @@ void initGame()
     invalid = !panel.init(true); // TODO setting the sn from HTCOM
     if (invalid)
     {
-      if (millis() > sact) {
+      if (millis() > sact)
+      {
         sact = millis() + 5000;
         Serial.println(F("invalid wire configuration"));
         game.sendError(ERRORS::ERR_INVALID_WIRES);
