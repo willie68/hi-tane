@@ -1,5 +1,7 @@
 #include "communication.h"
 #include <PJONSoftwareBitBang.h>
+#define debug
+#include <debug.h>
 
 void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info)
 {
@@ -9,12 +11,16 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
 
 void HTCOM::receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info)
 {
+    dbgOut("ht: receive");
     byte cmd = payload[0];
     switch (cmd)
     {
     case CMD_HEARTBEAT:
         gametime = (payload[1] << 8) + payload[2];
         strikes = payload[3];
+        break;
+    case CMD_ERROR:
+        setCtrlError(payload[2]);
         break;
     default:
         break;
@@ -30,6 +36,7 @@ HTCOM::HTCOM(uint8_t pin, uint8_t id)
 {
     bus = PJONSoftwareBitBang();
     attach(pin, id);
+    moduleID = id;
 }
 
 void HTCOM::attach(uint8_t pin, uint8_t id)
@@ -40,6 +47,8 @@ void HTCOM::attach(uint8_t pin, uint8_t id)
     bus.set_receiver(receiver_function);
     bus.set_custom_pointer(this);
     bus.begin();
+    moduleID = id;
+    resetError();
 }
 
 void HTCOM::setCtrlSerialNumber(uint32_t srn)
@@ -51,40 +60,66 @@ void HTCOM::poll()
 {
     bus.receive(100);
     bus.update();
+    if (hasError && (millis() > errTime))
+        resetError();
 };
 
 void HTCOM::sendCtrlHearbeat(word countdown)
 {
-    byte buf[6];
-    buf[0] = CMD_HEARTBEAT;
-    buf[1] = countdown >> 8;
-    buf[2] = countdown & 0x00FF;
-    buf[3] = strikes;
-    buf[4] = 0;
-    buf[5] = 0;
+    sndbuf[0] = CMD_HEARTBEAT;
+    sndbuf[1] = countdown >> 8;
+    sndbuf[2] = countdown & 0x00FF;
+    sndbuf[3] = strikes;
 
-    sendAll(&buf);
+    sendAll(&sndbuf, 4);
 }
 
-void HTCOM::sendAll(const void *buf)
+void HTCOM::sendAll(const void *buf, byte size)
 {
-    bus.send(ID_WIRES, buf, 6);
-    bus.send(ID_MAZE, buf, 6);
+    if (moduleID != ID_WIRES)
+        bus.send(ID_WIRES, buf, size);
+    if (moduleID != ID_MAZE)
+        bus.send(ID_MAZE, buf, size);
+    if (moduleID != ID_SIMON)
+        bus.send(ID_SIMON, buf, size);
+    if (moduleID != ID_CONTROLLER)
+        bus.send(ID_CONTROLLER, buf, size);
 }
 
-void HTCOM::sendError(const void *msg)
+void HTCOM::sendError(byte err)
 {
-    bus.send(ID_CONTROLLER, msg, 40);
+    sndbuf[0] = CMD_ERROR;
+    sndbuf[1] = moduleID;
+    sndbuf[2] = err;
+    sndbuf[3] = 0;
+    sndbuf[4] = 0;
+    sndbuf[5] = 0;
+    sndbuf[6] = 0;
+    sndbuf[7] = 0;
+
+    bus.send(ID_CONTROLLER, sndbuf, 8);
 }
 
 void HTCOM::sendDisarmed()
 {
-    bus.send(ID_CONTROLLER, "wires: disarmed", 16);
+    sndbuf[0] = CMD_ARM;
+    sndbuf[1] = moduleID;
+    sndbuf[2] = PAR_DISARM;
+    sndbuf[3] = 0;
+    sndbuf[4] = 0;
+    sndbuf[5] = 0;
+    sndbuf[6] = 0;
+    sndbuf[7] = 0;
+
+    bus.send(ID_CONTROLLER, sndbuf, 8);
 }
 
 void HTCOM::sendStrike()
 {
-    bus.send(ID_CONTROLLER, "wires: strike", 14);
+    sndbuf[0] = CMD_STRIKE;
+    sndbuf[1] = moduleID;
+
+    bus.send(ID_CONTROLLER, sndbuf, 2);
 }
 
 void HTCOM::setCtrlIndicators(word inds)
@@ -101,6 +136,11 @@ void HTCOM::setCtlrStrikes(bool strikes[])
 void HTCOM::setCtrlDifficulty(byte difficulty)
 {
     this->difficulty = difficulty;
+}
+
+byte HTCOM::getBrightness()
+{
+    return this->brightness;
 }
 
 void HTCOM::setCtrlBrightness(byte brightness)
@@ -121,34 +161,36 @@ int HTCOM::getGameTime()
 
 void HTCOM::sendGameSettings()
 {
-    byte buf[8];
-    buf[0] = CMD_GAMESETTINGS;
-    buf[1] = this->difficulty;
-    buf[2] = inds >> 8;
-    buf[3] = inds & 0x00FF;
-    buf[4] = snr & 0xff;
-    buf[5] = (snr >> 8) & 0xff;
-    buf[6] = (snr >> 16) & 0xff;
-    buf[7] = 0;
-    sendAll(&buf);
+    sndbuf[0] = CMD_GAMESETTINGS;
+    sndbuf[1] = this->difficulty;
+    sndbuf[2] = inds >> 8;
+    sndbuf[3] = inds & 0x00FF;
+    sndbuf[4] = snr & 0xff;
+    sndbuf[5] = (snr >> 8) & 0xff;
+    sndbuf[6] = (snr >> 16) & 0xff;
+    sendAll(&sndbuf, 7);
 }
 
 void HTCOM::sendAmbientSettings()
 {
-    byte buf[6];
-    buf[0] = CMD_AMBIENTSETTINGS;
-    buf[1] = this->brightness;
-    buf[2] = 0;
-    buf[3] = 0;
-    buf[4] = 0;
-    buf[5] = 0;
+    sndbuf[0] = CMD_AMBIENTSETTINGS;
+    sndbuf[1] = this->brightness;
 
-    sendAll(&buf);
+    sendAll(&sndbuf, 2);
 }
 
 void HTCOM::setCtrlError(byte error)
 {
     lastError = error;
+    hasError = true;
+    errTime = millis() + 5000;
+}
+
+void HTCOM::resetError()
+{
+    errTime = 0;
+    hasError = false;
+    lastError = 0;
 }
 
 bool HTCOM::hasCtrlError()

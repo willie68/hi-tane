@@ -51,17 +51,21 @@ void initGame()
 {
   game.init();
   bool invalid = true;
+  unsigned long sact = millis();
   while (invalid)
   {
+    game.poll();
     invalid = !panel.init(true); // TODO setting the sn from HTCOM
     if (invalid)
     {
-      delay(1000);
-      Serial.println(F("invalid wire configuration"));
-      game.sendError("wires: invalid configuration");
+      if (millis() > sact) {
+        sact = millis() + 5000;
+        Serial.println(F("invalid wire configuration"));
+        game.sendError(ERRORS::ERR_INVALID_WIRES);
+        game.setIntLED(true);
+      }
     }
   }
-
+  game.setIntLED(false);
   panel.printPlugs();
 }
-

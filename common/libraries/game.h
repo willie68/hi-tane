@@ -34,12 +34,12 @@ enum ModuleState
 
 enum ModuleTag
 {
-    CONTROLLER = 44,
-    WIRES = 45,
-    MAZE = 46,
-    PASSWORD = 47,
-    MORSE = 48,
-    SIMON = 49
+    CONTROLLER = ID_CONTROLLER,
+    WIRES = ID_WIRES,
+    MAZE = ID_MAZE,
+    PASSWORD = ID_PASSWORD,
+    MORSE = ID_MORSE,
+    SIMON = ID_SIMON
 };
 
 enum Difficulty
@@ -58,6 +58,11 @@ const char *const GAMEMODE_NAMES[] PROGMEM = {gm_simple, gm_medium, gm_hard, gm_
 
 void nextDiff(Difficulty &diff);
 void prevDiff(Difficulty &diff);
+
+enum ERRORS {
+    ERR_NO_ERR = 0,
+    ERR_INVALID_WIRES = 1
+};
 
 class Game
 {
@@ -78,7 +83,7 @@ public:
     void setState(ModuleState state);
     bool isState(ModuleState state);
 
-    void sendError(const void *msg);
+    void sendError(byte err);
 
     void setPixelColor(uint32_t color);
 
@@ -89,7 +94,7 @@ public:
     void setGameDifficulty(Difficulty difficulty);
 
     bool hasIndicator(INDICATOR indicator, bool active);
-
+    void setIntLED(bool on);
 private:
     ModuleTag tag;
     byte StatusLED;

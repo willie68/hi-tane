@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #define debug
+#include <debug.h>
 #include "indicators.h"
 #include "communication.h"
 #include <game.h>
@@ -123,8 +124,6 @@ void setup()
   Serial.println(COM);
 
   initGame();
-
-  htcom.setCtrlError(1);
 }
 
 void initGame()
@@ -144,10 +143,13 @@ void initGame()
   printStatusLine();
 
   //  htcom = HTCOM(COM_PIN, 44);
+  dbgOutLn("htcom init");
   htcom = HTCOM();
   htcom.attach(COM_PIN, ID_CONTROLLER);
   htcom.setCtrlSerialNumber(snr.Get());
   htcom.setCtrlDifficulty(difficulty);
+  htcom.setCtrlIndicators(indicators.Compress());
+  dbgOutLn("htcom init ready");
 }
 
 // menu line to display, with save var
@@ -165,7 +167,6 @@ byte sbr = 0;
 void loop()
 {
   htcom.poll();
-
   if (started && !(paused))
   {
     int act = MAX_TIME - int(((millis() - start) / 1000L));
@@ -181,12 +182,16 @@ void loop()
       strcpy_P(buffer, (char *)pgm_read_word(&(ERROR_MESSAGES[err])));
       lcd.print(buffer);
     }
+  } else {
+    if (serr > 0) {
+      serr = 0;
+      clearRow(2);
+    }
   }
   if (!started)
   {
     showMenu();
   }
-
   showStrikes();
   //  printClickEncoderButtonState();
   //  printClickEncoderValue();
@@ -342,6 +347,7 @@ void setBrightness()
     if (clickEnc.getButton() == Button::Clicked)
     {
       htcom.setCtrlBrightness(brightness);
+      pixel.setBrightness(brightness * 16);
       ok = true;
     }
   }
@@ -350,13 +356,17 @@ void setBrightness()
 
 void startGame()
 {
-  dblBeep();
   resetStrikes();
+  pixel.setBrightness(16*htcom.getBrightness());
+  display.setBrightness(htcom.getBrightness() >> 1);
   htcom.setCtlrStrikes(strikes);
   htcom.setCtrlDifficulty(difficulty);
   htcom.sendGameSettings();
+
   clearRow(0);
   printHeader(false);
+  
+  dblBeep();
   started = true;
   start = millis();
 }
@@ -396,7 +406,6 @@ void generateIndicators()
     Serial.println(buffer);
   }
   Serial.println(indicators.Compress(), BIN);
-  htcom.setCtrlIndicators(indicators.Compress());
 #endif
 }
 

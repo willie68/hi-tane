@@ -40,6 +40,7 @@ Game::Game()
 
 void Game::init()
 {
+    pinMode(LED_BUILTIN, OUTPUT);
     pinMode(StatusLED, OUTPUT);
     pixel = new Adafruit_NeoPixel(1, StatusLED, NEO_RGB + NEO_KHZ800);
     pixel->setPixelColor(0, PX_BLACK);
@@ -129,9 +130,9 @@ bool Game::isState(ModuleState state)
     return this->state == state;
 };
 
-void Game::sendError(const void *msg)
+void Game::sendError(byte err)
 {
-    htcom->sendError(msg);
+    htcom->sendError(err);
 }
 
 void Game::setPixelColor(uint32_t color)
@@ -187,3 +188,6 @@ void Game::showTime()
     }
 }
 
+void Game::setIntLED(bool on) {
+    digitalWrite(LED_BUILTIN, on);
+}
