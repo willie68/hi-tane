@@ -6,7 +6,8 @@ void nextDiff(Difficulty &diff)
 {
     int idx = static_cast<int>(diff);
     idx++;
-    if (idx == HARD) {
+    if (idx == HARD)
+    {
         idx--;
     }
     diff = static_cast<Difficulty>(idx);
@@ -16,7 +17,8 @@ void prevDiff(Difficulty &diff)
 {
     int idx = static_cast<int>(diff);
     idx--;
-    if (idx <0) {
+    if (idx < 0)
+    {
         idx = 0;
     }
     diff = static_cast<Difficulty>(idx);
@@ -66,17 +68,20 @@ word Game::getGameTime()
     return htcom->getGameTime();
 };
 
-void Game::arm() {
+void Game::arm()
+{
     dbgOutLn(F("ARMED"));
     setState(ModuleState::ARMED);
 }
 
-void Game::setStrike() {
+void Game::setStrike()
+{
     dbgOutLn(F("STRIKE"));
     setState(ModuleState::STRIKED);
 };
 
-void Game::setSolved() {
+void Game::setSolved()
+{
     dbgOutLn(F("SOLVED"));
     setState(ModuleState::DISARMED);
 };
@@ -138,6 +143,7 @@ void Game::sendError(byte err)
 void Game::setPixelColor(uint32_t color)
 {
     pixel->setPixelColor(0, color);
+    pixel->setBrightness(htcom->getBrightness() * 16);
     pixel->show();
 }
 
@@ -148,12 +154,15 @@ void Game::poll()
     {
         if ((millis() % 250) < 125)
         {
-            pixel->setPixelColor(0, PX_RED);
+            setPixelColor(PX_RED);
         }
         else
         {
-            pixel->setPixelColor(0, PX_BLACK);
+            setPixelColor(PX_BLACK);
         }
+    }
+    if (htcom->getBrightness() != pixel->getBrightness()) {
+        pixel->setBrightness(htcom->getBrightness() * 16);
         pixel->show();
     }
 }
@@ -188,6 +197,7 @@ void Game::showTime()
     }
 }
 
-void Game::setIntLED(bool on) {
+void Game::setIntLED(bool on)
+{
     digitalWrite(LED_BUILTIN, on);
 }

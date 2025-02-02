@@ -26,12 +26,13 @@ void HTCOM::receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &i
         break;
     case CMD_GAMESETTINGS:
         difficulty = payload[1];
-        inds = payload[2] +payload[3] << 8 ;
-        snr = payload[4] + (paylod[5] << 8) + (paylod[6] << 16)
+        inds = payload[2] + (payload[3] << 8);
+        snr = uint32_t(payload[4]) + (uint32_t(payload[5]) << 8) + (uint32_t(payload[6]) << 16); 
         break;
     default:
         dbgOut("unkown: ");
-        dbgOutLn2(payload[0], HEX) break;
+        dbgOutLn2(payload[0], HEX); 
+        break;
     };
 };
 
