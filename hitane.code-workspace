@@ -45,7 +45,10 @@
 			"xstring": "cpp",
 			"xtree": "cpp",
 			"xutility": "cpp",
-			"cstdlib": "cpp"
+			"cstdlib": "cpp",
+			"cstddef": "cpp",
+			"iosfwd": "cpp",
+			"xlocbuf": "cpp"
 		}
 	}
 }

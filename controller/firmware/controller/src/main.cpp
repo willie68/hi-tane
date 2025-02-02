@@ -79,7 +79,6 @@ SerialNumber snr;
 uint32_t color = BLUE;
 long start;
 char buffer[30];
-bool strikes[3];
 Difficulty difficulty = Difficulty::SIMPLE;
 Difficulty sdiff = Difficulty::SIMPLE;
 bool started, paused;
@@ -98,10 +97,10 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
   display.clear();
   display.setSegments(TTD, 1, 0);
-  display.setBrightness(7);
+  display.setBrightness(DEFAULT_BRIGHTNESS > 1);
 
   pixel.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
-  pixel.setBrightness(7 * 8);
+  pixel.setBrightness(DEFAULT_BRIGHTNESS * 16);
   pixel.show();
 
   // Setup and configure "full-blown" ClickEncoder
@@ -138,8 +137,6 @@ void initGame()
 
   generateIndicators();
 
-  resetStrikes();
-
   printStatusLine();
 
   //  htcom = HTCOM(COM_PIN, 44);
@@ -149,6 +146,8 @@ void initGame()
   htcom.setCtrlSerialNumber(snr.Get());
   htcom.setCtrlDifficulty(difficulty);
   htcom.setCtrlIndicators(indicators.Compress());
+  resetStrikes();
+
   dbgOutLn("htcom init ready");
 }
 
@@ -161,7 +160,7 @@ byte serr = 0;
 
 bool cmdStartGame = true;
 
-byte brightness = 15;
+byte brightness = DEFAULT_BRIGHTNESS;
 byte sbr = 0;
 
 void loop()
@@ -182,17 +181,20 @@ void loop()
       strcpy_P(buffer, (char *)pgm_read_word(&(ERROR_MESSAGES[err])));
       lcd.print(buffer);
     }
-  } else {
-    if (serr > 0) {
+  }
+  else
+  {
+    if (serr > 0)
+    {
       serr = 0;
       clearRow(2);
     }
   }
   if (!started)
-  {
     showMenu();
-  }
-  showStrikes();
+
+  if (started)
+    showStrikes();
   //  printClickEncoderButtonState();
   //  printClickEncoderValue();
   //  printClickEncoderCount();
@@ -356,16 +358,16 @@ void setBrightness()
 
 void startGame()
 {
+  dbgOutLn(F("start game"));
   resetStrikes();
-  pixel.setBrightness(16*htcom.getBrightness());
+  pixel.setBrightness(16 * htcom.getBrightness());
   display.setBrightness(htcom.getBrightness() >> 1);
-  htcom.setCtlrStrikes(strikes);
   htcom.setCtrlDifficulty(difficulty);
   htcom.sendGameSettings();
 
   clearRow(0);
   printHeader(false);
-  
+
   dblBeep();
   started = true;
   start = millis();
@@ -549,18 +551,17 @@ void beep()
 
 void resetStrikes()
 {
-  for (uint8_t x = 0; x < sizeof(strikes); x++)
-  {
-    strikes[x] = false;
-  }
+  htcom.setCtlrStrikes(0);
 }
 
 void showStrikes()
 {
-  for (uint8_t x = 0; x < sizeof(strikes); x++)
+  byte strikes = htcom.getStrikes();
+  dbgOutLn(strikes);
+  for (uint8_t x = 0; x < 3; x++)
   {
     pixel.setPixelColor(x, GREEN);
-    if (strikes[x])
+    if ( x < strikes)
     {
       pixel.setPixelColor(x, RED);
       lcd.setCursor(10 + x, 0);

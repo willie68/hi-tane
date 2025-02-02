@@ -6,6 +6,8 @@
 #include <Arduino.h>
 #include <PJONSoftwareBitBang.h>
 
+const byte DEFAULT_BRIGHTNESS = 4;
+
 enum MODULEIDS
 {
     ID_CONTROLLER = 44,
@@ -53,11 +55,14 @@ public:
     void sendDisarmed();
     void sendStrike();
     int getGameTime();
+
+    bool hasNewStrikes();
     byte getStrikes();
     byte getBrightness();
+    bool isNewAmbSettings();
 
     // Controller only functions
-    void setCtlrStrikes(bool strikes[]);
+    void setCtlrStrikes(byte strikes);
     void setCtrlSerialNumber(uint32_t srn);
     void setCtrlDifficulty(byte difficulty);
     void setCtrlBrightness(byte brightness);
@@ -81,9 +86,14 @@ protected:
 
     int gametime;
     word inds;
+
+    bool newStrike;
     byte strikes;
     byte difficulty;
+
+    bool newAmbSettings; // new ambient settings received
     byte brightness;
+
     bool hasError;
     byte lastError;
     unsigned long errTime;

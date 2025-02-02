@@ -1,5 +1,6 @@
 #include "game.h"
 #include <Adafruit_NeoPixel.h>
+#define debug
 #include <debug.h>
 
 void nextDiff(Difficulty &diff)
@@ -104,7 +105,7 @@ bool Game::isGameDifficulty(Difficulty difficulty)
 void Game::setState(ModuleState state)
 {
 #ifdef debug
-    if (this->state != moduleState)
+    if (this->state != state)
     {
         Serial.print(F("Module state:"));
         Serial.println(state);
@@ -161,9 +162,13 @@ void Game::poll()
             setPixelColor(PX_BLACK);
         }
     }
-    if (htcom->getBrightness() != pixel->getBrightness()) {
-        pixel->setBrightness(htcom->getBrightness() * 16);
-        pixel->show();
+    if (htcom->isNewAmbSettings())
+    {
+        if (htcom->getBrightness() != pixel->getBrightness())
+        {
+            pixel->setBrightness(htcom->getBrightness() * 16);
+            pixel->show();
+        }
     }
 }
 

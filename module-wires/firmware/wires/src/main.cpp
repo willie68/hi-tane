@@ -2,6 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #define debug
+#include <debug.h>
 #include <game.h>
 #include "indicators.h"
 #include "communication.h"
@@ -39,6 +40,7 @@ void loop()
     }
     else if (panel.isStriken())
     {
+      dbgOutLn("Strike");
       game.setStrike();
     }
   }

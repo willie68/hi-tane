@@ -23,11 +23,16 @@ void HTCOM::receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &i
         break;
     case CMD_AMBIENTSETTINGS:
         brightness = (payload[1]);
+        newAmbSettings = true;
         break;
     case CMD_GAMESETTINGS:
         difficulty = payload[1];
         inds = payload[2] + (payload[3] << 8);
         snr = uint32_t(payload[4]) + (uint32_t(payload[5]) << 8) + (uint32_t(payload[6]) << 16); 
+        break;
+    case CMD_STRIKE:
+        strikes++;
+        newStrike = true;
         break;
     default:
         dbgOut("unkown: ");
@@ -58,6 +63,9 @@ void HTCOM::attach(uint8_t pin, uint8_t id)
     bus.begin();
     moduleID = id;
     resetError();
+    newAmbSettings = false;
+    newStrike = false;
+    brightness = DEFAULT_BRIGHTNESS;
 }
 
 void HTCOM::setCtrlSerialNumber(uint32_t srn)
@@ -144,10 +152,9 @@ void HTCOM::setCtrlIndicators(word inds)
     this->inds = inds;
 }
 
-void HTCOM::setCtlrStrikes(bool strikes[])
+void HTCOM::setCtlrStrikes(byte strikes)
 {
-    this->strikes = 0;
-    this->strikes = this->strikes | strikes[0] | strikes[1] << 1 | strikes[2] << 2;
+    this->strikes = strikes;
 }
 
 void HTCOM::setCtrlDifficulty(byte difficulty)
@@ -169,6 +176,15 @@ void HTCOM::setCtrlBrightness(byte brightness)
 byte HTCOM::getStrikes()
 {
     return this->strikes;
+}
+
+bool HTCOM::hasNewStrikes()
+{
+    if (newStrike) {
+        newStrike = false;
+        return true;
+    }
+    return true;
 }
 
 int HTCOM::getGameTime()
@@ -218,4 +234,12 @@ bool HTCOM::hasCtrlError()
 byte HTCOM::getCtrlError()
 {
     return lastError;
+}
+
+bool HTCOM::isNewAmbSettings() {
+    if (newAmbSettings) {
+        newAmbSettings = false;
+        return true;
+    }
+    return false;
 }
