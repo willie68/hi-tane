@@ -78,6 +78,9 @@ public:
     void setStrike();
     void setSolved();
 
+    bool snrHasVocal();
+    byte getStrikes();
+
     Difficulty getGameDifficulty();
     bool isGameDifficulty(Difficulty difficulty);
     void setState(ModuleState state);

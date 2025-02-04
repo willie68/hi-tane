@@ -13,10 +13,10 @@
 #define BTN_RED 3
 #define LED_BLUE 5
 #define BTN_BLUE 6
-#define LED_GREEN 7
-#define BTN_GREEN 8
-#define LED_YELLOW 9
-#define BTN_YELLOW 10
+#define LED_YELLOW 7
+#define BTN_YELLOW 8
+#define LED_GREEN 9
+#define BTN_GREEN 10
 
 Switch btRed = Switch(BTN_RED);
 Switch btBlue = Switch(BTN_BLUE);
@@ -35,17 +35,17 @@ const byte color2pin[] = {LED_RED, LED_BLUE, LED_GREEN, LED_YELLOW};
 
 // color validation schema matrixes
 // snr has vocal, no error
-const Colors mx_hv_ne[] = {BLUE, RED, YELLOW, GREEN};
+Colors mx_hv_ne[4] = {BLUE, RED, YELLOW, GREEN};
 // snr has vocal, one error
-const Colors mx_hv_oe[] = {YELLOW, GREEN, BLUE, RED};
+Colors mx_hv_oe[4] = {YELLOW, GREEN, BLUE, RED};
 // snr has vocal, two error
-const Colors mx_hv_te[] = {GREEN, RED, YELLOW, BLUE};
+Colors mx_hv_te[4] = {GREEN, RED, YELLOW, BLUE};
 // snr has no vocal, no error
-const Colors mx_nv_ne[] = {BLUE, YELLOW, GREEN, RED};
+Colors mx_nv_ne[4] = {BLUE, YELLOW, GREEN, RED};
 // snr has no vocal, one error
-const Colors mx_nv_oe[] = {RED, BLUE, YELLOW, GREEN};
+Colors mx_nv_oe[4] = {RED, BLUE, YELLOW, GREEN};
 // snr has no vocal, two error
-const Colors mx_nv_te[] = {YELLOW, GREEN, BLUE, RED};
+Colors mx_nv_te[4] = {YELLOW, GREEN, BLUE, RED};
 
 // Game framework
 Game game(ModuleTag::SIMON, LED_PIN, COM_PIN);
@@ -56,6 +56,8 @@ void LedOn(Colors color, bool on);
 void blink(Colors color);
 void btnPoll();
 void ledPoll();
+void showStep();
+void calcValidationSchema();
 
 const byte STEPS_SIMPLE = 6;
 const byte STEPS_MEDIUM = 8;
@@ -63,6 +65,7 @@ const byte STEPS_HARD = 10;
 
 byte stepCount;
 Colors steps[STEPS_HARD];
+Colors *validationSchema;
 
 void setup()
 {
@@ -85,20 +88,23 @@ void setup()
   game.arm();
 }
 
+// the actual step we're in
+byte step;
+byte sstep;
+Colors actColor;
+Colors expColor;
+
 void loop()
 {
   game.poll();
   btnPoll();
   ledPoll();
 
-  if (btRed.singleClick())
-    blink(RED);
-  if (btBlue.singleClick())
-    blink(BLUE);
-  if (btGreen.singleClick())
-    blink(GREEN);
-  if (btYellow.singleClick())
-    blink(YELLOW);
+  if (step != sstep)
+  {
+    sstep = step;
+    showStep();
+  }
 
   game.showTime();
 }
@@ -124,6 +130,61 @@ void initGame()
     dbgOut(i);
     dbgOut(":");
     dbgOutLn(steps[i]);
+  }
+  step = 0;
+  sstep = 255;
+}
+
+void showStep()
+{
+  calcValidationSchema();
+  actColor = steps[step];
+  LedOn(actColor, true);
+
+  expColor = validationSchema[actColor];
+
+  Serial.print(actColor);
+  Serial.print("->");
+  Serial.println(expColor);
+}
+
+void calcValidationSchema()
+{
+  if (game.snrHasVocal())
+  {
+    switch (game.getStrikes())
+    {
+    case 0:
+      dbgOutLn("mx_hv_ne");
+      validationSchema = mx_hv_ne;
+      break;
+    case 1:
+      dbgOutLn("mx_hv_oe");
+      validationSchema = mx_hv_oe;
+      break;
+    case 2:
+      dbgOutLn("mx_hv_te");
+      validationSchema = mx_hv_te;
+      break;
+    }
+  }
+  else
+  {
+    switch (game.getStrikes())
+    {
+    case 0:
+      dbgOutLn("mx_nv_ne");
+      validationSchema = mx_nv_ne;
+      break;
+    case 1:
+      dbgOutLn("mx_nv_oe");
+      validationSchema = mx_nv_oe;
+      break;
+    case 2:
+      dbgOutLn("mx_nv_te");
+      validationSchema = mx_nv_te;
+      break;
+    }
   }
 }
 

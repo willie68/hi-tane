@@ -202,6 +202,16 @@ void Game::showTime()
     }
 }
 
+bool Game::snrHasVocal()
+{
+    return false;
+}
+
+byte Game::getStrikes()
+{
+    return htcom->getStrikes();
+};
+
 void Game::setIntLED(bool on)
 {
     digitalWrite(LED_BUILTIN, on);
