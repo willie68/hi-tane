@@ -58,6 +58,9 @@ void btnPoll();
 void ledPoll();
 void showStep();
 void calcValidationSchema();
+bool notBtnColorCLicked(Colors color);
+bool btnColorClicked(Colors color);
+void nextStep();
 
 const byte STEPS_SIMPLE = 6;
 const byte STEPS_MEDIUM = 8;
@@ -105,8 +108,54 @@ void loop()
     sstep = step;
     showStep();
   }
+  if (notBtnColorCLicked(expColor)) {
+    Serial.println("strike");
+  }
+  if (btnColorClicked(expColor)) {
+    nextStep();
+  }
 
   game.showTime();
+}
+
+void nextStep() {
+  if (step < stepCount) {
+    step++;
+    calcValidationSchema();
+    return;
+  } else {
+    game.setSolved();
+  }
+}
+
+bool notBtnColorCLicked(Colors color)
+{
+  switch (color)
+  {
+  case RED:
+    return btGreen.singleClick() || btBlue.singleClick() || btYellow.singleClick();
+  case GREEN:
+    return btRed.singleClick() || btBlue.singleClick() || btYellow.singleClick();
+  case BLUE:
+    return btGreen.singleClick() || btRed.singleClick() || btYellow.singleClick();
+  case YELLOW:
+    return btGreen.singleClick() || btRed.singleClick() || btBlue.singleClick();
+  }
+}
+
+bool btnColorClicked(Colors color)
+{
+  switch (color)
+  {
+  case RED:
+    return btRed.singleClick();
+  case GREEN:
+    return btGreen.singleClick();
+  case BLUE:
+    return btBlue.singleClick();
+  case YELLOW:
+    return btYellow.singleClick();
+  }
 }
 
 void initGame()
