@@ -4,6 +4,7 @@
 #define debug
 #include <debug.h>
 #include <game.h>
+#include <button.h>
 
 // RGB LED
 #define LED_PIN 4
@@ -18,22 +19,16 @@
 #define LED_GREEN 9
 #define BTN_GREEN 10
 
-Switch btRed = Switch(BTN_RED);
-Switch btBlue = Switch(BTN_BLUE);
-Switch btGreen = Switch(BTN_GREEN);
-Switch btYellow = Switch(BTN_YELLOW);
+Button btRed = Button(LED_RED, BTN_RED, RED);
+Button btBlue = Button(LED_BLUE, BTN_BLUE, BLUE);
+Button btGreen = Button(LED_GREEN, BTN_GREEN, GREEN);
+Button btYellow = Button(LED_YELLOW, BTN_YELLOW, YELLOW);
 
-enum Colors
-{
-  RED = 0,
-  BLUE,
-  GREEN,
-  YELLOW
-};
-
-const byte color2pin[] = {LED_RED, LED_BLUE, LED_GREEN, LED_YELLOW};
+const Button color2btn[] = {btRed, btBlue, btGreen, btYellow};
 
 // color validation schema matrixes
+// no validation, simple simon says
+Colors mx_si_no[4] = {RED, BLUE, GREEN, YELLOW};
 // snr has vocal, no error
 Colors mx_hv_ne[4] = {BLUE, RED, YELLOW, GREEN};
 // snr has vocal, one error
@@ -53,9 +48,7 @@ Game game(ModuleTag::SIMON, LED_PIN, COM_PIN);
 // --- forward functions
 void initGame();
 void LedOn(Colors color, bool on);
-void blink(Colors color);
-void btnPoll();
-void ledPoll();
+void poll();
 void showStep();
 void calcValidationSchema();
 bool notBtnColorCLicked(Colors color);
@@ -76,16 +69,6 @@ void setup()
   Serial.println("init simon");
   pinMode(LED_BUILTIN, OUTPUT);
 
-  pinMode(LED_RED, OUTPUT);
-  pinMode(LED_BLUE, OUTPUT);
-  pinMode(LED_GREEN, OUTPUT);
-  pinMode(LED_YELLOW, OUTPUT);
-
-  pinMode(BTN_RED, INPUT_PULLUP);
-  pinMode(BTN_BLUE, INPUT_PULLUP);
-  pinMode(BTN_GREEN, INPUT_PULLUP);
-  pinMode(BTN_YELLOW, INPUT_PULLUP);
-
   randomSeed(analogRead(0));
   initGame();
   game.arm();
@@ -99,31 +82,35 @@ Colors expColor;
 
 void loop()
 {
-  game.poll();
-  btnPoll();
-  ledPoll();
+  poll();
 
   if (step != sstep)
   {
     sstep = step;
     showStep();
   }
-  if (notBtnColorCLicked(expColor)) {
+  if (notBtnColorCLicked(expColor))
+  {
     Serial.println("strike");
   }
-  if (btnColorClicked(expColor)) {
+  if (btnColorClicked(expColor))
+  {
     nextStep();
   }
 
   game.showTime();
 }
 
-void nextStep() {
-  if (step < stepCount) {
+void nextStep()
+{
+  if (step < stepCount)
+  {
     step++;
     calcValidationSchema();
     return;
-  } else {
+  }
+  else
+  {
     game.setSolved();
   }
 }
@@ -141,6 +128,7 @@ bool notBtnColorCLicked(Colors color)
   case YELLOW:
     return btGreen.singleClick() || btRed.singleClick() || btBlue.singleClick();
   }
+  return false;
 }
 
 bool btnColorClicked(Colors color)
@@ -156,6 +144,7 @@ bool btnColorClicked(Colors color)
   case YELLOW:
     return btYellow.singleClick();
   }
+  return false;
 }
 
 void initGame()
@@ -199,6 +188,10 @@ void showStep()
 
 void calcValidationSchema()
 {
+#ifdef debug
+  dbgOutLn("mx_si_no");
+  validationSchema = mx_si_no;
+#else
   if (game.snrHasVocal())
   {
     switch (game.getStrikes())
@@ -235,35 +228,19 @@ void calcValidationSchema()
       break;
     }
   }
-}
-
-long ledTimers[4];
-void blink(Colors color)
-{
-  LedOn(color, true);
-  ledTimers[color] = millis() + 500;
-}
-
-void ledPoll()
-{
-  long act = millis();
-  for (byte i = 0; i < 4; i++)
-    if (ledTimers[i] > 0)
-      if (ledTimers[i] < act)
-      {
-        ledTimers[i] = 0;
-        LedOn(static_cast<Colors>(i), false);
-      }
+#endif
 }
 
 void LedOn(Colors color, bool on)
 {
-  byte pin = color2pin[color];
-  digitalWrite(pin, on);
+  Button btn = color2btn[color];
+  btn.LED(on);
 }
 
 void btnPoll()
 {
+  game.poll();
+
   btBlue.poll();
   btRed.poll();
   btYellow.poll();
