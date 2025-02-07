@@ -120,13 +120,13 @@ bool notBtnColorCLicked(Colors color)
   switch (color)
   {
   case RED:
-    return btGreen.singleClick() || btBlue.singleClick() || btYellow.singleClick();
+    return btGreen.clicked() || btBlue.clicked() || btYellow.clicked();
   case GREEN:
-    return btRed.singleClick() || btBlue.singleClick() || btYellow.singleClick();
+    return btRed.clicked() || btBlue.clicked() || btYellow.clicked();
   case BLUE:
-    return btGreen.singleClick() || btRed.singleClick() || btYellow.singleClick();
+    return btGreen.clicked() || btRed.clicked() || btYellow.clicked();
   case YELLOW:
-    return btGreen.singleClick() || btRed.singleClick() || btBlue.singleClick();
+    return btGreen.clicked() || btRed.clicked() || btBlue.clicked();
   }
   return false;
 }
@@ -136,13 +136,13 @@ bool btnColorClicked(Colors color)
   switch (color)
   {
   case RED:
-    return btRed.singleClick();
+    return btRed.clicked();
   case GREEN:
-    return btGreen.singleClick();
+    return btGreen.clicked();
   case BLUE:
-    return btBlue.singleClick();
+    return btBlue.clicked();
   case YELLOW:
-    return btYellow.singleClick();
+    return btYellow.clicked();
   }
   return false;
 }
@@ -237,7 +237,7 @@ void LedOn(Colors color, bool on)
   btn.LED(on);
 }
 
-void btnPoll()
+void poll()
 {
   game.poll();
 
