@@ -108,5 +108,6 @@ private:
     HTCOM *htcom;
     Difficulty difficulty;
     Indicators indicators;
+    unsigned long strikeTime;
 };
 #endif

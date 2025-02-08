@@ -45,15 +45,23 @@ Colors mx_nv_te[4] = {YELLOW, GREEN, BLUE, RED};
 // Game framework
 Game game(ModuleTag::SIMON, LED_PIN, COM_PIN);
 
+enum TriState
+{
+  TRUE = 1,
+  FALSE,
+  NONE
+};
+
 // --- forward functions
 void initGame();
 void LedOn(Colors color, bool on);
 void poll();
 void showStep();
 void calcValidationSchema();
-bool notBtnColorCLicked(Colors color);
-bool btnColorClicked(Colors color);
+TriState btnColorClicked(Colors color);
 void nextStep();
+void allLEDOff();
+void allLEDOn();
 
 const byte STEPS_SIMPLE = 6;
 const byte STEPS_MEDIUM = 8;
@@ -79,6 +87,7 @@ byte step;
 byte sstep;
 Colors actColor;
 Colors expColor;
+TriState state;
 
 void loop()
 {
@@ -89,16 +98,18 @@ void loop()
     sstep = step;
     showStep();
   }
-  if (notBtnColorCLicked(expColor))
-  {
-    Serial.println("strike");
-  }
-  if (btnColorClicked(expColor))
-  {
-    nextStep();
-  }
+  state = btnColorClicked(expColor);
+  switch (state) {
+    case TRUE:
+      nextStep();
+      break;
+    case FALSE:
+      game.setStrike();
+      step = 0;
+      break;
+    }
 
-  game.showTime();
+  // game.showTime();
 }
 
 void nextStep()
@@ -111,40 +122,59 @@ void nextStep()
   }
   else
   {
+    allLEDOn();
+    delay(1000);
+    allLEDOff();
     game.setSolved();
   }
 }
 
-bool notBtnColorCLicked(Colors color)
+TriState btnColorClicked(Colors color)
 {
+  TriState state = NONE;
   switch (color)
   {
   case RED:
-    return btGreen.clicked() || btBlue.clicked() || btYellow.clicked();
+    if (btRed.clicked())
+      state = TRUE;
+    break;
   case GREEN:
-    return btRed.clicked() || btBlue.clicked() || btYellow.clicked();
+    if (btGreen.clicked())
+      state = TRUE;
+    break;
   case BLUE:
-    return btGreen.clicked() || btRed.clicked() || btYellow.clicked();
+    if (btBlue.clicked())
+      state = TRUE;
+    break;
   case YELLOW:
-    return btGreen.clicked() || btRed.clicked() || btBlue.clicked();
+    if (btYellow.clicked())
+      state = TRUE;
+    break;
   }
-  return false;
-}
-
-bool btnColorClicked(Colors color)
-{
+  if (state == TRUE)
+  {
+    return state;
+  }
   switch (color)
   {
   case RED:
-    return btRed.clicked();
+    if (btGreen.clicked() || btBlue.clicked() || btYellow.clicked())
+      state = FALSE;
+    break;
   case GREEN:
-    return btGreen.clicked();
+    if (btRed.clicked() || btBlue.clicked() || btYellow.clicked())
+      state = FALSE;
+    break;
   case BLUE:
-    return btBlue.clicked();
+    if (btGreen.clicked() || btRed.clicked() || btYellow.clicked())
+      state = FALSE;
+    break;
   case YELLOW:
-    return btYellow.clicked();
+    if (btGreen.clicked() || btRed.clicked() || btBlue.clicked())
+      state = FALSE;
+    break;
   }
-  return false;
+  return state;
 }
 
 void initGame()
@@ -164,9 +194,9 @@ void initGame()
   for (byte i = 0; i < STEPS_HARD; i++)
   {
     steps[i] = static_cast<Colors>(random(0, 4));
-    dbgOut("Step ");
+    dbgOut(F("Step "));
     dbgOut(i);
-    dbgOut(":");
+    dbgOut(F(":"));
     dbgOutLn(steps[i]);
   }
   step = 0;
@@ -175,6 +205,10 @@ void initGame()
 
 void showStep()
 {
+  dbgOut("show step: ");
+  dbgOutLn(step);
+  allLEDOff();
+  delay(100);
   calcValidationSchema();
   actColor = steps[step];
   LedOn(actColor, true);
@@ -245,4 +279,20 @@ void poll()
   btRed.poll();
   btYellow.poll();
   btGreen.poll();
+}
+
+void allLEDOff()
+{
+  btBlue.LED(0);
+  btRed.LED(0);
+  btYellow.LED(0);
+  btGreen.LED(0);
+}
+
+void allLEDOn()
+{
+  btBlue.LED(1);
+  btRed.LED(1);
+  btYellow.LED(1);
+  btGreen.LED(1);
 }

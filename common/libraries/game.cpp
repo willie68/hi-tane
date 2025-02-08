@@ -123,6 +123,7 @@ void Game::setState(ModuleState state)
     case STRIKED:
         htcom->sendStrike();
         setPixelColor(PX_RED);
+        strikeTime = millis() + 3001;
         break;
     case DISARMED:
         htcom->sendDisarmed();
@@ -153,13 +154,18 @@ void Game::poll()
     htcom->poll();
     if (state == ModuleState::STRIKED)
     {
-        if ((millis() % 250) < 125)
+        unsigned long ms = millis();
+        if (((ms % 250) < 125) && (ms < strikeTime))
         {
             setPixelColor(PX_RED);
         }
         else
         {
             setPixelColor(PX_BLACK);
+        }
+        if (ms > strikeTime) {
+            setPixelColor(PX_RED);
+            state = ModuleState::ARMED;
         }
     }
     if (htcom->isNewAmbSettings())
