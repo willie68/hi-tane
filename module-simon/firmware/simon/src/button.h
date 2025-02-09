@@ -3,7 +3,7 @@
 
 #include <avdweb_Switch.h>
 
-enum Colors
+enum Color
 {
   RED = 0,
   BLUE,
@@ -14,14 +14,15 @@ enum Colors
 class Button
 {
     public:
-      Button(byte ledPin, byte switchPin, Colors color);
+      Button(byte ledPin, byte switchPin, Color color);
       void poll();
       bool  clicked();
       void LED(bool on);
+      void LEDOff();
     private:
         Switch *btn;
         byte ledPin;
-        Colors color;
+        Color color;
 };
 
 #endif

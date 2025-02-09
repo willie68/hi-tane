@@ -65,6 +65,7 @@ void HTCOM::attach(uint8_t pin, uint8_t id)
     resetError();
     newAmbSettings = false;
     newStrike = false;
+    strikes = 0;
     brightness = DEFAULT_BRIGHTNESS;
 }
 

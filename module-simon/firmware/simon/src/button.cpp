@@ -2,7 +2,7 @@
 #define debug
 #include <debug.h>
 
-Button::Button(byte ledPin, byte switchPin, Colors color) 
+Button::Button(byte ledPin, byte switchPin, Color color) 
 {
     btn = new Switch(switchPin);
     this->ledPin = ledPin;
@@ -19,5 +19,13 @@ bool Button::clicked() {
 }
 
 void Button::LED(bool on) {
-    digitalWrite(ledPin, on);
+    if (on) {
+        analogWrite(ledPin, 255);
+    } else {
+        analogWrite(ledPin, 20);
+    }
+}
+
+void Button::LEDOff() {
+    analogWrite(ledPin, 0);
 }
