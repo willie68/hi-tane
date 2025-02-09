@@ -66,6 +66,12 @@ void initGame(byte wd)
   strcpy_P(alpha3, (char *)pgm_read_word(&(pwd[off + 4])));
   strcpy_P(alpha4, (char *)pgm_read_word(&(pwd[off + 5])));
 
+  x0 = random(5);
+  x1 = random(5);
+  x2 = random(5);
+  x3 = random(5);
+  x4 = random(5);
+
   updateInput();
 
   Serial.println(answer);
