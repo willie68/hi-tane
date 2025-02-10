@@ -77,6 +77,8 @@ public:
     void setCtrlError(byte error);
     void resetError();
 
+    void busReceive();
+
     // internal use only
     void receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info);
 

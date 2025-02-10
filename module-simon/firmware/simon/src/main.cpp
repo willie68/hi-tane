@@ -53,6 +53,7 @@ enum TriState
 };
 
 // --- forward functions
+void initInt();
 void initGame();
 void LedOn(Color color, bool on);
 void poll();
@@ -73,6 +74,24 @@ byte stepCount;
 Color steps[STEPS_HARD];
 Color *validationSchema;
 
+void initInt()
+{
+  sei();
+  // using pin 11 for Pin changed interrupt to receive via PJON
+  // Pin 11 is PB3
+  PCICR |= 0b00000001; // turn on port b
+  // activate Mask for pin 11 (PB3) PCINT3
+  PCMSK0 |= 0b00001000; // turn on pin PB3, which is PCINT3, physical pin 17
+  cli();
+}
+
+ISR(PCINT0_vect) // Port B, PCINT0 - PCINT7
+{
+  game.busReceive();
+}
+// ISR(PCINT1_vect){}    // Port C, PCINT8 - PCINT14
+// ISR(PCINT2_vect){}    // Port D, PCINT16 - PCINT23
+
 void setup()
 {
   Serial.begin(115200);
@@ -80,6 +99,9 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
 
   randomSeed(analogRead(0));
+  game.init();
+  initInt();
+
   initGame();
   game.arm();
 }
@@ -120,8 +142,6 @@ void loop()
     break;
     // do nothing is ok here
   }
-
-  // game.showTime();
 }
 
 void showSolveEffekt()
@@ -219,7 +239,6 @@ TriState btnColorClicked(Color color)
 
 void initGame()
 {
-  game.init();
   switch (game.getGameDifficulty())
   {
   case Difficulty::MEDIUM:

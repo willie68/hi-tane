@@ -98,6 +98,9 @@ public:
 
     bool hasIndicator(INDICATOR indicator, bool active);
     void setIntLED(bool on);
+
+    // only for special taks
+    void busReceive();
 private:
     ModuleTag tag;
     byte StatusLED;

@@ -69,9 +69,8 @@ void HTCOM::attach(uint8_t pin, uint8_t id)
     brightness = DEFAULT_BRIGHTNESS;
 }
 
-void HTCOM::setCtrlSerialNumber(uint32_t srn)
-{
-    this->snr = snr;
+void HTCOM::busReceive() {
+    bus.receive();
 }
 
 void HTCOM::poll()
@@ -79,8 +78,13 @@ void HTCOM::poll()
     bus.receive(100);
     bus.update();
     if (hasError && (millis() > errTime))
-        resetError();
-};
+    resetError();
+}
+
+void HTCOM::setCtrlSerialNumber(uint32_t srn)
+{
+    this->snr = snr;
+}
 
 void HTCOM::sendCtrlHearbeat(word countdown)
 {

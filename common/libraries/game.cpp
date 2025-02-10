@@ -149,6 +149,10 @@ void Game::setPixelColor(uint32_t color)
     pixel->show();
 }
 
+void Game::busReceive() {
+    htcom->busReceive();
+}
+
 void Game::poll()
 {
     htcom->poll();
