@@ -33,6 +33,7 @@ const uint8_t MND[] = {SEG_G};
 
 Switch btn = Switch(BUTTON_PIN);  // Button north
 TM1637Display display = TM1637Display(CLK, DIO);
+Morse morse = Morse(MORSE_LED_PIN, BEEP_PIN);
 
 void setup()
 {

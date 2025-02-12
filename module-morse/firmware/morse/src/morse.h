@@ -5,6 +5,7 @@
 
 #define DIGIT_START 26
 #define UMLAUT_START 36
+#define NO_PIN 255
 
 // Morse Code (explicit declaration of letter timings)
 const uint8_t MORSE_LETTERS[40] = {
@@ -47,7 +48,16 @@ const uint8_t MORSE_LETTERS[40] = {
     /* Ä */ B10101,
     /* Ö */ B11110,
     /* Ü */ B10011,
-    /* ß */ B10001100
+    /* ß */ B10001100};
+
+class Morse
+{
+public:
+    Morse(byte ledPin, byte tonePin);
+
+private:
+    byte ledP;
+    byte toneP;
 };
 
 #endif
