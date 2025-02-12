@@ -11,10 +11,10 @@ void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info
 
 void HTCOM::receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info)
 {
-    dbgOutLn("ht: rec");
     switch (payload[0])
     {
     case CMD_HEARTBEAT:
+        dbgOutLn("hb");
         gametime = (payload[1] << 8) + payload[2];
         strikes = payload[3];
         break;
@@ -28,15 +28,16 @@ void HTCOM::receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &i
     case CMD_GAMESETTINGS:
         difficulty = payload[1];
         inds = payload[2] + (payload[3] << 8);
-        snr = uint32_t(payload[4]) + (uint32_t(payload[5]) << 8) + (uint32_t(payload[6]) << 16); 
+        snr = uint32_t(payload[4]) + (uint32_t(payload[5]) << 8) + (uint32_t(payload[6]) << 16);
         break;
     case CMD_STRIKE:
+        dbgOutLn(F("s"));
         strikes++;
         newStrike = true;
         break;
     default:
         dbgOut("unkown: ");
-        dbgOutLn2(payload[0], HEX); 
+        dbgOutLn2(payload[0], HEX);
         break;
     };
 };
@@ -69,16 +70,24 @@ void HTCOM::attach(uint8_t pin, uint8_t id)
     brightness = DEFAULT_BRIGHTNESS;
 }
 
-void HTCOM::busReceive() {
+void HTCOM::withInterrupt(bool wi)
+{
+    wint = wi;
+}
+
+void HTCOM::busReceive()
+{
     bus.receive();
 }
 
 void HTCOM::poll()
 {
-    bus.receive(100);
+    if (!wint)
+        bus.receive(100); // only do a receive, when no interrupt methode active
+
     bus.update();
     if (hasError && (millis() > errTime))
-    resetError();
+        resetError();
 }
 
 void HTCOM::setCtrlSerialNumber(uint32_t srn)
@@ -93,24 +102,22 @@ void HTCOM::sendCtrlHearbeat(word countdown)
     sndbuf[2] = countdown & 0x00FF;
     sndbuf[3] = strikes;
 
-    sendAll(&sndbuf, 4, false);
+    sendAll(&sndbuf, 4, true);
 }
 
 void HTCOM::sendAll(const void *buf, byte size, bool once = false)
 {
-    byte mod = ID_CONTROLLER;
-    while (mod < ID_MAX_MODULES)
+    for (byte i = 0; i < MODULE_COUNT; i++)
     {
+        byte mod = modules[i];
         if (moduleID != mod)
         {
             if (once)
             {
                 bus.send_packet(mod, buf, size);
+                return;
             }
-            else
-            {
-                bus.send(mod, buf, size);
-            }
+            bus.send(mod, buf, size);
         }
         mod++;
     }
@@ -185,7 +192,8 @@ byte HTCOM::getStrikes()
 
 bool HTCOM::hasNewStrikes()
 {
-    if (newStrike) {
+    if (newStrike)
+    {
         newStrike = false;
         return true;
     }
@@ -241,8 +249,10 @@ byte HTCOM::getCtrlError()
     return lastError;
 }
 
-bool HTCOM::isNewAmbSettings() {
-    if (newAmbSettings) {
+bool HTCOM::isNewAmbSettings()
+{
+    if (newAmbSettings)
+    {
         newAmbSettings = false;
         return true;
     }

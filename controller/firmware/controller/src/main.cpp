@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #define debug
+#define nolcd
 #include <debug.h>
 #include "indicators.h"
 #include "communication.h"
@@ -51,7 +52,7 @@ const uint32_t GREEN = pixel.Color(0, 0xff, 0);
 
 // Tone
 const uint8_t BEEP_PIN = 12;
-
+// Communication
 const uint8_t COM_PIN = 11;
 HTCOM htcom;
 
@@ -82,6 +83,20 @@ char buffer[30];
 Difficulty difficulty = Difficulty::SIMPLE;
 Difficulty sdiff = Difficulty::SIMPLE;
 bool started, paused;
+
+void initInt()
+{
+  //sei();
+  PCICR |= 0b00000001; 
+  PCMSK0 |= 0b00001000;
+  //cli();
+}
+
+ISR(PCINT0_vect)
+{
+  htcom.busReceive();
+}
+
 
 void timerIsr()
 {
@@ -146,7 +161,9 @@ void initGame()
   htcom.setCtrlSerialNumber(snr.Get());
   htcom.setCtrlDifficulty(difficulty);
   htcom.setCtrlIndicators(indicators.Compress());
+  //htcom.withInterrupt(true); 
   resetStrikes();
+  initInt();
 
   dbgOutLn("htcom init ready");
 }
@@ -195,9 +212,6 @@ void loop()
 
   if (started)
     showStrikes();
-  //  printClickEncoderButtonState();
-  //  printClickEncoderValue();
-  //  printClickEncoderCount();
 }
 
 void showMenu()
@@ -471,66 +485,11 @@ void showTime(int act)
   }
 }
 
-void printClickEncoderButtonState()
-{
-  switch (clickEnc.getButton())
-  {
-  case Button::Clicked:
-    clearRow(2);
-    lcd.print("Button clicked");
-    beep();
-    break;
-  case Button::DoubleClicked:
-    clearRow(2);
-    lcd.print("Button doubleClicked");
-    dblBeep();
-    break;
-  case Button::Held:
-    clearRow(2);
-    lcd.print("Button Held");
-    break;
-  case Button::LongPressRepeat:
-    clearRow(2);
-    lcd.print("Button longPressRepeat");
-    break;
-  case Button::Released:
-    clearRow(2);
-    lcd.print("Button released");
-    break;
-  default:
-    // no output for "Open" to not spam the terminal.
-    break;
-  }
-}
-
 void clearRow(uint8_t row)
 {
   lcd.setCursor(0, row);
   lcd.print("                    ");
   lcd.setCursor(0, row);
-}
-
-void printClickEncoderValue()
-{
-  int16_t value = clickEnc.getIncrement();
-  if (value != 0)
-  {
-    clearRow(1);
-    lcd.print("Enc: ");
-    lcd.print(value, PRINT_BASE);
-  }
-}
-
-void printClickEncoderCount()
-{
-  static int16_t lastValue{0};
-  int16_t value = clickEnc.getAccumulate();
-  if (value != lastValue)
-  {
-    lcd.print(", c: ");
-    lcd.print(value, PRINT_BASE);
-  }
-  lastValue = value;
 }
 
 void dblBeep()
@@ -557,7 +516,6 @@ void resetStrikes()
 void showStrikes()
 {
   byte strikes = htcom.getStrikes();
-  dbgOutLn(strikes);
   for (uint8_t x = 0; x < 3; x++)
   {
     pixel.setPixelColor(x, GREEN);

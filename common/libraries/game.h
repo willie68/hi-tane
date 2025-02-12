@@ -101,6 +101,8 @@ public:
 
     // only for special taks
     void busReceive();
+    void withInterrupt(bool wi);
+
 private:
     ModuleTag tag;
     byte StatusLED;

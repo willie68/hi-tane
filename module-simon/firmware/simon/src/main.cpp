@@ -97,6 +97,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("init simon");
   pinMode(LED_BUILTIN, OUTPUT);
+  game.withInterrupt(true);
 
   randomSeed(analogRead(0));
   game.init();

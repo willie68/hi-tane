@@ -56,14 +56,20 @@ void Game::init()
     setState(ModuleState::INIT);
 };
 
+void Game::withInterrupt(bool wi) {
+    htcom->withInterrupt(wi);
+}
+
 bool Game::hasIndicator(INDICATOR ind)
 {
     return false;
 };
+
 bool Game::isSerialnumberOdd()
 {
     return false;
 };
+
 word Game::getGameTime()
 {
     return htcom->getGameTime();
