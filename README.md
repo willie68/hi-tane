@@ -25,7 +25,8 @@ Folgende Module sind geplant:
 - Wires: entferne die richtigen Kabel
 - Simon says: ähnlich unserem Senso
 - Password: finde das richtige Passwort
-- Keypad: Höre und Antworte
+- Morse: Höre und Antworte
+- 
 
 ## Allgemein
 
