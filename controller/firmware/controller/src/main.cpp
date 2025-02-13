@@ -74,6 +74,7 @@ void startGame();
 void setBrightness();
 void showMenu();
 void setDifficulty();
+void LED(bool on);
 
 Indicators indicators;
 SerialNumber snr;
@@ -86,10 +87,12 @@ bool started, paused;
 
 void initInt()
 {
-  cli();
-  PCICR |= 0b00000001; 
-  PCMSK0 |= 0b00001000;
-  sei();
+/*
+noInterrupts();
+PCICR |= 0b00000001; 
+PCMSK0 |= 0b00001000;
+interrupts();
+*/
 }
 
 ISR(PCINT0_vect)
@@ -110,6 +113,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("init");
   pinMode(LED_BUILTIN, OUTPUT);
+  LED(1);
   display.clear();
   display.setSegments(TTD, 1, 0);
   display.setBrightness(DEFAULT_BRIGHTNESS > 1);
@@ -138,6 +142,7 @@ void setup()
   Serial.println(COM);
 
   initGame();
+  LED(0);
 }
 
 void initGame()
@@ -544,4 +549,8 @@ void printWelcome()
 {
   lcd.setCursor(0, 1);
   lcd.print(F("Welcome"));
+}
+
+void LED(bool on) {
+  digitalWrite(LED_BUILTIN, on);
 }

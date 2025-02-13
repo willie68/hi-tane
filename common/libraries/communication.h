@@ -18,8 +18,8 @@ enum MODULEIDS
     ID_MORSE = 49,
     ID_MAX_MODULES = 50
 };
-const byte MODULE_COUNT = 2;
-const byte modules[MODULE_COUNT] = {ID_CONTROLLER, ID_SIMON};
+const byte MODULE_COUNT = 6;
+const byte modules[MODULE_COUNT] = {ID_CONTROLLER, ID_WIRES, ID_MAZE, ID_SIMON, ID_PASSWORD, ID_MORSE};
 
 const char e_nn[] PROGMEM = "";
 const char e_we[] PROGMEM = "wires: invalid wire";
@@ -85,8 +85,8 @@ public:
     void receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info);
     void withInterrupt(bool wi);
 
-protected:
     PJONSoftwareBitBang bus;
+protected:
     byte moduleID;
 
     int gametime;
@@ -108,7 +108,8 @@ protected:
     byte recbuf[8];
     bool wint; // with interrupt receiver
 
-    void sendAll(const void *buf, byte size, bool once);
+    void sendAll(const void *buf, byte size);
+    void broadcast(const void *buf, byte size);
 };
 
 #endif

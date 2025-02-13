@@ -101,25 +101,22 @@ void HTCOM::sendCtrlHearbeat(word countdown)
     sndbuf[1] = countdown >> 8;
     sndbuf[2] = countdown & 0x00FF;
     sndbuf[3] = strikes;
-
-    sendAll(&sndbuf, 4, true);
+    broadcast(&sndbuf, 4);
 }
 
-void HTCOM::sendAll(const void *buf, byte size, bool once = false)
+void HTCOM::broadcast(const void *buf, byte size)
+{
+    bus.send(PJON_BROADCAST, buf, size);
+    return;
+}
+
+void HTCOM::sendAll(const void *buf, byte size)
 {
     for (byte i = 0; i < MODULE_COUNT; i++)
     {
         byte mod = modules[i];
         if (moduleID != mod)
-        {
-            if (once)
-            {
-                bus.send_packet(mod, buf, size);
-                return;
-            }
             bus.send(mod, buf, size);
-        }
-        mod++;
     }
 }
 

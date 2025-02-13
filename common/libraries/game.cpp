@@ -188,12 +188,16 @@ void Game::poll()
     }
 }
 
-void Game::showTime()
+void Game::showTime(bool fast)
 {
-    word act = getGameTime();
+    word act = htcom->getGameTime();
     if (act != saveTime)
     {
         saveTime = act;
+        if (fast) {
+            Serial.println(act, DEC);
+            return;
+        }
         bool neg = act < 0;
         int t = abs(act);
         byte sec = t % 60;

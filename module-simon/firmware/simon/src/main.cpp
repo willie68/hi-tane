@@ -8,10 +8,10 @@
 
 // RGB LED
 #define LED_PIN 4
-#define COM_PIN 11
+#define COM_PIN 2
 
 #define LED_RED 3
-#define BTN_RED 2
+#define BTN_RED 11
 #define LED_BLUE 5
 #define BTN_BLUE 7
 #define LED_YELLOW 6
@@ -76,21 +76,16 @@ Color *validationSchema;
 
 void initInt()
 {
-  cli();
-  // using pin 11 for Pin changed interrupt to receive via PJON
-  // Pin 11 is PB3
-  PCICR |= 0b00000001; // turn on port b
-  // activate Mask for pin 11 (PB3) PCINT3
-  PCMSK0 |= 0b00001000; // turn on pin PB3, which is PCINT3, physical pin 17
-  sei();
+  noInterrupts();
+  PCICR |= 0b00000001; 
+  PCMSK0 |= 0b00001000;
+  interrupts();
 }
 
 ISR(PCINT0_vect) // Port B, PCINT0 - PCINT7
 {
-  game.busReceive();
+  game.htcom->bus.receive();
 }
-// ISR(PCINT1_vect){}    // Port C, PCINT8 - PCINT14
-// ISR(PCINT2_vect){}    // Port D, PCINT16 - PCINT23
 
 void setup()
 {
@@ -143,6 +138,7 @@ void loop()
     break;
     // do nothing is ok here
   }
+  game.showTime(true);
 }
 
 void showSolveEffekt()
