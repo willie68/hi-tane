@@ -76,13 +76,13 @@ Color *validationSchema;
 
 void initInt()
 {
-  sei();
+  cli();
   // using pin 11 for Pin changed interrupt to receive via PJON
   // Pin 11 is PB3
   PCICR |= 0b00000001; // turn on port b
   // activate Mask for pin 11 (PB3) PCINT3
   PCMSK0 |= 0b00001000; // turn on pin PB3, which is PCINT3, physical pin 17
-  cli();
+  sei();
 }
 
 ISR(PCINT0_vect) // Port B, PCINT0 - PCINT7
