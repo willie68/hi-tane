@@ -86,10 +86,10 @@ bool started, paused;
 
 void initInt()
 {
-  //sei();
+  cli();
   PCICR |= 0b00000001; 
   PCMSK0 |= 0b00001000;
-  //cli();
+  sei();
 }
 
 ISR(PCINT0_vect)
