@@ -6,12 +6,12 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #define debug
-#define nolcd
 #include <debug.h>
 #include "indicators.h"
 #include "communication.h"
 #include <game.h>
 #include <serialnumber.h>
+#include <pins_arduino.h>
 
 #define Version "V0.1 " // always add an space at the end
 
@@ -85,21 +85,18 @@ Difficulty difficulty = Difficulty::SIMPLE;
 Difficulty sdiff = Difficulty::SIMPLE;
 bool started, paused;
 
-void initInt()
+void initInt(byte comPin)
 {
-/*
-noInterrupts();
-PCICR |= 0b00000001; 
-PCMSK0 |= 0b00001000;
-interrupts();
-*/
+  cli();
+  PCICR |= 0b00000001; 
+  PCMSK0 |= 0b00001000;
+  sei();
 }
 
 ISR(PCINT0_vect)
 {
   htcom.busReceive();
 }
-
 
 void timerIsr()
 {
@@ -166,9 +163,10 @@ void initGame()
   htcom.setCtrlSerialNumber(snr.Get());
   htcom.setCtrlDifficulty(difficulty);
   htcom.setCtrlIndicators(indicators.Compress());
-  //htcom.withInterrupt(true); 
+  htcom.withInterrupt(true);
+
   resetStrikes();
-  initInt();
+  initInt(COM_PIN);
 
   dbgOutLn("htcom init ready");
 }
@@ -524,7 +522,7 @@ void showStrikes()
   for (uint8_t x = 0; x < 3; x++)
   {
     pixel.setPixelColor(x, GREEN);
-    if ( x < strikes)
+    if (x < strikes)
     {
       pixel.setPixelColor(x, RED);
       lcd.setCursor(10 + x, 0);
