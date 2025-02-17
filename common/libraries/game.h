@@ -59,7 +59,8 @@ const char *const GAMEMODE_NAMES[] PROGMEM = {gm_simple, gm_medium, gm_hard, gm_
 void nextDiff(Difficulty &diff);
 void prevDiff(Difficulty &diff);
 
-enum ERRORS {
+enum ERRORS
+{
     ERR_NO_ERR = 0,
     ERR_INVALID_WIRES = 1
 };
@@ -99,11 +100,9 @@ public:
     bool hasIndicator(INDICATOR indicator, bool active);
     void setIntLED(bool on);
 
-    // only for special taks
-    void busReceive();
-
-    HTCOM *htcom;
 private:
+    HTCOM *htcom;
+
     ModuleTag tag;
     byte StatusLED;
     word saveTime;

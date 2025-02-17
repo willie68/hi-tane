@@ -78,9 +78,6 @@ public:
     byte getCtrlError();
     void setCtrlError(byte error);
     void resetError();
-
-    void busReceive();
-
 protected:
     byte moduleID;
 
@@ -103,8 +100,6 @@ protected:
     can_frame sndCanMsg;
     can_frame rcvCanMsg;
     MCP2515 *mcp2515;
-
-    void receive(can_frame *payload);
 };
 
 #endif
