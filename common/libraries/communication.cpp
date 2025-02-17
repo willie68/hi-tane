@@ -1,91 +1,78 @@
 #include "communication.h"
-#include <PJONSoftwareBitBang.h>
+#include <SPI.h>
+#include <mcp2515.h>
 #define debug
 #include <debug.h>
 
-void receiver_function(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info)
-{
-    if (info.custom_pointer)
-        ((HTCOM *)info.custom_pointer)->receive(payload, length, info);
-};
-
-void HTCOM::receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info)
-{
-    switch (payload[0])
-    {
-    case CMD_HEARTBEAT:
-        dbgOutLn("hb");
-        gametime = (payload[1] << 8) + payload[2];
-        strikes = payload[3];
-        break;
-    case CMD_ERROR:
-        setCtrlError(payload[2]);
-        break;
-    case CMD_AMBIENTSETTINGS:
-        brightness = (payload[1]);
-        newAmbSettings = true;
-        break;
-    case CMD_GAMESETTINGS:
-        difficulty = payload[1];
-        inds = payload[2] + (payload[3] << 8);
-        snr = uint32_t(payload[4]) + (uint32_t(payload[5]) << 8) + (uint32_t(payload[6]) << 16);
-        break;
-    case CMD_STRIKE:
-        dbgOutLn(F("s"));
-        strikes++;
-        newStrike = true;
-        break;
-    default:
-        dbgOut("unkown: ");
-        dbgOutLn2(payload[0], HEX);
-        break;
-    };
-};
-
 HTCOM::HTCOM()
 {
-    bus = PJONSoftwareBitBang();
 }
 
-HTCOM::HTCOM(uint8_t pin, uint8_t id)
+HTCOM::HTCOM(uint8_t id)
 {
-    bus = PJONSoftwareBitBang();
-    attach(pin, id);
     moduleID = id;
 }
 
-void HTCOM::attach(uint8_t pin, uint8_t id)
+void HTCOM::attach(uint8_t id)
 {
+    mcp2515 = new MCP2515(10);
     gametime = 3600;
-    bus.set_id(id);
-    bus.strategy.set_pin(pin);
-    bus.set_receiver(receiver_function);
-    bus.set_custom_pointer(this);
-    bus.begin();
     moduleID = id;
     resetError();
     newAmbSettings = false;
     newStrike = false;
     strikes = 0;
     brightness = DEFAULT_BRIGHTNESS;
-}
 
-void HTCOM::withInterrupt(bool wi)
-{
-    wint = wi;
-}
-
-void HTCOM::busReceive()
-{
-    bus.receive();
+    mcp2515->reset();
+    mcp2515->setBitrate(CAN_500KBPS);
+    mcp2515->setNormalMode();
 }
 
 void HTCOM::poll()
 {
-    if (!wint)
-        bus.receive(100); // only do a receive, when no interrupt methode active
-
-    bus.update();
+    if (mcp2515->readMessage(&rcvCanMsg) == MCP2515::ERROR_OK)
+    {
+        unsigned long canID = rcvCanMsg.can_id;
+        byte rcvModule = ID_CONTROLLER;
+        if (canID > 0x00ff)
+        {
+            rcvModule = canID & 0x00ff;
+            canID = canID & 0xff00;
+        }
+        switch (canID)
+        {
+        case MID_HEARTBEAT:
+            dbgOutLn("hb");
+            gametime = (rcvCanMsg.data[0] << 8) + rcvCanMsg.data[1];
+            strikes = rcvCanMsg.data[2];
+            break;
+        case MID_AMBIENTSETTINGS:
+            brightness = (rcvCanMsg.data[0]);
+            newAmbSettings = true;
+            break;
+        case MID_GAMESETTINGS:
+            difficulty = rcvCanMsg.data[1];
+            inds = rcvCanMsg.data[2] + (rcvCanMsg.data[3] << 8);
+            snr = uint32_t(rcvCanMsg.data[4]) + (uint32_t(rcvCanMsg.data[5]) << 8) + (uint32_t(rcvCanMsg.data[6]) << 16);
+            break;
+        case MID_ERROR:
+            setCtrlError(rcvCanMsg.data[0]);
+            break;
+        case MID_STRIKE:
+            dbgOutLn(F("s"));
+            strikes++;
+            newStrike = true;
+            break;
+        default:
+            dbgOut("unkown: ");
+            dbgOut2(rcvModule, HEX);
+            dbgOut(" ")
+            dbgOutLn2(rcvCanMsg.can_id, HEX);
+            break;
+        };
+    }
+    // check if there is an message incoming
     if (hasError && (millis() > errTime))
         resetError();
 }
@@ -97,63 +84,40 @@ void HTCOM::setCtrlSerialNumber(uint32_t srn)
 
 void HTCOM::sendCtrlHearbeat(word countdown)
 {
-    sndbuf[0] = CMD_HEARTBEAT;
-    sndbuf[1] = countdown >> 8;
-    sndbuf[2] = countdown & 0x00FF;
-    sndbuf[3] = strikes;
-    broadcast(&sndbuf, 4);
-}
+    sndCanMsg.can_id = MID_HEARTBEAT;
+    sndCanMsg.can_dlc = 3;
+    sndCanMsg.data[0] = countdown >> 8;
+    sndCanMsg.data[1] = countdown & 0x00FF;
+    sndCanMsg.data[2] = strikes;
 
-void HTCOM::broadcast(const void *buf, byte size)
-{
-    bus.send(PJON_BROADCAST, buf, size);
-    return;
-}
-
-void HTCOM::sendAll(const void *buf, byte size)
-{
-    for (byte i = 0; i < MODULE_COUNT; i++)
-    {
-        byte mod = modules[i];
-        if (moduleID != mod)
-            bus.send(mod, buf, size);
-    }
+    mcp2515->sendMessage(&sndCanMsg);
 }
 
 void HTCOM::sendError(byte err)
 {
-    sndbuf[0] = CMD_ERROR;
-    sndbuf[1] = moduleID;
-    sndbuf[2] = err;
-    sndbuf[3] = 0;
-    sndbuf[4] = 0;
-    sndbuf[5] = 0;
-    sndbuf[6] = 0;
-    sndbuf[7] = 0;
+    sndCanMsg.can_id = MID_ERROR + moduleID;
+    sndCanMsg.can_dlc = 1;
+    sndCanMsg.data[0] = err;
 
-    bus.send(ID_CONTROLLER, sndbuf, 8);
+    mcp2515->sendMessage(&sndCanMsg);
 }
 
 void HTCOM::sendDisarmed()
 {
-    sndbuf[0] = CMD_ARM;
-    sndbuf[1] = moduleID;
-    sndbuf[2] = PAR_DISARM;
-    sndbuf[3] = 0;
-    sndbuf[4] = 0;
-    sndbuf[5] = 0;
-    sndbuf[6] = 0;
-    sndbuf[7] = 0;
+    sndCanMsg.can_id = MID_DISARM + moduleID;
+    sndCanMsg.can_dlc = 1;
+    sndCanMsg.data[0] = moduleID;
 
-    bus.send(ID_CONTROLLER, sndbuf, 8);
+    mcp2515->sendMessage(&sndCanMsg);
 }
 
 void HTCOM::sendStrike()
 {
-    sndbuf[0] = CMD_STRIKE;
-    sndbuf[1] = moduleID;
+    sndCanMsg.can_id = MID_STRIKE + moduleID;
+    sndCanMsg.can_dlc = 1;
+    sndCanMsg.data[0] = moduleID;
 
-    bus.send(ID_CONTROLLER, sndbuf, 2);
+    mcp2515->sendMessage(&sndCanMsg);
 }
 
 void HTCOM::setCtrlIndicators(word inds)
@@ -204,22 +168,25 @@ int HTCOM::getGameTime()
 
 void HTCOM::sendGameSettings()
 {
-    sndbuf[0] = CMD_GAMESETTINGS;
-    sndbuf[1] = this->difficulty;
-    sndbuf[2] = inds & 0x00FF;
-    sndbuf[3] = inds >> 8;
-    sndbuf[4] = snr & 0xff;
-    sndbuf[5] = (snr >> 8) & 0xff;
-    sndbuf[6] = (snr >> 16) & 0xff;
-    sendAll(&sndbuf, 7);
+    sndCanMsg.can_id = MID_GAMESETTINGS;
+    sndCanMsg.can_dlc = 6;
+    sndCanMsg.data[0] = this->difficulty;
+    sndCanMsg.data[1] = inds & 0x00FF;
+    sndCanMsg.data[2] = inds >> 8;
+    sndCanMsg.data[3] = snr & 0xff;
+    sndCanMsg.data[4] = (snr >> 8) & 0xff;
+    sndCanMsg.data[5] = (snr >> 16) & 0xff;
+
+    mcp2515->sendMessage(&sndCanMsg);
 }
 
 void HTCOM::sendAmbientSettings()
 {
-    sndbuf[0] = CMD_AMBIENTSETTINGS;
-    sndbuf[1] = this->brightness;
+    sndCanMsg.can_id = MID_AMBIENTSETTINGS;
+    sndCanMsg.can_dlc = 1;
+    sndCanMsg.data[0] = this->brightness;
 
-    sendAll(&sndbuf, 2);
+    mcp2515->sendMessage(&sndCanMsg);
 }
 
 void HTCOM::setCtrlError(byte error)

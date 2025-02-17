@@ -85,19 +85,6 @@ Difficulty difficulty = Difficulty::SIMPLE;
 Difficulty sdiff = Difficulty::SIMPLE;
 bool started, paused;
 
-void initInt(byte comPin)
-{
-  cli();
-  PCICR |= 0b00000001; 
-  PCMSK0 |= 0b00001000;
-  sei();
-}
-
-ISR(PCINT0_vect)
-{
-  htcom.busReceive();
-}
-
 void timerIsr()
 {
   // This is the Encoder's worker routine. It will physically read the hardware
@@ -136,7 +123,6 @@ void setup()
   }
 
   lcd.clear();
-  Serial.println(COM);
 
   initGame();
   LED(0);
@@ -159,14 +145,12 @@ void initGame()
   //  htcom = HTCOM(COM_PIN, 44);
   dbgOutLn("htcom init");
   htcom = HTCOM();
-  htcom.attach(COM_PIN, ID_CONTROLLER);
+  htcom.attach(ID_CONTROLLER);
   htcom.setCtrlSerialNumber(snr.Get());
   htcom.setCtrlDifficulty(difficulty);
   htcom.setCtrlIndicators(indicators.Compress());
-  htcom.withInterrupt(true);
 
   resetStrikes();
-  initInt(COM_PIN);
 
   dbgOutLn("htcom init ready");
 }

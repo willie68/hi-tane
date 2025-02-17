@@ -67,7 +67,7 @@ enum ERRORS {
 class Game
 {
 public:
-    Game(ModuleTag moduleTag, byte pinStatusLED, byte pinCom);
+    Game(ModuleTag moduleTag, byte pinStatusLED);
     Game();
 
     void init();
@@ -101,13 +101,11 @@ public:
 
     // only for special taks
     void busReceive();
-    void withInterrupt(bool wi);
 
     HTCOM *htcom;
 private:
     ModuleTag tag;
     byte StatusLED;
-    byte Com;
     word saveTime;
     Adafruit_NeoPixel *pixel;
     ModuleState state;

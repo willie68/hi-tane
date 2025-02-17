@@ -25,11 +25,10 @@ void prevDiff(Difficulty &diff)
     diff = static_cast<Difficulty>(idx);
 }
 
-Game::Game(ModuleTag moduleTag, byte pinStatusLED, byte pinCom)
+Game::Game(ModuleTag moduleTag, byte pinStatusLED)
 {
     tag = moduleTag;
     StatusLED = pinStatusLED;
-    Com = pinCom;
 };
 
 Game::Game()
@@ -37,7 +36,6 @@ Game::Game()
     state = ModuleState::INIT;
     tag = ModuleTag::WIRES;
     StatusLED = 4;
-    Com = 11;
     difficulty = Difficulty::HARD;
 };
 
@@ -51,14 +49,10 @@ void Game::init()
     pixel->show();
 
     htcom = new HTCOM();
-    htcom->attach(Com, tag);
+    htcom->attach(tag);
 
     setState(ModuleState::INIT);
 };
-
-void Game::withInterrupt(bool wi) {
-    htcom->withInterrupt(wi);
-}
 
 bool Game::hasIndicator(INDICATOR ind)
 {

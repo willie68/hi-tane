@@ -1,10 +1,10 @@
 
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
-#define COM 1
 
 #include <Arduino.h>
-#include <PJONSoftwareBitBang.h>
+#include <SPI.h>
+#include <mcp2515.h>
 
 const byte DEFAULT_BRIGHTNESS = 4;
 
@@ -29,12 +29,12 @@ const char *const ERROR_MESSAGES[] PROGMEM = {
 
 enum COMMANDS
 {
-    CMD_HEARTBEAT = 1,
-    CMD_STRIKE,
-    CMD_GAMESETTINGS,
-    CMD_ERROR,
-    CMD_ARM,
-    CMD_AMBIENTSETTINGS
+    MID_HEARTBEAT = 0x0001,
+    MID_AMBIENTSETTINGS = 0x0002,
+    MID_GAMESETTINGS = 0x0003,
+    MID_ERROR = 0x0300,
+    MID_DISARM = 0x0400,
+    MID_STRIKE = 0x0500
 };
 
 enum PARAMETER
@@ -46,10 +46,10 @@ enum PARAMETER
 class HTCOM
 {
 public:
-    HTCOM(byte pin, byte id);
+    HTCOM(byte id);
     HTCOM();
 
-    void attach(byte pin, byte id);
+    void attach(byte id);
     void poll();
 
     // module functions
@@ -81,11 +81,6 @@ public:
 
     void busReceive();
 
-    // internal use only
-    void receive(uint8_t *payload, uint16_t length, const PJON_Packet_Info &info);
-    void withInterrupt(bool wi);
-
-    PJONSoftwareBitBang bus;
 protected:
     byte moduleID;
 
@@ -104,12 +99,12 @@ protected:
     unsigned long errTime;
 
     uint32_t snr;
-    byte sndbuf[8];
-    byte recbuf[8];
-    bool wint; // with interrupt receiver
 
-    void sendAll(const void *buf, byte size);
-    void broadcast(const void *buf, byte size);
+    can_frame sndCanMsg;
+    can_frame rcvCanMsg;
+    MCP2515 *mcp2515;
+
+    void receive(can_frame *payload);
 };
 
 #endif
