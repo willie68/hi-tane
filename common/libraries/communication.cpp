@@ -35,10 +35,21 @@ void HTCOM::poll()
     {
         unsigned long canID = rcvCanMsg.can_id;
         byte rcvModule = ID_CONTROLLER;
-        if (canID > 0x00ff)
+        if (canID > 0x0000ff)
         {
-            rcvModule = canID & 0x00ff;
-            canID = canID & 0xff00;
+            rcvModule = canID & 0x0000ff;
+            canID = canID & 0x00ff00;
+        }
+        if (moduleID == ID_CONTROLLER) {
+            // the controller is only interested in non controller messages
+            if (rcvModule == ID_CONTROLLER) {
+                return
+            }
+        } else {
+            // the game Modules are only interested in controller messages
+            if (rcvModule != ID_CONTROLLER) {
+                return
+            }
         }
         switch (canID)
         {
