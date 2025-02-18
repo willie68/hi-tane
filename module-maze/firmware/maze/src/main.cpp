@@ -19,16 +19,16 @@ void showSmile(bool ok);
 #define LED_PIN 4
 #define COM_PIN 11
 // Game framework
-Game game(ModuleTag::MAZE, LED_PIN, COM_PIN);
+Game game(ModuleTag::MAZE, LED_PIN);
 
 #define MATRIX_PIN 3
 const byte MATRIX_LED_COUNT = 64;
 Adafruit_NeoPixel matrix(MATRIX_LED_COUNT, MATRIX_PIN, NEO_GRB + NEO_KHZ800);
 
-Switch btn = Switch(8);  // Button north
-Switch bte = Switch(6);  // Button east
-Switch bts = Switch(7);  // Button south
-Switch btw = Switch(5);  // Button west
+Switch btn = Switch(8); // Button north
+Switch bte = Switch(6); // Button east
+Switch bts = Switch(7); // Button south
+Switch btw = Switch(5); // Button west
 Switch btm = Switch(9); // Button middle
 
 Maze maze;
@@ -37,7 +37,7 @@ void setup()
 {
   Serial.begin(115200);
   dbgOutLn(F("setup"))
-  game.setState(ModuleState::INIT);
+      game.setState(ModuleState::INIT);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(MATRIX_PIN, OUTPUT);
   matrix.setBrightness(64);
@@ -99,7 +99,7 @@ void loop()
     showBoard(showMarks);
   }
 
-  //game.showTime();
+  // game.showTime();
 }
 
 byte SM_OK[] = {0x3C, 0x42, 0xA5, 0x81, 0xA5, 0x99, 0x42, 0x3C};
@@ -134,7 +134,8 @@ void showSmile(bool ok)
       }
     }
   }
-  if (ok) {
+  if (ok)
+  {
     matrix.setBrightness(0x10);
   }
   matrix.show();
@@ -195,12 +196,12 @@ void initGame()
     {
       delay(1000);
       Serial.println(F("invalid maze configuration"));
-      game.sendError("maze: invalid configuration");
+      game.sendError(ERR_INVALID_CONFIGURATION);
     }
   }
 
   dbgOutLn(F("setBrightness"))
-  matrix.setBrightness(0x10);
+      matrix.setBrightness(0x10);
   for (byte x = 0; x < MATRIX_LED_COUNT; x++)
   {
     matrix.setPixelColor(x, PX_YELLOW);

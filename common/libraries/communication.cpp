@@ -40,16 +40,17 @@ void HTCOM::poll()
             rcvModule = canID & 0x0000ff;
             canID = canID & 0x00ff00;
         }
-        if (moduleID == ID_CONTROLLER) {
+        if (moduleID == ID_CONTROLLER)
+        {
             // the controller is only interested in non controller messages
-            if (rcvModule == ID_CONTROLLER) {
-                return
-            }
-        } else {
+            if (rcvModule == ID_CONTROLLER)
+                return;
+        }
+        else
+        {
             // the game Modules are only interested in controller messages
-            if (rcvModule != ID_CONTROLLER) {
-                return
-            }
+            if (rcvModule != ID_CONTROLLER)
+                return;
         }
         switch (canID)
         {
@@ -79,7 +80,7 @@ void HTCOM::poll()
             dbgOut("unkown: ");
             dbgOut2(rcvModule, HEX);
             dbgOut(" ")
-            dbgOutLn2(rcvCanMsg.can_id, HEX);
+                dbgOutLn2(rcvCanMsg.can_id, HEX);
             break;
         };
     }

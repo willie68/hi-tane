@@ -62,7 +62,8 @@ void prevDiff(Difficulty &diff);
 enum ERRORS
 {
     ERR_NO_ERR = 0,
-    ERR_INVALID_WIRES = 1
+    ERR_INVALID_WIRES = 1,
+    ERR_INVALID_CONFIGURATION = 2
 };
 
 class Game
