@@ -7,6 +7,7 @@
 #include "indicators.h"
 #include "game.h"
 #include <mazes.h>
+#include <debug.h>
 
 // ---- forward declarations
 void initGame();
@@ -20,22 +21,22 @@ void showSmile(bool ok);
 // Game framework
 Game game(ModuleTag::MAZE, LED_PIN, COM_PIN);
 
-#define MATRIX_PIN 5
+#define MATRIX_PIN 3
 const byte MATRIX_LED_COUNT = 64;
 Adafruit_NeoPixel matrix(MATRIX_LED_COUNT, MATRIX_PIN, NEO_GRB + NEO_KHZ800);
 
-Switch btn = Switch(6);  // Button north
-Switch bte = Switch(7);  // Button east
-Switch bts = Switch(8);  // Button south
-Switch btw = Switch(9);  // Button west
-Switch btm = Switch(10); // Button middle
+Switch btn = Switch(8);  // Button north
+Switch bte = Switch(6);  // Button east
+Switch bts = Switch(7);  // Button south
+Switch btw = Switch(5);  // Button west
+Switch btm = Switch(9); // Button middle
 
 Maze maze;
 
 void setup()
 {
   Serial.begin(115200);
-
+  dbgOutLn(F("setup"))
   game.setState(ModuleState::INIT);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(MATRIX_PIN, OUTPUT);
@@ -98,7 +99,7 @@ void loop()
     showBoard(showMarks);
   }
 
-  game.showTime();
+  //game.showTime();
 }
 
 byte SM_OK[] = {0x3C, 0x42, 0xA5, 0x81, 0xA5, 0x99, 0x42, 0x3C};
@@ -181,6 +182,7 @@ void showBoard(bool smo)
 
 void initGame()
 {
+  dbgOutLn(F("initGame"));
   game.init();
   game.setGameDifficulty(Difficulty::HARD);
 
@@ -197,6 +199,7 @@ void initGame()
     }
   }
 
+  dbgOutLn(F("setBrightness"))
   matrix.setBrightness(0x10);
   for (byte x = 0; x < MATRIX_LED_COUNT; x++)
   {

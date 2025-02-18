@@ -163,16 +163,18 @@ void Game::poll()
         {
             setPixelColor(PX_BLACK);
         }
-        if (ms > strikeTime) {
+        if (ms > strikeTime)
+        {
             setPixelColor(PX_RED);
             state = ModuleState::ARMED;
         }
     }
     if (htcom->isNewAmbSettings())
     {
-        if (htcom->getBrightness() != pixel->getBrightness())
+        byte brightness = htcom->getBrightness() * 16;
+        if (brightness != pixel->getBrightness())
         {
-            pixel->setBrightness(htcom->getBrightness() * 16);
+            pixel->setBrightness(brightness);
             pixel->show();
         }
     }
@@ -184,7 +186,8 @@ void Game::showTime(bool fast)
     if (act != saveTime)
     {
         saveTime = act;
-        if (fast) {
+        if (fast)
+        {
             Serial.println(act, DEC);
             return;
         }
