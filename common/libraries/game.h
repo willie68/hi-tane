@@ -96,10 +96,9 @@ public:
 
     // output game time for debug to serial
     void showTime(bool fast);
-    void setGameDifficulty(Difficulty difficulty);
 
     bool hasIndicator(INDICATOR indicator, bool active);
-    void setIntLED(bool on);
+    bool isNewGameSettings();
 
 private:
     HTCOM *htcom;
@@ -109,7 +108,7 @@ private:
     word saveTime;
     Adafruit_NeoPixel *pixel;
     ModuleState state;
-    Difficulty difficulty;
+    byte difficulty;
     Indicators indicators;
     unsigned long strikeTime;
 };

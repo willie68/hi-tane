@@ -15,11 +15,12 @@ HTCOM::HTCOM(uint8_t id)
 
 void HTCOM::attach(uint8_t id)
 {
-    mcp2515 = new MCP2515(10);
+    mcp2515 = new MCP2515(CS_PIN);
     gametime = 3600;
     moduleID = id;
     resetError();
     newAmbSettings = false;
+    newGameSettings = false;
     newStrike = false;
     strikes = 0;
     brightness = DEFAULT_BRIGHTNESS;
@@ -34,6 +35,8 @@ void HTCOM::poll()
     if (mcp2515->readMessage(&rcvCanMsg) == MCP2515::ERROR_OK)
     {
         unsigned long canID = rcvCanMsg.can_id;
+        dbgOut("msg from ");
+        dbgOutLn2(canID, HEX);
         byte rcvModule = ID_CONTROLLER;
         if (canID > 0x0000ff)
         {
@@ -64,9 +67,16 @@ void HTCOM::poll()
             newAmbSettings = true;
             break;
         case MID_GAMESETTINGS:
-            difficulty = rcvCanMsg.data[1];
-            inds = rcvCanMsg.data[2] + (rcvCanMsg.data[3] << 8);
-            snr = uint32_t(rcvCanMsg.data[4]) + (uint32_t(rcvCanMsg.data[5]) << 8) + (uint32_t(rcvCanMsg.data[6]) << 16);
+            dbgOut("gs ");
+            difficulty = rcvCanMsg.data[0];
+            dbgOut2(difficulty, HEX);
+            inds = rcvCanMsg.data[1] + (rcvCanMsg.data[2] << 8);
+            dbgOut(" ");
+            dbgOut2(inds, HEX);
+            snr = uint32_t(rcvCanMsg.data[3]) + (uint32_t(rcvCanMsg.data[4]) << 8) + (uint32_t(rcvCanMsg.data[5]) << 16);
+            dbgOut(" ");
+            dbgOutLn2(snr, HEX);
+            newGameSettings = true;
             break;
         case MID_ERROR:
             setCtrlError(rcvCanMsg.data[0]);
@@ -144,6 +154,8 @@ void HTCOM::setCtlrStrikes(byte strikes)
 
 void HTCOM::setCtrlDifficulty(byte difficulty)
 {
+    dbgOut("df: ");
+    dbgOutLn2(difficulty, HEX);
     this->difficulty = difficulty;
 }
 
@@ -233,4 +245,18 @@ bool HTCOM::isNewAmbSettings()
         return true;
     }
     return false;
+}
+
+bool HTCOM::isNewGameSettings()
+{
+    if (newGameSettings)
+    {
+        newGameSettings = false;
+        return true;
+    }
+    return false;
+}
+
+byte HTCOM::getDifficulty() {
+    return difficulty;
 }

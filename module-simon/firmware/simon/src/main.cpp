@@ -11,13 +11,13 @@
 #define COM_PIN 2
 
 #define LED_RED 3
-#define BTN_RED 11
+#define BTN_RED 14
 #define LED_BLUE 5
 #define BTN_BLUE 7
 #define LED_YELLOW 6
 #define BTN_YELLOW 8
 #define LED_GREEN 9
-#define BTN_GREEN 10
+#define BTN_GREEN 15
 
 Button btRed = Button(LED_RED, BTN_RED, RED);
 Button btBlue = Button(LED_BLUE, BTN_BLUE, BLUE);
@@ -43,7 +43,7 @@ Color mx_nv_oe[4] = {RED, BLUE, YELLOW, GREEN};
 Color mx_nv_te[4] = {YELLOW, GREEN, BLUE, RED};
 
 // Game framework
-Game game(ModuleTag::SIMON, LED_PIN, COM_PIN);
+Game game(ModuleTag::SIMON, LED_PIN);
 
 enum TriState
 {
@@ -53,7 +53,6 @@ enum TriState
 };
 
 // --- forward functions
-void initInt();
 void initGame();
 void LedOn(Color color, bool on);
 void poll();
@@ -74,29 +73,14 @@ byte stepCount;
 Color steps[STEPS_HARD];
 Color *validationSchema;
 
-void initInt()
-{
-  noInterrupts();
-  PCICR |= 0b00000001; 
-  PCMSK0 |= 0b00001000;
-  interrupts();
-}
-
-ISR(PCINT0_vect) // Port B, PCINT0 - PCINT7
-{
-  game.htcom->bus.receive();
-}
-
 void setup()
 {
   Serial.begin(115200);
   Serial.println("init simon");
   pinMode(LED_BUILTIN, OUTPUT);
-  game.withInterrupt(true);
 
   randomSeed(analogRead(0));
   game.init();
-  initInt();
 
   initGame();
   game.arm();
@@ -236,7 +220,11 @@ TriState btnColorClicked(Color color)
 
 void initGame()
 {
-  switch (game.getGameDifficulty())
+  dbgOutLn("init game");
+  Difficulty dif = game.getGameDifficulty();
+  dbgOut("df: ");
+  dbgOutLn2(dif, HEX);
+  switch (dif)
   {
   case Difficulty::MEDIUM:
     stepCount = STEPS_MEDIUM;
@@ -249,6 +237,10 @@ void initGame()
   }
   for (byte i = 0; i < STEPS_HARD; i++)
   {
+    if (i >= stepCount) {
+      steps[i] = Color::NN;
+      continue;
+    }
     byte step = random(0, 4);
     if (i > 0)
     {
@@ -265,14 +257,14 @@ void initGame()
   }
   step = 0;
   sstep = 255;
-  printMX(mx_hv_ne);
-  printMX(mx_si_no);
-  printMX(mx_hv_ne);
-  printMX(mx_hv_oe);
-  printMX(mx_hv_te);
-  printMX(mx_nv_ne);
-  printMX(mx_nv_oe);
-  printMX(mx_nv_te);
+//  printMX(mx_hv_ne);
+//  printMX(mx_si_no);
+//  printMX(mx_hv_ne);
+//  printMX(mx_hv_oe);
+//  printMX(mx_hv_te);
+//  printMX(mx_nv_ne);
+//  printMX(mx_nv_oe);
+//  printMX(mx_nv_te);
 }
 
 void printMX(Color mx[4])
@@ -359,6 +351,9 @@ void LedOn(Color color, bool on)
 void poll()
 {
   game.poll();
+  if (game.isNewGameSettings()) {
+    initGame();
+  }
 
   btBlue.poll();
   btRed.poll();

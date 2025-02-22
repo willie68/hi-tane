@@ -7,6 +7,7 @@
 #include <mcp2515.h>
 
 const byte DEFAULT_BRIGHTNESS = 4;
+const byte CS_PIN = 10;
 
 enum MODULEIDS
 {
@@ -57,11 +58,13 @@ public:
     void sendDisarmed();
     void sendStrike();
     int getGameTime();
+    byte getDifficulty();
 
     bool hasNewStrikes();
     byte getStrikes();
     byte getBrightness();
     bool isNewAmbSettings();
+    bool isNewGameSettings();
 
     // Controller only functions
     void setCtlrStrikes(byte strikes);
@@ -89,6 +92,7 @@ protected:
     byte difficulty;
 
     bool newAmbSettings; // new ambient settings received
+    bool newGameSettings; // new game settings received
     byte brightness;
 
     bool hasError;

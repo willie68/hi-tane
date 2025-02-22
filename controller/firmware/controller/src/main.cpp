@@ -51,9 +51,8 @@ const uint32_t BLUE = pixel.Color(0, 0, 0xff);
 const uint32_t GREEN = pixel.Color(0, 0xff, 0);
 
 // Tone
-const uint8_t BEEP_PIN = 12;
+const uint8_t BEEP_PIN = 9;
 // Communication
-const uint8_t COM_PIN = 11;
 HTCOM htcom;
 
 // --- forward-declared function prototypes:

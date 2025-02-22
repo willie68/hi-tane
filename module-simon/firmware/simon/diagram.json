@@ -90,7 +90,8 @@
       "left": -231.25,
       "rotate": 270,
       "attrs": { "value": "150" }
-    }
+    },
+    { "type": "chip-mcp2515", "id": "chip1", "top": 116.22, "left": -91.2, "attrs": {} }
   ],
   "connections": [
     [ "nano:4", "rgb1:DIN", "green", [ "v-81.6", "h76.3", "v9.6" ] ],
@@ -104,18 +105,25 @@
     [ "led3:A", "r3:2", "green", [ "h19.2", "v-20.4" ] ],
     [ "led4:A", "r4:2", "green", [ "h19.2", "v-20.4" ] ],
     [ "led4:C", "btn4:1.l", "black", [ "h-18.8", "v19.2" ] ],
-    [ "r2:1", "nano:5", "cyan", [ "h0", "v38.4", "h115.2" ] ],
-    [ "r4:1", "nano:9", "limegreen", [ "h0", "v76.8", "h249.6" ] ],
+    [ "r2:1", "nano:5", "cyan", [ "v28.8", "h115.2" ] ],
+    [ "r4:1", "nano:9", "limegreen", [ "v67.2", "h249.6" ] ],
     [ "nano:GND.1", "btn4:1.l", "black", [ "v19.2", "h-403.2", "v-192" ] ],
     [ "nano:GND.1", "btn3:1.l", "black", [ "v19.2", "h-316.8", "v-192" ] ],
     [ "nano:GND.1", "btn2:1.l", "black", [ "v19.2", "h-230.4", "v-192" ] ],
     [ "btn3:1.l", "led3:C", "black", [ "h-9.6", "v-19.2" ] ],
-    [ "nano:8", "btn3:2.l", "gold", [ "v-28.8", "h-134.4" ] ],
-    [ "btn4:2.l", "nano:10", "green", [ "v86.8", "h288" ] ],
+    [ "nano:8", "btn3:2.l", "gold", [ "v-38.4", "h-198.8" ] ],
     [ "r1:1", "nano:3", "violet", [ "v19.2", "h48" ] ],
-    [ "btn1:2.l", "nano:2", "red", [ "v23.2", "h74" ] ],
-    [ "btn2:2.l", "nano:7", "blue", [ "v42.4", "h122" ] ],
-    [ "r3:1", "nano:6", "orange", [ "v57.6", "h192" ] ]
+    [ "btn2:2.l", "nano:7", "blue", [ "v32.8", "h122" ] ],
+    [ "r3:1", "nano:6", "orange", [ "v48", "h192" ] ],
+    [ "btn1:2.l", "nano:A0", "red", [ "v13.6", "h-50.8", "v172.8", "h67.2" ] ],
+    [ "btn4:2.l", "nano:A1", "green", [ "v176.8", "h285.2" ] ],
+    [ "chip1:INT", "nano:2", "gray", [ "h184.21", "v-163.2", "h-86.4" ] ],
+    [ "chip1:SCK", "nano:13", "gold", [ "h30.61", "v-38.4", "h-38.4" ] ],
+    [ "chip1:SI", "nano:11", "orange", [ "v19.2", "h-142.19", "v-182.4", "h153.6" ] ],
+    [ "chip1:SO", "nano:12", "green", [ "h-28.8", "v-163.2" ] ],
+    [ "chip1:CS", "nano:10", "white", [ "h-19.2", "v-163.2", "h144" ] ],
+    [ "nano:5V", "chip1:VCC", "red", [ "v48", "h-192" ] ],
+    [ "nano:GND.1", "chip1:GND", "black", [ "v19.2", "h-240", "v57.6" ] ]
   ],
   "dependencies": {}
 }

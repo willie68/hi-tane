@@ -87,19 +87,14 @@ void Game::setSolved()
     setState(ModuleState::DISARMED);
 };
 
-void Game::setGameDifficulty(Difficulty difficulty)
-{
-    this->difficulty = difficulty;
-}
-
 Difficulty Game::getGameDifficulty()
 {
-    return difficulty;
+    return (Difficulty)htcom->getDifficulty();
 }
 
 bool Game::isGameDifficulty(Difficulty difficulty)
 {
-    return this->difficulty == difficulty;
+    return htcom->getDifficulty() == byte(difficulty);
 };
 
 void Game::setState(ModuleState state)
@@ -225,7 +220,7 @@ byte Game::getStrikes()
     return htcom->getStrikes();
 };
 
-void Game::setIntLED(bool on)
+bool Game::isNewGameSettings()
 {
-    digitalWrite(LED_BUILTIN, on);
+    return htcom->isNewGameSettings();
 }

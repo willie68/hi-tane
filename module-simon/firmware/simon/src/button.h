@@ -8,7 +8,8 @@ enum Color
   RED = 0,
   BLUE,
   GREEN,
-  YELLOW
+  YELLOW,
+  NN = 255
 };
 
 class Button
