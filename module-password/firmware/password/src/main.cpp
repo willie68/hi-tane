@@ -4,20 +4,20 @@
 #include <avdweb_Switch.h>
 
 #define debug
-#define wokwi
+#include <debug.h>
 #include "game.h"
 
 // ---- forward declarations
-void initGame(byte wd);
+void initGame();
 void updateInput();
-void btnpoll();
+void poll();
 bool answerCorrect();
+void showSolveEffekt();
 
 // RGB LED
 #define LED_PIN 4
-#define COM_PIN 11
 // Game framework
-Game game(ModuleTag::PASSWORD, LED_PIN, COM_PIN);
+Game game(ModuleTag::PASSWORD, LED_PIN);
 
 // U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8x8(U8G2_R0); ///* clock=A5*/ 19, /* data=A4*/ 18);
 // U8G2_SSD1306_128X32_UNIVISION_1_HW_I2C u8x8(U8G2_R0, 255, 19, 18); ///* clock=A5*/ 19, /* data=A4*/ 18);
@@ -29,7 +29,7 @@ Switch bt0 = Switch(6);      // Button north
 Switch bt1 = Switch(7);      // Button east
 Switch bt2 = Switch(8);      // Button south
 Switch bt3 = Switch(9);      // Button west
-Switch bt4 = Switch(10);     // Button middle
+Switch bt4 = Switch(3);      // Button middle
 
 char answer[6];
 char alpha0[7];
@@ -39,25 +39,32 @@ char alpha3[7];
 char alpha4[7];
 char input[6];
 byte x0, x1, x2, x3, x4 = 0;
+bool solved;
 
 void setup()
 {
   Serial.begin(115200);
   u8x8.begin();
-  u8x8.setFont(u8x8_font_courB18_2x3_f);
+  //  u8x8.setFont(u8x8_font_inr21_2x4_f);
+  u8x8.setFont(u8x8_font_profont29_2x3_f);
   u8x8.clearDisplay();
   u8x8.setPowerSave(1);
   delay(1000);
   u8x8.setPowerSave(0);
 
   randomSeed(analogRead(0));
-  byte idx = random(PWD_COUNT);
-  initGame(idx);
+  game.init();
+
+  initGame();
+
+  game.arm();
 }
 
-void initGame(byte wd)
+void initGame()
 {
-  game.init();
+  byte wd = random(PWD_COUNT);
+  dbgOutLn("init game");
+  // Difficulty dif = game.getGameDifficulty();
   byte off = wd * 6;
   strcpy_P(answer, (char *)pgm_read_word(&(pwd[off + 0])));
   strcpy_P(alpha0, (char *)pgm_read_word(&(pwd[off + 1])));
@@ -81,14 +88,25 @@ void initGame(byte wd)
   Serial.println(alpha3);
   Serial.println(alpha4);
   Serial.println(input);
-  game.arm();
+
+  solved = false;
 }
 
 bool changed;
 void loop()
 {
-  game.poll();
-  btnpoll();
+  poll();
+  if (solved)
+  {
+    return;
+  }
+  if (game.isState(ModuleState::DISARMED) && !solved)
+  {
+    solved = true;
+    showSolveEffekt();
+    return;
+  }
+
   if (bt0.singleClick())
   {
     x0++;
@@ -134,36 +152,39 @@ void loop()
     else
     {
       game.setStrike();
+      changed = true;
     }
   }
   if (changed)
   {
     changed = false;
-    u8x8.clearDisplay();
-    u8x8.setPowerSave(1);
-    delay(1000);
-    u8x8.setPowerSave(0);
     if (game.isState(ModuleState::STRIKED))
     {
-      u8x8.drawString(0, 0, "STRIKE");
+      u8x8.drawString(2, 1, "STRIKE");
       for (byte i = 0; i < 60; i++)
       {
         game.poll();
         delay(50);
       }
+      u8x8.drawString(2, 1, "      ");
       game.arm();
     }
     if (game.isState(ModuleState::DISARMED))
     {
-      u8x8.drawString(0, 0, "SOLVED");
+      showSolveEffekt();
     }
     else
     {
-      u8x8.drawString(0, 0, input);
+      u8x8.drawString(3, 1, input);
     }
 
     Serial.println(input);
   }
+}
+
+void showSolveEffekt()
+{
+  u8x8.drawString(2, 1, "SOLVED");
 }
 
 void updateInput()
@@ -187,8 +208,14 @@ bool answerCorrect()
   return true;
 }
 
-void btnpoll()
+void poll()
 {
+  game.poll();
+  if (game.isNewGameSettings())
+  {
+    initGame();
+  }
+
   btsubmit.poll();
   bt0.poll();
   bt1.poll();

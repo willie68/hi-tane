@@ -77,13 +77,61 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("init simon");
-  pinMode(LED_BUILTIN, OUTPUT);
 
   randomSeed(analogRead(0));
   game.init();
 
   initGame();
   game.arm();
+}
+
+void initGame()
+{
+  dbgOutLn("init game");
+  Difficulty dif = game.getGameDifficulty();
+  dbgOut("df: ");
+  dbgOutLn2(dif, HEX);
+  switch (dif)
+  {
+  case Difficulty::MEDIUM:
+    stepCount = STEPS_MEDIUM;
+    break;
+  case Difficulty::HARD:
+    stepCount = STEPS_HARD;
+    break;
+  default:
+    stepCount = STEPS_SIMPLE;
+  }
+  for (byte i = 0; i < STEPS_HARD; i++)
+  {
+    if (i >= stepCount) {
+      steps[i] = Color::NN;
+      continue;
+    }
+    byte step = random(0, 4);
+    if (i > 0)
+    {
+      while (steps[i - 1] == step)
+      {
+        step = random(0, 4);
+      }
+    }
+    steps[i] = static_cast<Color>(step);
+    dbgOut(F("Step "));
+    dbgOut(i);
+    dbgOut(F(":"));
+    dbgOutLn(steps[i]);
+  }
+  step = 0;
+  sstep = 255;
+//  printMX(mx_hv_ne);
+//  printMX(mx_si_no);
+//  printMX(mx_hv_ne);
+//  printMX(mx_hv_oe);
+//  printMX(mx_hv_te);
+//  printMX(mx_nv_ne);
+//  printMX(mx_nv_oe);
+//  printMX(mx_nv_te);
 }
 
 // the actual step we're in
@@ -216,55 +264,6 @@ TriState btnColorClicked(Color color)
     break;
   }
   return state;
-}
-
-void initGame()
-{
-  dbgOutLn("init game");
-  Difficulty dif = game.getGameDifficulty();
-  dbgOut("df: ");
-  dbgOutLn2(dif, HEX);
-  switch (dif)
-  {
-  case Difficulty::MEDIUM:
-    stepCount = STEPS_MEDIUM;
-    break;
-  case Difficulty::HARD:
-    stepCount = STEPS_HARD;
-    break;
-  default:
-    stepCount = STEPS_SIMPLE;
-  }
-  for (byte i = 0; i < STEPS_HARD; i++)
-  {
-    if (i >= stepCount) {
-      steps[i] = Color::NN;
-      continue;
-    }
-    byte step = random(0, 4);
-    if (i > 0)
-    {
-      while (steps[i - 1] == step)
-      {
-        step = random(0, 4);
-      }
-    }
-    steps[i] = static_cast<Color>(step);
-    dbgOut(F("Step "));
-    dbgOut(i);
-    dbgOut(F(":"));
-    dbgOutLn(steps[i]);
-  }
-  step = 0;
-  sstep = 255;
-//  printMX(mx_hv_ne);
-//  printMX(mx_si_no);
-//  printMX(mx_hv_ne);
-//  printMX(mx_hv_oe);
-//  printMX(mx_hv_te);
-//  printMX(mx_nv_ne);
-//  printMX(mx_nv_oe);
-//  printMX(mx_nv_te);
 }
 
 void printMX(Color mx[4])
