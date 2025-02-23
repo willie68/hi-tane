@@ -13,16 +13,14 @@ void updateInput();
 void poll();
 bool answerCorrect();
 void showSolveEffekt();
+void showStrikeEffekt();
 
 // RGB LED
 #define LED_PIN 4
 // Game framework
 Game game(ModuleTag::PASSWORD, LED_PIN);
 
-// U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8x8(U8G2_R0); ///* clock=A5*/ 19, /* data=A4*/ 18);
-// U8G2_SSD1306_128X32_UNIVISION_1_HW_I2C u8x8(U8G2_R0, 255, 19, 18); ///* clock=A5*/ 19, /* data=A4*/ 18);
-//  #include <U8x8lib.h>
-U8X8_SSD1306_128X32_UNIVISION_SW_I2C u8x8(/* clock=A5*/ 19, /* data=A4*/ 18);
+U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(/* clock=A5*/ 19, /* data=A4*/ 18);
 
 Switch btsubmit = Switch(5); // Button north
 Switch bt0 = Switch(6);      // Button north
@@ -38,7 +36,9 @@ char alpha2[7];
 char alpha3[7];
 char alpha4[7];
 char input[6];
-byte x0, x1, x2, x3, x4 = 0;
+char curline[6];
+byte xo[5];
+byte cursor;
 bool solved;
 
 void setup()
@@ -73,12 +73,12 @@ void initGame()
   strcpy_P(alpha3, (char *)pgm_read_word(&(pwd[off + 4])));
   strcpy_P(alpha4, (char *)pgm_read_word(&(pwd[off + 5])));
 
-  x0 = random(5);
-  x1 = random(5);
-  x2 = random(5);
-  x3 = random(5);
-  x4 = random(5);
+  for (byte i = 0; i < 5; i++)
+  {
+    xo[i] = random(5);
+  }
 
+  cursor = 0;
   updateInput();
 
   Serial.println(answer);
@@ -109,32 +109,14 @@ void loop()
 
   if (bt0.singleClick())
   {
-    x0++;
-    x0 = x0 % 6;
-    updateInput();
+    cursor++;
+    cursor = cursor % 5;
+    changed = true;
   }
   if (bt1.singleClick())
   {
-    x1++;
-    x1 = x1 % 6;
-    updateInput();
-  }
-  if (bt2.singleClick())
-  {
-    x2++;
-    x2 = x2 % 6;
-    updateInput();
-  }
-  if (bt3.singleClick())
-  {
-    x3++;
-    x3 = x3 % 6;
-    updateInput();
-  }
-  if (bt4.singleClick())
-  {
-    x4++;
-    x4 = x4 % 6;
+    xo[cursor]++;
+    xo[cursor] = xo[cursor] % 6;
     updateInput();
   }
   if (btsubmit.singleClick())
@@ -160,7 +142,7 @@ void loop()
     changed = false;
     if (game.isState(ModuleState::STRIKED))
     {
-      u8x8.drawString(2, 1, "STRIKE");
+      showStrikeEffekt();
       for (byte i = 0; i < 60; i++)
       {
         game.poll();
@@ -175,7 +157,20 @@ void loop()
     }
     else
     {
-      u8x8.drawString(3, 1, input);
+      for (byte i = 0; i < 5; i++)
+      {
+        if (i == cursor)
+        {
+          curline[i] = '_';
+        }
+        else
+        {
+          curline[i] = ' ';
+        }
+      }
+      curline[5] = 0x00;
+      u8x8.drawString(3, 1, curline);
+      u8x8.drawString(3, 0, input);
     }
 
     Serial.println(input);
@@ -184,17 +179,25 @@ void loop()
 
 void showSolveEffekt()
 {
+  u8x8.drawString(2, 0, "      ");
   u8x8.drawString(2, 1, "SOLVED");
+}
+
+void showStrikeEffekt()
+{
+  u8x8.drawString(2, 0, "      ");
+  u8x8.drawString(2, 1, "STRIKE");
 }
 
 void updateInput()
 {
-  input[0] = alpha0[x0];
-  input[1] = alpha1[x1];
-  input[2] = alpha2[x2];
-  input[3] = alpha3[x3];
-  input[4] = alpha4[x4];
+  input[0] = alpha0[xo[0]];
+  input[1] = alpha1[xo[1]];
+  input[2] = alpha2[xo[2]];
+  input[3] = alpha3[xo[3]];
+  input[4] = alpha4[xo[4]];
   input[5] = 0x00;
+
   changed = true;
 }
 
