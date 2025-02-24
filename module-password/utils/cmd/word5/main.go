@@ -61,7 +61,7 @@ func main() {
 		wordlist = append(wordlist, w)
 	}
 
-	filename := "../password/src/passwords.h"
+	filename := "../firmware/password/src/passwords.h"
 	os.Remove(filename)
 	f, err := os.OpenFile(filename, os.O_CREATE, os.ModePerm)
 	if err != nil {
@@ -122,7 +122,7 @@ func runeok(alphas [][]rune, word string) bool {
 	return true
 }
 
-var letters = []rune("aäbcdefghijklmnoöpqrsßtuüvwxyz")
+var letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
 func randSeq(not []rune) rune {
 	r := not[0]

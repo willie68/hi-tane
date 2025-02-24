@@ -124,7 +124,7 @@ func runeok(alphas [][]rune, word string) bool {
 	return true
 }
 
-var letters = []rune("aäbcdefghijklmnoöpqrsßtuüvwxyz")
+var letters = []rune("abcdefghijklmnopqrstuvwxyz")
 
 func randSeq(not []rune) rune {
 	r := not[0]

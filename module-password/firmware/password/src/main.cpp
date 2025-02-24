@@ -13,8 +13,7 @@ void initGame();
 void updateInput();
 void poll();
 bool answerCorrect();
-void showSolveEffekt();
-void showStrikeEffekt();
+void showEffekt(bool solved);
 
 // RGB LED
 #define LED_PIN 4
@@ -46,8 +45,8 @@ void setup()
 {
   Serial.begin(115200);
   u8x8.begin();
-  //  u8x8.setFont(u8x8_font_inr21_2x4_f);
-  u8x8.setFont(u8x8_font_profont29_2x3_f);
+  //u8x8.setFont(u8x8_font_courB18_2x3_f);
+  u8x8.setFont(u8x8_font_profont29_2x3_r);
   u8x8.clearDisplay();
   u8x8.setPowerSave(1);
   delay(1000);
@@ -66,11 +65,15 @@ void initGame()
   // game.setGameDifficulty(Difficulty::HARD);
   byte wd = random(PWD_COUNT);
   dbgOutLn("init game");
-  byte off = wd * 6;
+  dbgOut("dif:");
+  dbgOut(game.getGameDifficulty());
+  dbgOut(" ");
   if (game.isGameDifficulty(Difficulty::HARD))
   {
+    dbgOutLn("HARD");
     positions = 6;
     hard = true;
+    byte off = wd * 7;
     strcpy_P(answer, (char *)pgm_read_word(&(pwd6[off + 0])));
     strcpy_P(alpha0, (char *)pgm_read_word(&(pwd6[off + 1])));
     strcpy_P(alpha1, (char *)pgm_read_word(&(pwd6[off + 2])));
@@ -81,8 +84,10 @@ void initGame()
   }
   else
   {
+    dbgOutLn("SIM/MED");
     positions = 5;
     hard = false;
+    byte off = wd * 6;
     strcpy_P(answer, (char *)pgm_read_word(&(pwd[off + 0])));
     strcpy_P(alpha0, (char *)pgm_read_word(&(pwd[off + 1])));
     strcpy_P(alpha1, (char *)pgm_read_word(&(pwd[off + 2])));
@@ -121,7 +126,7 @@ void loop()
   if (game.isState(ModuleState::DISARMED) && !solved)
   {
     solved = true;
-    showSolveEffekt();
+    showEffekt(true);
     return;
   }
 
@@ -161,18 +166,19 @@ void loop()
     changed = false;
     if (game.isState(ModuleState::STRIKED))
     {
-      showStrikeEffekt();
+      showEffekt(false);
       for (byte i = 0; i < 60; i++)
       {
         game.poll();
         delay(50);
       }
+
       u8x8.drawString(2, 1, "       ");
       game.arm();
     }
     if (game.isState(ModuleState::DISARMED))
     {
-      showSolveEffekt();
+      showEffekt(true);
     }
     else
     {
@@ -186,24 +192,22 @@ void loop()
       byte idx = 3;
       if (hard)
         idx = 2;
-      u8x8.drawString(idx, 2, curline);
-      u8x8.drawString(idx, 1, input);
+
+      u8x8.drawString(idx, 1, curline);
+      u8x8.drawString(idx, 0, input);
     }
 
     dbgOutLn(input);
   }
 }
 
-void showSolveEffekt()
+void showEffekt(bool solved)
 {
   u8x8.drawString(2, 0, "        ");
-  u8x8.drawString(2, 1, "SOLVED");
-}
-
-void showStrikeEffekt()
-{
-  u8x8.drawString(2, 0, "        ");
-  u8x8.drawString(2, 1, "STRIKE");
+  if (solved)
+    u8x8.drawString(2, 1, "SOLVED");
+  else
+    u8x8.drawString(2, 1, "STRIKE");
 }
 
 void updateInput()
@@ -242,6 +246,7 @@ void poll()
   if (game.isNewGameSettings())
   {
     initGame();
+    u8x8.clearDisplay();
   }
 
   btsubmit.poll();

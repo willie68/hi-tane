@@ -44,9 +44,9 @@ enum ModuleTag
 
 enum Difficulty
 {
-    SIMPLE = 1,
-    MEDIUM,
-    HARD,
+    SIMPLE = 0,
+    MEDIUM = 1,
+    HARD = 2,
     NUM_DIFF
 };
 

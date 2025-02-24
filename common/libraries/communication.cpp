@@ -1,7 +1,7 @@
 #include "communication.h"
 #include <SPI.h>
 #include <mcp2515.h>
-//#define debug
+#define debug
 #include <debug.h>
 
 HTCOM::HTCOM()

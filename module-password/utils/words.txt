@@ -4,8 +4,8 @@ beten
 bombe
 danke
 draht
+dreck
 druck
-drück
 farbe
 fehlt
 ferse
@@ -29,7 +29,7 @@ sende
 strom
 super
 timer
-übrig
+unter
 verse
 warte
 zange
