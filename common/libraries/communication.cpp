@@ -1,7 +1,7 @@
 #include "communication.h"
 #include <SPI.h>
 #include <mcp2515.h>
-#define debug
+//#define debug
 #include <debug.h>
 
 HTCOM::HTCOM()
@@ -257,6 +257,11 @@ bool HTCOM::isNewGameSettings()
     return false;
 }
 
-byte HTCOM::getDifficulty() {
+byte HTCOM::getDifficulty()
+{
     return difficulty;
+}
+
+void HTCOM::setGameDifficulty(byte dif) {
+    difficulty = dif;
 }

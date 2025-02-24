@@ -100,6 +100,8 @@ public:
     bool hasIndicator(INDICATOR indicator, bool active);
     bool isNewGameSettings();
 
+    void setGameDifficulty(Difficulty difficulty);
+
 private:
     HTCOM *htcom;
 

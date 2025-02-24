@@ -66,6 +66,8 @@ public:
     bool isNewAmbSettings();
     bool isNewGameSettings();
 
+    void setGameDifficulty(byte dif);
+
     // Controller only functions
     void setCtlrStrikes(byte strikes);
     void setCtrlSerialNumber(uint32_t srn);

@@ -1,6 +1,6 @@
 #include "game.h"
 #include <Adafruit_NeoPixel.h>
-#define debug
+//#define debug
 #include <debug.h>
 
 void nextDiff(Difficulty &diff)
@@ -223,4 +223,8 @@ byte Game::getStrikes()
 bool Game::isNewGameSettings()
 {
     return htcom->isNewGameSettings();
+}
+
+void Game::setGameDifficulty(Difficulty difficulty) {
+    htcom->setGameDifficulty(difficulty);
 }
