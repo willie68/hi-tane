@@ -48,7 +48,8 @@
 			"cstdlib": "cpp",
 			"cstddef": "cpp",
 			"iosfwd": "cpp",
-			"xlocbuf": "cpp"
+			"xlocbuf": "cpp",
+			"system_error": "cpp"
 		}
 	}
 }

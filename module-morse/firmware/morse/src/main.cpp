@@ -3,7 +3,6 @@
 #include <avdweb_Switch.h>
 
 #define debug
-#define wokwi
 #include <debug.h>
 #include "game.h"
 #include <words.h>
@@ -15,36 +14,34 @@ byte getSlider();
 
 // RGB LED
 #define LED_PIN 4
-#define COM_PIN 11
 // Game framework
-Game game(ModuleTag::MORSE, LED_PIN, COM_PIN);
+Game game(ModuleTag::MORSE, LED_PIN);
 
-#define BEEP_PIN  12
-#define SLIDER_PIN 0
-#define BUTTON_PIN 10
+#define BEEP_PIN 5
+#define SLIDER_PIN 0 // this is a0
+#define BUTTON_PIN 7
 
-#define MORSE_LED_PIN 9
+#define MORSE_LED_PIN 6
 
-#define CLK 2
-#define DIO 3
+#define CLK 8
+#define DIO 9
 // 7-Segment LED Display
 const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
 const uint8_t MND[] = {SEG_G};
 
-Switch btn = Switch(BUTTON_PIN);  // Button north
+Switch btn = Switch(BUTTON_PIN); // Button north
 TM1637Display display = TM1637Display(CLK, DIO);
-Morse morse = Morse(MORSE_LED_PIN, BEEP_PIN);
+Morse morse = Morse(MORSE_LED_PIN, BEEP_PIN, 250);
 
 void setup()
 {
-  initDebug();
+  //  initDebug();
   Serial.begin(115200);
 
   pinMode(MORSE_LED_PIN, OUTPUT);
-  //pinMode(BUTTON_PIN, INPUT_PULLUP);
 
   game.init();
-  
+
   initGame();
 
   display.clear();
@@ -66,31 +63,58 @@ void initGame()
 }
 
 long freq, sfreq;
+char SOS[] = {'s', 'o', 's', 0x00};
+char buf[10];
+unsigned long striketime = 0;
 
 void loop()
 {
-    game.poll();
-    btn.poll();
+  game.poll();
+  btn.poll();
+  morse.poll();
 
-    digitalWrite(MORSE_LED_PIN, 1);
-    delay(100);
-    digitalWrite(MORSE_LED_PIN, 0);
-    delay(100);
-    freq = map(getSlider(), 0, 255, frqBase, frqBase + 255);
-    if (freq != sfreq) {
-      sfreq = freq;
-      display.showNumberDec(freq);
+  if (game.isState(ModuleState::ARMED)  && morse.finished())
+  {
+    dbgOutLn("new message");
+    wordFreq.word.toCharArray(buf, 10);
+    morse.sendMessage(buf);
+  }
+
+  if (striketime > millis())
+  {
+    return;
+  }
+
+  freq = map(getSlider(), 0, 255, frqBase, frqBase + 255);
+  if (freq != sfreq)
+  {
+    dbgOut("freq: ");
+    dbgOutLn2(freq, DEC);
+    sfreq = freq;
+    display.showNumberDec(freq);
+  }
+  if (btn.singleClick())
+  {
+    Serial.println("clicked");
+    if (freq == wordFreq.frq)
+    {
+      dbgOutLn("solved");
+      game.setSolved();
     }
-    if (btn.singleClick()) {
-      Serial.println("clicked");
-      if (freq == wordFreq.frq) {
-        game.setSolved();
-      } else {
-        game.setStrike();
-      }
+    else
+    {
+      dbgOutLn("strike");
+      game.setStrike();
+      striketime = millis() + 5000;
+      display.setSegments(MND, 1, 0);
+      display.setSegments(MND, 1, 1);
+      display.setSegments(MND, 1, 2);
+      display.setSegments(MND, 1, 3);
     }
+  }
 }
 
-byte getSlider() {
+byte getSlider()
+{
   return byte(analogRead(SLIDER_PIN) >> 2);
 }

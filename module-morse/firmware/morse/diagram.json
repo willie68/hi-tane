@@ -53,21 +53,21 @@
   "connections": [
     [ "sevseg1:GND", "nano:GND.1", "black", [ "h9.6", "v48", "h182.4" ] ],
     [ "sevseg1:VCC", "nano:5V", "red", [ "h19.2", "v48", "h144" ] ],
-    [ "sevseg1:DIO", "nano:3", "gold", [ "h28.8", "v-38.4", "h115.7" ] ],
-    [ "nano:2", "sevseg1:CLK", "blue", [ "v-24", "h-134.9", "v38.4" ] ],
     [ "nano:GND.2", "rgb3:VSS", "black", [ "v-129.6", "h-0.5" ] ],
     [ "nano:5V", "rgb3:VDD", "red", [ "v24", "h66.7", "v-230.4", "h-153.6", "v9.6" ] ],
     [ "rgb3:DIN", "nano:4", "green", [ "h0" ] ],
     [ "sevseg1:GND", "bz1:1", "black", [ "h9.6", "v-144" ] ],
-    [ "nano:12", "bz1:2", "green", [ "v0" ] ],
     [ "nano:GND.1", "btn1:2.r", "black", [ "v0" ] ],
-    [ "nano:10", "btn1:1.r", "orange", [ "v-33.6", "h172.3", "v144" ] ],
     [ "nano:A0", "pot1:SIG", "green", [ "v14.4", "h-115.7", "v115.2", "h-249.6", "v-57.6" ] ],
     [ "nano:5V", "pot1:VCC", "red", [ "v24", "h-442.1", "v28.8" ] ],
     [ "nano:GND.1", "pot1:GND", "black", [ "v33.6", "h-230.9", "v19.2" ] ],
     [ "rgb3:VSS", "led1:C", "black", [ "v47.1", "h-106.8" ] ],
     [ "led1:A", "r1:1", "green", [ "v0" ] ],
-    [ "r1:2", "nano:9", "green", [ "h0" ] ]
+    [ "bz1:2", "nano:5", "green", [ "h0" ] ],
+    [ "btn1:1.r", "nano:7", "orange", [ "h125", "v-144", "h-114.7" ] ],
+    [ "r1:2", "nano:6", "violet", [ "h0" ] ],
+    [ "sevseg1:CLK", "nano:8", "gold", [ "h86.4", "v-48", "h86.4" ] ],
+    [ "sevseg1:DIO", "nano:9", "green", [ "h105.6", "v-48", "h57.6" ] ]
   ],
   "dependencies": {}
 }

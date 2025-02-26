@@ -8,25 +8,25 @@ word frqBase = 3500; // MHz
 struct WordFrequency
 {
   String word;
-  byte frq;
+  uint16_t frq;
 };
 
-const WordFrequency w0 = WordFrequency{"halle", byte(3505 - frqBase)};
-const WordFrequency w1 = WordFrequency{"hallo", byte(3.515 - frqBase)};
-const WordFrequency w2 = WordFrequency{"lokal", byte(3.522 - frqBase)};
-const WordFrequency w3 = WordFrequency{"steak", byte(3.532 - frqBase)};
-const WordFrequency w4 = WordFrequency{"st\xfc""ck", byte(3.535 - frqBase)};
-const WordFrequency w5 = WordFrequency{"speck", byte(3.542 - frqBase)};
-const WordFrequency w6 = WordFrequency{"bistro", byte(3.545 - frqBase)};
-const WordFrequency w7 = WordFrequency{"robust", byte(3552 - frqBase)};
-const WordFrequency w8 = WordFrequency{"s\xe4""bel", byte(3555 - frqBase)};
-const WordFrequency w9 = WordFrequency{"s\xfc""lze", byte(3565 - frqBase)};
-const WordFrequency wa = WordFrequency{"sektor", byte(3572 - frqBase)};
-const WordFrequency wb = WordFrequency{"vektor", byte(3575 - frqBase)};
-const WordFrequency wc = WordFrequency{"bravo", byte(3582 - frqBase)};
-const WordFrequency wd = WordFrequency{"kobra", byte(3592 - frqBase)};
-const WordFrequency we = WordFrequency{"bombe", byte(3595 - frqBase)};
-const WordFrequency wf = WordFrequency{"s\xfc""den", byte(3600 - frqBase)};
+const WordFrequency w0 = WordFrequency{"halle", 3505};
+const WordFrequency w1 = WordFrequency{"hallo", 3515};
+const WordFrequency w2 = WordFrequency{"lokal", 3522};
+const WordFrequency w3 = WordFrequency{"steak", 3532};
+const WordFrequency w4 = WordFrequency{"strom", 3535};
+const WordFrequency w5 = WordFrequency{"speck", 3542};
+const WordFrequency w6 = WordFrequency{"bistro", 3545};
+const WordFrequency w7 = WordFrequency{"robust", 3552};
+const WordFrequency w8 = WordFrequency{"sehne", 3555};
+const WordFrequency w9 = WordFrequency{"knopf", 3565};
+const WordFrequency wa = WordFrequency{"sektor", 3572};
+const WordFrequency wb = WordFrequency{"vektor", 3575};
+const WordFrequency wc = WordFrequency{"bravo", 3582};
+const WordFrequency wd = WordFrequency{"kobra", 3592};
+const WordFrequency we = WordFrequency{"bombe", 3595};
+const WordFrequency wf = WordFrequency{"norden", 3600};
 
 const byte WORD_COUNT = 16;
 
