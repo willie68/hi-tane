@@ -29,9 +29,15 @@
 			"path": "module-password/utils"
 		},
 		{
+			"name": "simon",
 			"path": "module-simon/firmware/simon"
 		},
 		{
+			"name": "showsnr",
+			"path": "module-showsnr/firmware/showsnr"
+		},
+		{
+			"name": "hi-tane",
 			"path": "."
 		}
 	],

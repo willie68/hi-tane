@@ -99,6 +99,15 @@ void HTCOM::poll()
         resetError();
 }
 
+uint32_t HTCOM::getSerialNumber() {
+    return snr;
+}
+
+word HTCOM::getIndicators() {
+    return inds;
+}
+
+
 void HTCOM::setCtrlSerialNumber(uint32_t srn)
 {
     this->snr = snr;

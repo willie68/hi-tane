@@ -73,7 +73,10 @@ public:
     Game();
 
     void init();
+    
     bool hasIndicator(INDICATOR ind);
+    Indicators getIndicators();
+
     bool isSerialnumberOdd();
     word getGameTime();
     void arm();
@@ -82,6 +85,8 @@ public:
 
     bool snrHasVocal();
     byte getStrikes();
+
+    uint32_t getSerialNumber();
 
     Difficulty getGameDifficulty();
     bool isGameDifficulty(Difficulty difficulty);
@@ -102,6 +107,8 @@ public:
 
     void setGameDifficulty(Difficulty difficulty);
 
+    void setTestParameter();
+
 private:
     HTCOM *htcom;
 
@@ -110,8 +117,8 @@ private:
     word saveTime;
     Adafruit_NeoPixel *pixel;
     ModuleState state;
-    byte difficulty;
     Indicators indicators;
+    byte difficulty;
     unsigned long strikeTime;
 };
 #endif

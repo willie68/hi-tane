@@ -59,10 +59,12 @@ public:
     void sendStrike();
     int getGameTime();
     byte getDifficulty();
+    uint16_t getIndicators();
 
     bool hasNewStrikes();
     byte getStrikes();
     byte getBrightness();
+    uint32_t getSerialNumber();
     bool isNewAmbSettings();
     bool isNewGameSettings();
 

@@ -2,6 +2,8 @@
 #include <Adafruit_NeoPixel.h>
 //#define debug
 #include <debug.h>
+#include <serialnumber.h>
+#include <indicators.h>
 
 void nextDiff(Difficulty &diff)
 {
@@ -54,10 +56,25 @@ void Game::init()
     setState(ModuleState::INIT);
 };
 
-bool Game::hasIndicator(INDICATOR ind)
+void Game::setTestParameter() {
+  SerialNumber serialNumber;
+  serialNumber.Generate();
+
+  indicators.Add(INDICATOR::CLR, false);
+  indicators.Add(INDICATOR::IND, true);
+  indicators.Add(INDICATOR::NSA, false);
+}
+
+bool Game::hasIndicator(INDICATOR ind, bool active)
 {
-    return false;
+    word inds = htcom->getIndicators();
+    indicators.Decompress(inds);
+    return indicators.hasIndicator(ind, active);
 };
+
+Indicators Game::getIndicators() {
+    return indicators;
+}
 
 bool Game::isSerialnumberOdd()
 {
@@ -90,6 +107,10 @@ void Game::setSolved()
 Difficulty Game::getGameDifficulty()
 {
     return (Difficulty)htcom->getDifficulty();
+}
+
+uint32_t Game::getSerialNumber(){
+    return htcom->getSerialNumber();
 }
 
 bool Game::isGameDifficulty(Difficulty difficulty)

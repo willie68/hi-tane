@@ -1,13 +1,8 @@
 #include <Arduino.h>
 #include <passwords.h>
 #include <passwords6.h>
-//#include <U8g2lib.h>
-
+#include <U8g2lib.h>
 #include <avdweb_Switch.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 
 #define debug
 #include <debug.h>
@@ -16,7 +11,7 @@
 // ---- forward declarations
 void initDisplay();
 void initGame();
-// void updateInput();
+void updateInput();
 void poll();
 bool answerCorrect();
 void showEffekt(bool solved);
@@ -26,13 +21,7 @@ void showEffekt(bool solved);
 // Game framework
 Game game(ModuleTag::PASSWORD, LED_PIN);
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 32 // OLED display height, in pixels
-#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3D ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
-//  U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(/* clock=A5*/ 19, /* data=A4*/ 18);
+U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(/* clock=A5*/ 19, /* data=A4*/ 18);
 
 Switch btsubmit = Switch(5); // submit the worf
 Switch bt0 = Switch(6);      // switch the cursor
@@ -59,38 +48,23 @@ void setup()
   initDisplay();
 
   randomSeed(analogRead(0));
-//  game.init();
+  game.init();
 
-//  initGame();
+  initGame();
 
-//  game.arm();
+  game.arm();
 }
-void initDisplay() {
+
+void initDisplay()
+{
   dbgOutLn("init display");
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  }
-
-  display.fillScreen(SSD1306_WHITE);
-  delay(2000); // Pause for 2 seconds
-
-  // Clear the buffer
-  display.clearDisplay();
-
-  // Draw a single pixel in white
-  display.drawPixel(10, 10, SSD1306_WHITE);
-  display.drawChar(10,10,'C', SSD1306_WHITE, SSD1306_BLACK, 8);
-
-  /*
   u8x8.begin();
-  //u8x8.setFont(u8x8_font_courB18_2x3_f);
+  // u8x8.setFont(u8x8_font_courB18_2x3_f);
   u8x8.setFont(u8x8_font_profont29_2x3_r);
   u8x8.clearDisplay();
   u8x8.setPowerSave(1);
   delay(1000);
   u8x8.setPowerSave(0);
-  */
 }
 
 void initGame()
@@ -133,7 +107,7 @@ void initGame()
     xo[i] = random(5);
 
   cursor = 0;
-  // updateInput();
+  updateInput();
 
   dbgOutLn(answer);
   dbgOutLn(alpha0);
@@ -148,10 +122,6 @@ void initGame()
   solved = false;
 }
 
-void loop() {
-
-}
-/*
 bool changed;
 void loop()
 {
@@ -209,7 +179,6 @@ void loop()
         game.poll();
         delay(50);
       }
-
       u8x8.drawString(2, 1, "       ");
       game.arm();
     }
@@ -242,9 +211,13 @@ void showEffekt(bool solved)
 {
   u8x8.drawString(2, 0, "        ");
   if (solved)
+  {
     u8x8.drawString(2, 1, "SOLVED");
+  }
   else
+  {
     u8x8.drawString(2, 1, "STRIKE");
+  }
 }
 
 void updateInput()
@@ -283,11 +256,9 @@ void poll()
   if (game.isNewGameSettings())
   {
     initGame();
-    u8x8.clearDisplay();
   }
 
   btsubmit.poll();
   bt0.poll();
   bt1.poll();
 }
-*/
