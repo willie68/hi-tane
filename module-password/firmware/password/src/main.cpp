@@ -65,6 +65,7 @@ void initDisplay()
   u8x8.setPowerSave(1);
   delay(1000);
   u8x8.setPowerSave(0);
+  u8x8.setFlipMode(1);
 }
 
 void initGame()
