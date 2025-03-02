@@ -2,6 +2,7 @@
 #include "Arduino.h"
 #define debug
 #include <debug.h>
+#define SUMMER
 
 Morse::Morse(byte ls, byte led, long dit)
 {
@@ -13,12 +14,18 @@ Morse::Morse(byte ls, byte led, long dit)
     _mend = true;
     if (_bls)
     {
+        pinMode(_ls, OUTPUT);
+#ifdef SUMMER
+        digitalWrite(_ls, 0);
+#else
         noTone(_ls);
+#endif
         //    dbgOut("LS on ");
         //    dbgOut(_ls);
     }
     if (_bled)
     {
+        pinMode(_led, OUTPUT);
         digitalWrite(_led, 0);
         //    dbgOut("LEB on ");
         //    dbgOut(_led);
@@ -34,7 +41,7 @@ void Morse::setDitLength(word dl)
 
 void Morse::calculateLengths()
 {
-    _dah  = 3 * _dit;
+    _dah = 3 * _dit;
     _symPause = _dit;
     _charPause = 3 * _dit;
     _wordPause = 7 * _dit;
@@ -42,7 +49,7 @@ void Morse::calculateLengths()
 
 void Morse::sendMessage(const char *msg)
 {
-    dbgOut("morsing:");
+    dbgOut(F("morsing: "));
     dbgOutLn(msg);
     reset();
     _msg = msg;
@@ -52,18 +59,16 @@ void Morse::sendMessage(const char *msg)
     _mit = false;
     _pse = true;
     _t = millis() + _wordPause;
-
-    /*   if (x > 0) {
-          delay(charPause);
-          Serial.print(" ");
-        }
-    */
 }
 
 void Morse::reset()
 {
     if (_bls)
+#ifdef SUMMER
+        digitalWrite(_ls, 0);
+#else
         noTone(_ls);
+#endif
     if (_bled)
         digitalWrite(_led, 0);
     _pos = 0;
@@ -97,7 +102,6 @@ void Morse::poll()
         }
         // convert it to morse entry
         _ch = _msg[_pos];
-        dbgOut(", ");
         dbgOut(_ch);
         if ((_ch >= 'a') && (_ch <= 'z'))
         {
@@ -113,6 +117,7 @@ void Morse::poll()
         }
         dbgOut("->");
         dbgOut2(_ch, HEX);
+        dbgOut(" ");
 
         _cend = false;
         _mit = false;
@@ -139,7 +144,11 @@ void Morse::poll()
         {
             // nächstes zeichen
             if (_bls)
+#ifdef SUMMER
+                digitalWrite(_ls, 0);
+#else
                 noTone(_ls);
+#endif
             if (_bled)
                 digitalWrite(_led, 0);
             _t = act + _charPause;
@@ -151,7 +160,11 @@ void Morse::poll()
         {
             // wenn gerade mit gesendet wird
             if (_bls)
+#ifdef SUMMER
+                digitalWrite(_ls, 0);
+#else
                 noTone(_ls);
+#endif
             if (_bled)
                 digitalWrite(_led, 0);
             _mit = false;
@@ -162,7 +175,11 @@ void Morse::poll()
         {
             // wenn gerade pause ist und die Pausenzeit abgelaufen ist.
             if (_bls)
+#ifdef SUMMER
+                digitalWrite(_ls, 1);
+#else
                 tone(_ls, mFreq);
+#endif
             if (_bled)
                 digitalWrite(_led, 1);
             _mit = true;

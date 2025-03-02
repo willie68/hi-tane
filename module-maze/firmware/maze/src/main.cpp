@@ -195,6 +195,7 @@ void initGame()
     invalid = !maze.init(game.getGameDifficulty()); // TODO setting the game settings from HTCOM
     invalid = false;
     if (invalid)
+    
     {
       delay(1000);
       Serial.println(F("invalid maze configuration"));

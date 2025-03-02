@@ -18,7 +18,9 @@ void HTCOM::attach(uint8_t id)
     mcp2515 = new MCP2515(CS_PIN);
     gametime = 3600;
     moduleID = id;
-    resetError();
+#ifndef HI_MODULE
+    resetCtrlError();
+#endif
     newAmbSettings = false;
     newGameSettings = false;
     newStrike = false;
@@ -78,9 +80,11 @@ void HTCOM::poll()
             dbgOutLn2(snr, HEX);
             newGameSettings = true;
             break;
+#ifndef HI_MODULE
         case MID_ERROR:
             setCtrlError(rcvCanMsg.data[0]);
             break;
+#endif
         case MID_STRIKE:
             dbgOutLn(F("s"));
             strikes++;
@@ -94,34 +98,21 @@ void HTCOM::poll()
             break;
         };
     }
+#ifndef HI_MODULE
     // check if there is an message incoming
     if (hasError && (millis() > errTime))
-        resetError();
+        resetCtrlError();
+#endif
 }
 
-uint32_t HTCOM::getSerialNumber() {
+uint32_t HTCOM::getSerialNumber()
+{
     return snr;
 }
 
-word HTCOM::getIndicators() {
+word HTCOM::getIndicators()
+{
     return inds;
-}
-
-
-void HTCOM::setCtrlSerialNumber(uint32_t srn)
-{
-    this->snr = snr;
-}
-
-void HTCOM::sendCtrlHearbeat(word countdown)
-{
-    sndCanMsg.can_id = MID_HEARTBEAT;
-    sndCanMsg.can_dlc = 3;
-    sndCanMsg.data[0] = countdown >> 8;
-    sndCanMsg.data[1] = countdown & 0x00FF;
-    sndCanMsg.data[2] = strikes;
-
-    mcp2515->sendMessage(&sndCanMsg);
 }
 
 void HTCOM::sendError(byte err)
@@ -151,32 +142,9 @@ void HTCOM::sendStrike()
     mcp2515->sendMessage(&sndCanMsg);
 }
 
-void HTCOM::setCtrlIndicators(word inds)
-{
-    this->inds = inds;
-}
-
-void HTCOM::setCtlrStrikes(byte strikes)
-{
-    this->strikes = strikes;
-}
-
-void HTCOM::setCtrlDifficulty(byte difficulty)
-{
-    dbgOut("df: ");
-    dbgOutLn2(difficulty, HEX);
-    this->difficulty = difficulty;
-}
-
 byte HTCOM::getBrightness()
 {
     return this->brightness;
-}
-
-void HTCOM::setCtrlBrightness(byte brightness)
-{
-    this->brightness = brightness;
-    sendAmbientSettings();
 }
 
 byte HTCOM::getStrikes()
@@ -197,6 +165,46 @@ bool HTCOM::hasNewStrikes()
 int HTCOM::getGameTime()
 {
     return gametime;
+}
+
+#ifndef HI_MODULE
+void HTCOM::setCtrlSerialNumber(uint32_t srn)
+{
+    this->snr = snr;
+}
+
+void HTCOM::sendCtrlHearbeat(word countdown)
+{
+    sndCanMsg.can_id = MID_HEARTBEAT;
+    sndCanMsg.can_dlc = 3;
+    sndCanMsg.data[0] = countdown >> 8;
+    sndCanMsg.data[1] = countdown & 0x00FF;
+    sndCanMsg.data[2] = strikes;
+
+    mcp2515->sendMessage(&sndCanMsg);
+}
+
+void HTCOM::setCtrlIndicators(word inds)
+{
+    this->inds = inds;
+}
+
+void HTCOM::setCtlrStrikes(byte strikes)
+{
+    this->strikes = strikes;
+}
+
+void HTCOM::setCtrlDifficulty(byte difficulty)
+{
+    dbgOut("df: ");
+    dbgOutLn2(difficulty, HEX);
+    this->difficulty = difficulty;
+}
+
+void HTCOM::setCtrlBrightness(byte brightness)
+{
+    this->brightness = brightness;
+    sendAmbientSettings();
 }
 
 void HTCOM::sendGameSettings()
@@ -229,7 +237,7 @@ void HTCOM::setCtrlError(byte error)
     errTime = millis() + 5000;
 }
 
-void HTCOM::resetError()
+void HTCOM::resetCtrlError()
 {
     errTime = 0;
     hasError = false;
@@ -245,6 +253,7 @@ byte HTCOM::getCtrlError()
 {
     return lastError;
 }
+#endif
 
 bool HTCOM::isNewAmbSettings()
 {
@@ -271,6 +280,7 @@ byte HTCOM::getDifficulty()
     return difficulty;
 }
 
-void HTCOM::setGameDifficulty(byte dif) {
+void HTCOM::setGameDifficulty(byte dif)
+{
     difficulty = dif;
 }

@@ -70,7 +70,8 @@ public:
 
     void setGameDifficulty(byte dif);
 
-    // Controller only functions
+// Controller only functions
+#ifndef HI_MODULE
     void setCtlrStrikes(byte strikes);
     void setCtrlSerialNumber(uint32_t srn);
     void setCtrlDifficulty(byte difficulty);
@@ -80,11 +81,13 @@ public:
     void sendCtrlHearbeat(word countdown);
     void sendGameSettings();
     void sendAmbientSettings();
+    void resetCtrlError();
 
     bool hasCtrlError();
     byte getCtrlError();
     void setCtrlError(byte error);
-    void resetError();
+#endif
+
 protected:
     byte moduleID;
 
@@ -95,7 +98,7 @@ protected:
     byte strikes;
     byte difficulty;
 
-    bool newAmbSettings; // new ambient settings received
+    bool newAmbSettings;  // new ambient settings received
     bool newGameSettings; // new game settings received
     byte brightness;
 

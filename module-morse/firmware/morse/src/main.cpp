@@ -17,8 +17,8 @@ byte getSlider();
 // Game framework
 Game game(ModuleTag::MORSE, LED_PIN);
 
-#define BEEP_PIN 5
-#define SLIDER_PIN 0 // this is a0
+#define MORSE_BEEP_PIN 5
+#define SLIDER_PIN 1 // this is a0
 #define BUTTON_PIN 7
 
 #define MORSE_LED_PIN 6
@@ -31,7 +31,7 @@ const uint8_t MND[] = {SEG_G};
 
 Switch btn = Switch(BUTTON_PIN); // Button north
 TM1637Display display = TM1637Display(CLK, DIO);
-Morse morse = Morse(MORSE_LED_PIN, BEEP_PIN, 250);
+Morse morse = Morse(MORSE_LED_PIN, MORSE_BEEP_PIN, 250);
 
 void setup()
 {
@@ -39,6 +39,7 @@ void setup()
   Serial.begin(115200);
 
   pinMode(MORSE_LED_PIN, OUTPUT);
+  pinMode(MORSE_BEEP_PIN, OUTPUT);
 
   game.init();
 
@@ -73,7 +74,7 @@ void loop()
   btn.poll();
   morse.poll();
 
-  if (game.isState(ModuleState::ARMED)  && morse.finished())
+  if (game.isState(ModuleState::ARMED) && morse.finished())
   {
     dbgOutLn("new message");
     wordFreq.word.toCharArray(buf, 10);
@@ -85,7 +86,8 @@ void loop()
     return;
   }
 
-  freq = map(getSlider(), 0, 255, frqBase, frqBase + 255);
+//  freq = map(getSlider(), 0, 128, frqBase, frqBase + 128);
+  freq = getSlider() +  frqBase;
   if (freq != sfreq)
   {
     dbgOut("freq: ");
@@ -114,7 +116,29 @@ void loop()
   }
 }
 
+const byte MAX = 100;
+byte values[MAX];
 byte getSlider()
 {
-  return byte(analogRead(SLIDER_PIN) >> 2);
+  byte min = 255;
+  byte max = 0;
+  word sum = 0;
+  for (byte i = 1; i < MAX; i++)
+  {
+    values[i - 1] = values[i];
+    sum += values[i - 1];
+    if (values[i - 1] < min)
+    {
+      min = values[i - 1];
+    }
+    if (values[i - 1] > max)
+    {
+      max = values[i - 1];
+    }
+  }
+  values[MAX - 1] = byte(analogRead(SLIDER_PIN) >> 3);
+  sum += values[MAX - 1];
+  sum -= min;
+  sum -= max;
+  return sum / (MAX - 1);
 }
