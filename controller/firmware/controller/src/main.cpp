@@ -70,10 +70,14 @@ void initGame();
 void resetStrikes();
 void showStrikes();
 void startGame();
-void setBrightness();
+void manuSetBrightness();
 void showMenu();
-void setDifficulty();
+void menuSetDifficulty();
 void LED(bool on);
+bool checkResolved();
+bool checkFullyStriked();
+void showResolved();
+void showFullyStriked();
 
 Indicators indicators;
 SerialNumber snr;
@@ -162,7 +166,8 @@ byte sline = 255;
 byte serr = 0;
 
 bool cmdStartGame = true;
-
+bool resolved = false;
+bool fullyStriked = false;
 byte brightness = DEFAULT_BRIGHTNESS;
 byte sbr = 0;
 
@@ -197,7 +202,23 @@ void loop()
     showMenu();
 
   if (started)
+  {
     showStrikes();
+    resolved = checkResolved();
+    fullyStriked = checkFullyStriked();
+    if (resolved || fullyStriked)
+    {
+      started = false;
+    }
+  }
+  if (resolved)
+  {
+    showResolved();
+  }
+  if (fullyStriked)
+  {
+    showFullyStriked();
+  }
 }
 
 void showMenu()
@@ -256,7 +277,7 @@ void showMenu()
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
-      setDifficulty();
+      menuSetDifficulty();
       lcd.setCursor(12, 1);
       lcd.noBlink();
     }
@@ -272,7 +293,7 @@ void showMenu()
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
-      setBrightness();
+      manuSetBrightness();
       lcd.setCursor(12, 1);
       lcd.noBlink();
     }
@@ -289,7 +310,7 @@ void showMenu()
   }
 }
 
-void setDifficulty()
+void menuSetDifficulty()
 {
   lcd.setCursor(12, 1);
   lcd.blink();
@@ -320,7 +341,7 @@ void setDifficulty()
   lcd.noBlink();
 }
 
-void setBrightness()
+void manuSetBrightness()
 {
   lcd.setCursor(12, 1);
   lcd.blink();
@@ -363,13 +384,14 @@ void startGame()
   pixel.setBrightness(16 * htcom.getBrightness());
   display.setBrightness(htcom.getBrightness() >> 1);
   htcom.setCtrlDifficulty(difficulty);
-  htcom.sendGameSettings();
+  htcom.sendCtrlGameSettings();
 
   clearRow(0);
   printHeader(false);
 
   dblBeep();
   started = true;
+  resolved = false;
   start = millis();
 }
 
@@ -497,6 +519,7 @@ void beep()
 void resetStrikes()
 {
   htcom.setCtlrStrikes(0);
+  fullyStriked = false;
 }
 
 void showStrikes()
@@ -532,6 +555,58 @@ void printWelcome()
   lcd.print(F("Welcome"));
 }
 
-void LED(bool on) {
+void LED(bool on)
+{
   digitalWrite(LED_BUILTIN, on);
+}
+
+bool checkResolved()
+{
+  return htcom.isAllResolved();
+}
+
+bool checkFullyStriked() {
+  return htcom.getStrikes() == 3;
+}
+
+void showResolved() {
+  clearRow(0);
+  printHeader(true);
+  
+  clearRow(1);
+  clearRow(2);
+  clearRow(3);
+  lcd.setCursor(0,1);
+  lcd.print(F("Hurray, you have"));
+  lcd.setCursor(0,2);
+  lcd.print(F("unarmed the bomb"));
+  lcd.setCursor(0,3);
+  lcd.print(F("Another game? <yes>"));
+  beep();
+  while (true) {
+    if (clickEnc.getButton() == Button::Clicked) {
+      initGame();
+      break;
+    }
+  }
+}
+
+void showFullyStriked() {
+  clearRow(0);
+  printHeader(true);
+
+  clearRow(1);
+  clearRow(2);
+  clearRow(3);
+  lcd.setCursor(0,1);
+  lcd.print(F("sorry, you explodes!"));
+  lcd.setCursor(0,3);
+  lcd.print(F("Another game? <yes>"));
+  beep();
+  while (true) {
+    if (clickEnc.getButton() == Button::Clicked) {
+      initGame();
+      break;
+    }
+  }
 }

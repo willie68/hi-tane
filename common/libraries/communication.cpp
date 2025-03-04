@@ -11,6 +11,13 @@ HTCOM::HTCOM()
 HTCOM::HTCOM(uint8_t id)
 {
     moduleID = id;
+#ifndef HI_MODULE
+    for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
+    {
+        installedModules[x] = 0;
+        stateOfModules[x] = ModuleState::UNKNOWN;
+    }
+#endif
 }
 
 void HTCOM::attach(uint8_t id)
@@ -59,6 +66,9 @@ void HTCOM::poll()
         }
         switch (canID)
         {
+        case MID_INITIALISATION:
+            sendModuleID();
+            break;
         case MID_HEARTBEAT:
             dbgOutLn("hb");
             gametime = (rcvCanMsg.data[0] << 8) + rcvCanMsg.data[1];
@@ -84,6 +94,17 @@ void HTCOM::poll()
         case MID_ERROR:
             setCtrlError(rcvCanMsg.data[0]);
             break;
+        case MID_MODULEINIT:
+            dbgOut("minit: ");
+            dbgOutLn2(rcvModule, HEX);
+            addToModuleList(rcvModule);
+            break;
+        case MID_STATE:
+            dbgOut("mstate: ");
+            dbgOut2(rcvModule, HEX);
+            dbgOutLn2(rcvCanMsg.data[1], HEX);
+            updateModule(rcvModule, static_cast<ModuleState>(rcvCanMsg.data[1]));
+            break;
 #endif
         case MID_STRIKE:
             dbgOutLn(F("s"));
@@ -93,8 +114,8 @@ void HTCOM::poll()
         default:
             dbgOut("unkown: ");
             dbgOut2(rcvModule, HEX);
-            dbgOut(" ")
-                dbgOutLn2(rcvCanMsg.can_id, HEX);
+            dbgOut(" ");
+            dbgOutLn2(rcvCanMsg.can_id, HEX);
             break;
         };
     }
@@ -115,6 +136,15 @@ word HTCOM::getIndicators()
     return inds;
 }
 
+void HTCOM::sendModuleID()
+{
+    sndCanMsg.can_id = MID_MODULEINIT + moduleID;
+    sndCanMsg.can_dlc = 1;
+    sndCanMsg.data[0] = moduleID;
+
+    mcp2515->sendMessage(&sndCanMsg);
+}
+
 void HTCOM::sendError(byte err)
 {
     sndCanMsg.can_id = MID_ERROR + moduleID;
@@ -124,11 +154,22 @@ void HTCOM::sendError(byte err)
     mcp2515->sendMessage(&sndCanMsg);
 }
 
+void HTCOM::sendArmed()
+{
+    sendModuleState(ModuleState::ARMED);
+}
+
 void HTCOM::sendDisarmed()
 {
-    sndCanMsg.can_id = MID_DISARM + moduleID;
-    sndCanMsg.can_dlc = 1;
+    sendModuleState(ModuleState::DISARMED);
+}
+
+void HTCOM::sendModuleState(ModuleState state)
+{
+    sndCanMsg.can_id = MID_STATE + moduleID;
+    sndCanMsg.can_dlc = 2;
     sndCanMsg.data[0] = moduleID;
+    sndCanMsg.data[1] = state;
 
     mcp2515->sendMessage(&sndCanMsg);
 }
@@ -204,10 +245,11 @@ void HTCOM::setCtrlDifficulty(byte difficulty)
 void HTCOM::setCtrlBrightness(byte brightness)
 {
     this->brightness = brightness;
-    sendAmbientSettings();
+    sendCtrlAmbientSettings();
 }
 
-void HTCOM::sendGameSettings()
+// game settings will be sendet to all modules
+void HTCOM::sendCtrlGameSettings()
 {
     sndCanMsg.can_id = MID_GAMESETTINGS;
     sndCanMsg.can_dlc = 6;
@@ -221,11 +263,22 @@ void HTCOM::sendGameSettings()
     mcp2515->sendMessage(&sndCanMsg);
 }
 
-void HTCOM::sendAmbientSettings()
+// here all ambient settings will be sended to all modules
+void HTCOM::sendCtrlAmbientSettings()
 {
     sndCanMsg.can_id = MID_AMBIENTSETTINGS;
     sndCanMsg.can_dlc = 1;
     sndCanMsg.data[0] = this->brightness;
+
+    mcp2515->sendMessage(&sndCanMsg);
+}
+
+// this will be sended to evaluate which modules are installed.
+void HTCOM::sendCtrlInitialisation()
+{
+    sndCanMsg.can_id = MID_INITIALISATION;
+    sndCanMsg.can_dlc = 1;
+    sndCanMsg.data[0] = 0xff;
 
     mcp2515->sendMessage(&sndCanMsg);
 }
@@ -253,6 +306,57 @@ byte HTCOM::getCtrlError()
 {
     return lastError;
 }
+
+void HTCOM::addToModuleList(byte moduleID)
+{
+    for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
+    {
+        if (installedModules[x] == 0)
+        {
+            installedModules[x] = moduleID;
+            break;
+        }
+    }
+}
+
+void HTCOM::updateModule(byte moduleID, ModuleState state)
+{
+    for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
+    {
+        if (installedModules[x] == 0)
+            break;
+        if (installedModules[x] == moduleID)
+        {
+            stateOfModules[x] = state;
+            break;
+        }
+    }
+}
+
+bool HTCOM::isModuleState(byte moduleID, ModuleState state)
+{
+    for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
+    {
+        if (installedModules[x] == 0)
+            break;
+        if (installedModules[x] == moduleID)
+            return stateOfModules[x] == (byte)state;
+    }
+    return false;
+}
+
+bool HTCOM::isAllResolved()
+{
+    for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
+    {
+        if (installedModules[x] == 0)
+            break;
+        if (stateOfModules[x] != ModuleState::DISARMED)
+            return false;
+    }
+    return true;
+}
+
 #endif
 
 bool HTCOM::isNewAmbSettings()

@@ -8,6 +8,16 @@
 
 const byte DEFAULT_BRIGHTNESS = 4;
 const byte CS_PIN = 10;
+const byte MAX_INSTALLED_MODULES = 12;
+
+enum ModuleState
+{
+    UNKNOWN = 0, 
+    INIT,
+    ARMED,
+    STRIKED,
+    DISARMED
+};
 
 enum MODULEIDS
 {
@@ -19,6 +29,7 @@ enum MODULEIDS
     ID_MORSE = 49,
     ID_MAX_MODULES = 50
 };
+
 const byte MODULE_COUNT = 6;
 const byte modules[MODULE_COUNT] = {ID_CONTROLLER, ID_WIRES, ID_MAZE, ID_SIMON, ID_PASSWORD, ID_MORSE};
 
@@ -33,9 +44,11 @@ enum COMMANDS
     MID_HEARTBEAT = 0x0001,
     MID_AMBIENTSETTINGS = 0x0002,
     MID_GAMESETTINGS = 0x0003,
+    MID_INITIALISATION = 0x0004,
     MID_ERROR = 0x0300,
-    MID_DISARM = 0x0400,
-    MID_STRIKE = 0x0500
+    MID_STATE = 0x0400,
+    MID_STRIKE = 0x0500,
+    MID_MODULEINIT = 0x0600
 };
 
 enum PARAMETER
@@ -54,6 +67,7 @@ public:
     void poll();
 
     // module functions
+    void sendArmed();
     void sendError(byte err);
     void sendDisarmed();
     void sendStrike();
@@ -69,6 +83,7 @@ public:
     bool isNewGameSettings();
 
     void setGameDifficulty(byte dif);
+    void sendModuleID();
 
 // Controller only functions
 #ifndef HI_MODULE
@@ -79,16 +94,21 @@ public:
     void setCtrlIndicators(word inds);
 
     void sendCtrlHearbeat(word countdown);
-    void sendGameSettings();
-    void sendAmbientSettings();
+    void sendCtrlGameSettings();
+    void sendCtrlAmbientSettings();
+    void sendCtrlInitialisation();
     void resetCtrlError();
 
     bool hasCtrlError();
     byte getCtrlError();
     void setCtrlError(byte error);
+
+    bool isAllResolved();
+
 #endif
 
 protected:
+    void sendModuleState(ModuleState state);
     byte moduleID;
 
     int gametime;
@@ -111,6 +131,15 @@ protected:
     can_frame sndCanMsg;
     can_frame rcvCanMsg;
     MCP2515 *mcp2515;
+
+#ifndef HI_MODULE
+    void addToModuleList(byte moduleID);
+    void updateModule(byte moduleID, ModuleState state);
+    bool isModuleState(byte moduleID, ModuleState state);
+
+    byte installedModules[MAX_INSTALLED_MODULES];
+    byte stateOfModules[MAX_INSTALLED_MODULES];
+#endif
 };
 
 #endif

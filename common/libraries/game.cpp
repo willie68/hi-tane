@@ -1,6 +1,6 @@
 #include "game.h"
 #include <Adafruit_NeoPixel.h>
-//#define debug
+// #define debug
 #include <debug.h>
 #include <serialnumber.h>
 #include <indicators.h>
@@ -56,13 +56,14 @@ void Game::init()
     setState(ModuleState::INIT);
 };
 
-void Game::setTestParameter() {
-  SerialNumber serialNumber;
-  serialNumber.Generate();
+void Game::setTestParameter()
+{
+    SerialNumber serialNumber;
+    serialNumber.Generate();
 
-  indicators.Add(INDICATOR::CLR, false);
-  indicators.Add(INDICATOR::IND, true);
-  indicators.Add(INDICATOR::NSA, false);
+    indicators.Add(INDICATOR::CLR, false);
+    indicators.Add(INDICATOR::IND, true);
+    indicators.Add(INDICATOR::NSA, false);
 }
 
 bool Game::hasIndicator(INDICATOR ind, bool active)
@@ -72,7 +73,8 @@ bool Game::hasIndicator(INDICATOR ind, bool active)
     return indicators.hasIndicator(ind, active);
 };
 
-Indicators Game::getIndicators() {
+Indicators Game::getIndicators()
+{
     return indicators;
 }
 
@@ -109,7 +111,8 @@ Difficulty Game::getGameDifficulty()
     return (Difficulty)htcom->getDifficulty();
 }
 
-uint32_t Game::getSerialNumber(){
+uint32_t Game::getSerialNumber()
+{
     return htcom->getSerialNumber();
 }
 
@@ -130,10 +133,12 @@ void Game::setState(ModuleState state)
     this->state = state;
     switch (state)
     {
+    case UNKNOWN:
     case INIT:
         setPixelColor(PX_BLUE);
         break;
     case ARMED:
+        htcom->sendArmed();
         setPixelColor(PX_RED);
         break;
     case STRIKED:
@@ -246,6 +251,7 @@ bool Game::isNewGameSettings()
     return htcom->isNewGameSettings();
 }
 
-void Game::setGameDifficulty(Difficulty difficulty) {
+void Game::setGameDifficulty(Difficulty difficulty)
+{
     htcom->setGameDifficulty(difficulty);
 }
