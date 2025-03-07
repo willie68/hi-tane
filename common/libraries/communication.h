@@ -104,6 +104,9 @@ public:
     void setCtrlError(byte error);
 
     bool isAllResolved();
+    byte installedModuleCount();
+
+    void addTestModule();
 
 #endif
 

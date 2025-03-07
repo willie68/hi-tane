@@ -77,13 +77,17 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("init simon");
-
+  
   randomSeed(analogRead(0));
   game.init();
-
+  
   initGame();
   game.arm();
 }
+
+// the actual step we're in
+byte step;
+byte sstep;
 
 void initGame()
 {
@@ -134,9 +138,6 @@ void initGame()
 //  printMX(mx_nv_te);
 }
 
-// the actual step we're in
-byte step;
-byte sstep;
 Color actColor;
 Color expColor;
 TriState state;

@@ -41,8 +41,6 @@
   "connections": [
     [ "sevseg1:GND", "nano:GND.1", "black", [ "h9.6", "v48", "h182.4" ] ],
     [ "sevseg1:VCC", "nano:5V", "red", [ "h19.2", "v48", "h144" ] ],
-    [ "sevseg1:DIO", "nano:3", "gold", [ "h28.8", "v-38.4", "h115.7" ] ],
-    [ "nano:2", "sevseg1:CLK", "blue", [ "v-24", "h-134.9", "v38.4" ] ],
     [ "nano:GND.2", "rgb3:VSS", "black", [ "v-129.6", "h-0.5" ] ],
     [ "rgb3:VSS", "rgb2:VSS", "black", [ "v0" ] ],
     [ "rgb2:VSS", "rgb1:VSS", "black", [ "v0" ] ],
@@ -62,7 +60,9 @@
     [ "encoder1:DT", "nano:6", "gold", [ "h-48", "v-83.1", "h-133.9" ] ],
     [ "encoder1:CLK", "nano:7", "blue", [ "h-56.8", "v-102.2", "h-124.8" ] ],
     [ "sevseg1:GND", "bz1:1", "black", [ "h9.6", "v-144" ] ],
-    [ "nano:12", "bz1:2", "green", [ "v0" ] ]
+    [ "nano:12", "bz1:2", "green", [ "v0" ] ],
+    [ "sevseg1:DIO", "nano:2", "gold", [ "h28.8", "v-38.4", "h125.3" ] ],
+    [ "sevseg1:CLK", "nano:3", "blue", [ "h19.2", "v-38.4", "h124.8" ] ]
   ],
   "dependencies": {}
 }

@@ -39,7 +39,7 @@ enum Difficulty
     SIMPLE = 0,
     MEDIUM = 1,
     HARD = 2,
-    NUM_DIFF
+    NUM_DIFF = 3
 };
 
 const char gm_simple[] PROGMEM = "SIMPLE";

@@ -45,7 +45,7 @@ LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POS
 
 // RGB LED
 #define LED_PIN 4
-Adafruit_NeoPixel pixel(3, LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixel(3, LED_PIN, NEO_RGB + NEO_KHZ800);
 const uint32_t RED = pixel.Color(0xff, 0, 0);
 const uint32_t BLUE = pixel.Color(0, 0, 0xff);
 const uint32_t GREEN = pixel.Color(0, 0xff, 0);
@@ -393,6 +393,11 @@ void startGame()
   started = true;
   resolved = false;
   start = millis();
+  byte cm = htcom.installedModuleCount();
+  if (cm == 0) {
+    dbgOutLn(F("no module installed, faking"));
+    htcom.addTestModule();
+  }
 }
 
 void generateSerialNumber()

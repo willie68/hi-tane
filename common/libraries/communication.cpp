@@ -357,6 +357,23 @@ bool HTCOM::isAllResolved()
     return true;
 }
 
+byte HTCOM::installedModuleCount()
+{
+    byte count = 0;
+    for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
+    {
+        if (installedModules[x] == 0)
+            break;
+        count++;
+    }
+    return count;
+}
+
+void HTCOM::addTestModule()
+{
+    addToModuleList(ID_MAZE);
+}
+
 #endif
 
 bool HTCOM::isNewAmbSettings()

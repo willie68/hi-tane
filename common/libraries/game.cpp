@@ -9,7 +9,7 @@ void nextDiff(Difficulty &diff)
 {
     int idx = static_cast<int>(diff);
     idx++;
-    if (idx == HARD)
+    if (idx == NUM_DIFF)
     {
         idx--;
     }
