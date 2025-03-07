@@ -16,8 +16,8 @@
 #define Version "V0.1 " // always add an space at the end
 
 // Display
-#define CLK 2
-#define DIO 3
+#define CLK 3
+#define DIO 2
 
 // 7-Segment LED Display
 const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
