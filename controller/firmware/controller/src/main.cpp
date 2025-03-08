@@ -5,6 +5,8 @@
 #include <timerOne.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <avr/wdt.h>
+
 #define debug
 #include <debug.h>
 #include "indicators.h"
@@ -25,7 +27,7 @@ const uint8_t MND[] = {SEG_G};
 
 TM1637Display display = TM1637Display(CLK, DIO);
 
-const int MAX_TIME = 910; // 3600;
+const int MAX_TIME = 20; // 3600;
 
 // Encoder
 const uint8_t PIN_ENCA = 6;
@@ -80,6 +82,7 @@ bool checkResolved();
 bool checkFullyStriked();
 void showResolved();
 void showFullyStriked();
+void reset();
 
 Indicators indicators;
 SerialNumber snr;
@@ -531,18 +534,23 @@ void dblBeep()
   tone(BEEP_PIN, 440, 100);
   delay(200);
   tone(BEEP_PIN, 440, 100);
+  delay(100);
+  pinMode(BEEP_PIN, INPUT);
 }
 
 void beep()
 {
   tone(BEEP_PIN, 440, 100);
+  delay(100);
+  pinMode(BEEP_PIN, INPUT);
 }
 
 void hibeep()
 {
-  tone(BEEP_PIN, 880, 500);
+  tone(BEEP_PIN, 880, 300);
+  delay(300);
+  pinMode(BEEP_PIN, INPUT);
 }
-
 
 void resetStrikes()
 {
@@ -613,7 +621,7 @@ void showResolved() {
   beep();
   while (true) {
     if (clickEnc.getButton() == Button::Clicked) {
-      initGame();
+      reset();
       break;
     }
   }
@@ -633,8 +641,14 @@ void showFullyStriked() {
   beep();
   while (true) {
     if (clickEnc.getButton() == Button::Clicked) {
-      initGame();
+      reset();
       break;
     }
   }
+}
+
+void reset() {
+  wdt_disable();
+  wdt_enable(WDTO_15MS);
+  while (1) {}
 }
