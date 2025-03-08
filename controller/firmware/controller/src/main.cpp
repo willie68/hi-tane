@@ -27,7 +27,7 @@ const uint8_t MND[] = {SEG_G};
 
 TM1637Display display = TM1637Display(CLK, DIO);
 
-const int MAX_TIME = 20; // 3600;
+const int MAX_TIME = 90*60;
 
 // Encoder
 const uint8_t PIN_ENCA = 6;
@@ -74,9 +74,11 @@ void resetStrikes();
 void showStrikes();
 void startGame();
 void calculateActGameTime();
-void manuSetBrightness();
 void showMenu();
+void manuSetBrightness();
 void menuSetDifficulty();
+void manuSetGameTime();
+void gt2Display();
 void LED(bool on);
 bool checkResolved();
 bool checkFullyStriked();
@@ -87,6 +89,7 @@ void reset();
 Indicators indicators;
 SerialNumber snr;
 uint32_t color = BLUE;
+int gameTime = 60*60;
 long start;
 char buffer[30];
 Difficulty difficulty = Difficulty::SIMPLE;
@@ -176,7 +179,8 @@ bool resolved = false;
 bool fullyStriked = false;
 byte brightness = DEFAULT_BRIGHTNESS;
 byte sbr = 0;
-int act; 
+int sgt = 0;
+int act;
 
 void loop()
 {
@@ -228,9 +232,11 @@ void loop()
   }
 }
 
-void calculateActGameTime() {
-  act = MAX_TIME - int(((millis() - start) / 1000L));
-  if (act < 0) {
+void calculateActGameTime()
+{
+  act = gameTime - int(((millis() - start) / 1000L));
+  if (act < 0)
+  {
     act = 0;
   }
 }
@@ -265,6 +271,12 @@ void showMenu()
       lcd.print(brightness);
       lcd.print(" ");
       lcd.setCursor(12, 1);
+      lcd.cursor();
+      lcd.noBlink();
+      break;
+    case 3:
+      lcd.print(F("Gametime:  "));
+      gt2Display();
       lcd.cursor();
       lcd.noBlink();
       break;
@@ -312,13 +324,26 @@ void showMenu()
       lcd.noBlink();
     }
     break;
+  case 3:
+    if (gameTime != sgt)
+    {
+      sgt = gameTime;
+      gt2Display();
+    }
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      manuSetGameTime();
+      lcd.setCursor(10, 1);
+      lcd.noBlink();
+    }
+    break;
   }
   int16_t value = clickEnc.getIncrement();
   if (value != 0)
   {
     value > 0 ? line++ : line--;
-    if (line > 2)
-      line = 2;
+    if (line > 3)
+      line = 3;
     if (line < 0)
       line = 0;
   }
@@ -391,6 +416,44 @@ void manuSetBrightness()
   lcd.noBlink();
 }
 
+void manuSetGameTime()
+{
+  lcd.setCursor(10, 1);
+  lcd.blink();
+  sgt = 0;
+  bool ok = false;
+  while (!ok)
+  {
+    htcom.poll();
+    int16_t value = clickEnc.getIncrement();
+    if (value != 0)
+    {
+      value > 0 ? gameTime += 60 : gameTime -= 60;
+      if (gameTime > MAX_TIME)
+        gameTime = MAX_TIME;
+      if (gameTime < 1)
+        gameTime = 60;
+    }
+    if (gameTime != sgt)
+    {
+      sgt = gameTime;
+      gt2Display();
+    }
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      ok = true;
+    }
+  }
+  lcd.noBlink();
+}
+
+void gt2Display() {
+  lcd.setCursor(10, 1);
+  lcd.print(gameTime / 60);
+  lcd.print(" min ");
+  lcd.setCursor(10, 1);
+}
+
 void startGame()
 {
   dbgOutLn(F("start game"));
@@ -409,7 +472,8 @@ void startGame()
   start = millis();
   calculateActGameTime();
   byte cm = htcom.installedModuleCount();
-  if (cm == 0) {
+  if (cm == 0)
+  {
     dbgOutLn(F("no module installed, faking"));
     htcom.addTestModule();
   }
@@ -510,13 +574,16 @@ void showTime(int act)
       lcd.print("0");
     lcd.print(sec);
     display.showNumberDec(sec, true, 2, 2);
-    if ((act % 900) == 0) {
+    if ((act % 900) == 0)
+    {
       dblBeep();
     }
-    if ((act <= 10) && (act > 0)) {
+    if ((act <= 10) && (act > 0))
+    {
       beep();
     }
-    if (act == 0) {
+    if (act == 0)
+    {
       hibeep();
     }
   }
@@ -601,54 +668,64 @@ bool checkResolved()
   return htcom.isAllResolved();
 }
 
-bool checkFullyStriked() {
+bool checkFullyStriked()
+{
   return (act == 0) || (htcom.getStrikes() == 3);
 }
 
-void showResolved() {
+void showResolved()
+{
   clearRow(0);
   printHeader(true);
-  
+
   clearRow(1);
   clearRow(2);
   clearRow(3);
-  lcd.setCursor(0,1);
+  lcd.setCursor(0, 1);
   lcd.print(F("Hurray, you have"));
-  lcd.setCursor(0,2);
+  lcd.setCursor(0, 2);
   lcd.print(F("unarmed the bomb"));
-  lcd.setCursor(0,3);
+  lcd.setCursor(0, 3);
   lcd.print(F("Another game? <yes>"));
   beep();
-  while (true) {
-    if (clickEnc.getButton() == Button::Clicked) {
+  while (true)
+  {
+    if (clickEnc.getButton() == Button::Clicked)
+    {
       reset();
       break;
     }
   }
 }
 
-void showFullyStriked() {
+void showFullyStriked()
+{
   clearRow(0);
   printHeader(true);
 
   clearRow(1);
   clearRow(2);
   clearRow(3);
-  lcd.setCursor(0,1);
+  lcd.setCursor(0, 1);
   lcd.print(F("sorry, you explodes!"));
-  lcd.setCursor(0,3);
+  lcd.setCursor(0, 3);
   lcd.print(F("Another game? <yes>"));
   beep();
-  while (true) {
-    if (clickEnc.getButton() == Button::Clicked) {
+  while (true)
+  {
+    if (clickEnc.getButton() == Button::Clicked)
+    {
       reset();
       break;
     }
   }
 }
 
-void reset() {
+void reset()
+{
   wdt_disable();
   wdt_enable(WDTO_15MS);
-  while (1) {}
+  while (1)
+  {
+  }
 }
