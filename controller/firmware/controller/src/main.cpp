@@ -25,7 +25,7 @@ const uint8_t MND[] = {SEG_G};
 
 TM1637Display display = TM1637Display(CLK, DIO);
 
-const int MAX_TIME = 3600;
+const int MAX_TIME = 910; // 3600;
 
 // Encoder
 const uint8_t PIN_ENCA = 6;
@@ -61,6 +61,7 @@ void showTime(int act);
 void clearRow(uint8_t row);
 void beep();
 void dblBeep();
+void hibeep();
 void generateSerialNumber();
 void generateIndicators();
 void printStatusLine();
@@ -70,6 +71,7 @@ void initGame();
 void resetStrikes();
 void showStrikes();
 void startGame();
+void calculateActGameTime();
 void manuSetBrightness();
 void showMenu();
 void menuSetDifficulty();
@@ -135,6 +137,7 @@ void initGame()
 {
   started = false;
   paused = false;
+  lcd.clear();
 
   printHeader(true);
   printWelcome();
@@ -170,13 +173,14 @@ bool resolved = false;
 bool fullyStriked = false;
 byte brightness = DEFAULT_BRIGHTNESS;
 byte sbr = 0;
+int act; 
 
 void loop()
 {
   htcom.poll();
   if (started && !(paused))
   {
-    int act = MAX_TIME - int(((millis() - start) / 1000L));
+    calculateActGameTime();
     showTime(act);
   }
   if (htcom.hasCtrlError())
@@ -218,6 +222,13 @@ void loop()
   if (fullyStriked)
   {
     showFullyStriked();
+  }
+}
+
+void calculateActGameTime() {
+  act = MAX_TIME - int(((millis() - start) / 1000L));
+  if (act < 0) {
+    act = 0;
   }
 }
 
@@ -393,6 +404,7 @@ void startGame()
   started = true;
   resolved = false;
   start = millis();
+  calculateActGameTime();
   byte cm = htcom.installedModuleCount();
   if (cm == 0) {
     dbgOutLn(F("no module installed, faking"));
@@ -495,6 +507,15 @@ void showTime(int act)
       lcd.print("0");
     lcd.print(sec);
     display.showNumberDec(sec, true, 2, 2);
+    if ((act % 900) == 0) {
+      dblBeep();
+    }
+    if ((act <= 10) && (act > 0)) {
+      beep();
+    }
+    if (act == 0) {
+      hibeep();
+    }
   }
 }
 
@@ -510,16 +531,18 @@ void dblBeep()
   tone(BEEP_PIN, 440, 100);
   delay(200);
   tone(BEEP_PIN, 440, 100);
-  delay(100);
-  pinMode(BEEP_PIN, INPUT);
 }
 
 void beep()
 {
   tone(BEEP_PIN, 440, 100);
-  delay(100);
-  pinMode(BEEP_PIN, INPUT);
 }
+
+void hibeep()
+{
+  tone(BEEP_PIN, 880, 500);
+}
+
 
 void resetStrikes()
 {
@@ -571,7 +594,7 @@ bool checkResolved()
 }
 
 bool checkFullyStriked() {
-  return htcom.getStrikes() == 3;
+  return (act == 0) || (htcom.getStrikes() == 3);
 }
 
 void showResolved() {
