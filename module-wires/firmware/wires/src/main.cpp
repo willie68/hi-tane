@@ -12,7 +12,7 @@
 #define LED_PIN 4
 #define COM_PIN 11
 // Game framework
-Game game(ModuleTag::WIRES, LED_PIN, COM_PIN);
+Game game(ModuleTag::WIRES, LED_PIN);
 
 Panel panel;
 
@@ -24,6 +24,7 @@ void setup()
   Serial.begin(115200);
   Serial.println("init");
   pinMode(LED_BUILTIN, OUTPUT);
+  game.init();
 
   initGame();
   game.arm();
@@ -32,6 +33,10 @@ void setup()
 void loop()
 {
   game.poll();
+  if (game.isNewGameSettings()) {
+    initGame();
+    game.arm();
+  }
   if (game.isState(ModuleState::ARMED))
   {
     if (panel.isDisarmed())
@@ -42,18 +47,26 @@ void loop()
     {
       dbgOutLn("Strike");
       game.setStrike();
+      while (panel.isStriken()) {
+        game.poll();
+        delay(10);
+      }
+      byte count = 100;
+      while (count > 0) {
+        game.poll();
+        delay(10);
+        count--;
+      }
     }
   }
   else if (!panel.isStriken() && game.isState(ModuleState::STRIKED))
   {
     game.setState(ModuleState::ARMED);
   }
-  game.showTime();
 }
 
 void initGame()
 {
-  game.init();
   bool invalid = true;
   unsigned long sact = millis();
   while (invalid)
@@ -67,10 +80,8 @@ void initGame()
         sact = millis() + 5000;
         Serial.println(F("invalid wire configuration"));
         game.sendError(ERRORS::ERR_INVALID_WIRES);
-        game.setIntLED(true);
       }
     }
   }
-  game.setIntLED(false);
   panel.printPlugs();
 }

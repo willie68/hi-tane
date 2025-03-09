@@ -144,7 +144,7 @@ void Game::setState(ModuleState state)
     case STRIKED:
         htcom->sendStrike();
         setPixelColor(PX_RED);
-        strikeTime = millis() + 3001;
+        strikeTime = millis() + 3000;
         break;
     case DISARMED:
         htcom->sendDisarmed();

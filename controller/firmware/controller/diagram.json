@@ -45,8 +45,7 @@
     [ "rgb3:VSS", "rgb2:VSS", "black", [ "v0" ] ],
     [ "rgb2:VSS", "rgb1:VSS", "black", [ "v0" ] ],
     [ "nano:5V", "rgb3:VDD", "red", [ "v24", "h66.7", "v-230.4", "h-153.6", "v9.6" ] ],
-    [ "rgb3:VDD", "rgb2:VDD", "red", [ "h0" ] ],
-    [ "rgb2:VDD", "rgb1:VDD", "red", [ "h0" ] ],
+    [ "rgb3:VDD", "rgb2:VDD", "red", [ "h-9.6", "v-9.6", "h-38.4", "v9.6" ] ],
     [ "rgb3:DIN", "nano:4", "green", [ "h0" ] ],
     [ "rgb3:DOUT", "rgb2:DIN", "green", [ "h-9.6", "v-10.5" ] ],
     [ "rgb2:DOUT", "rgb1:DIN", "green", [ "h-9.6", "v-10.5" ] ],
@@ -60,9 +59,10 @@
     [ "encoder1:DT", "nano:6", "gold", [ "h-48", "v-83.1", "h-133.9" ] ],
     [ "encoder1:CLK", "nano:7", "blue", [ "h-56.8", "v-102.2", "h-124.8" ] ],
     [ "sevseg1:GND", "bz1:1", "black", [ "h9.6", "v-144" ] ],
-    [ "nano:12", "bz1:2", "green", [ "v0" ] ],
     [ "sevseg1:DIO", "nano:2", "gold", [ "h28.8", "v-38.4", "h125.3" ] ],
-    [ "sevseg1:CLK", "nano:3", "blue", [ "h19.2", "v-38.4", "h124.8" ] ]
+    [ "sevseg1:CLK", "nano:3", "blue", [ "h19.2", "v-38.4", "h124.8" ] ],
+    [ "bz1:2", "nano:9", "green", [ "h0" ] ],
+    [ "rgb2:VDD", "rgb1:VDD", "red", [ "h-9.6", "v-9.6", "h-38.4", "v9.6" ] ]
   ],
   "dependencies": {}
 }
