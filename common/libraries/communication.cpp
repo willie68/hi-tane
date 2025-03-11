@@ -11,13 +11,6 @@ HTCOM::HTCOM()
 HTCOM::HTCOM(uint8_t id)
 {
     moduleID = id;
-#ifndef HI_MODULE
-    for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
-    {
-        installedModules[x] = 0;
-        stateOfModules[x] = ModuleState::UNKNOWN;
-    }
-#endif
 }
 
 void HTCOM::attach(uint8_t id)
@@ -27,6 +20,7 @@ void HTCOM::attach(uint8_t id)
     moduleID = id;
 #ifndef HI_MODULE
     resetCtrlError();
+    initModules();
 #endif
     newAmbSettings = false;
     newGameSettings = false;
@@ -38,6 +32,17 @@ void HTCOM::attach(uint8_t id)
     mcp2515->setBitrate(CAN_500KBPS);
     mcp2515->setNormalMode();
 }
+
+#ifndef HI_MODULE
+void HTCOM::initModules()
+{
+    for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
+    {
+        installedModules[x] = 0;
+        stateOfModules[x] = ModuleState::UNKNOWN;
+    }
+}
+#endif
 
 void HTCOM::poll()
 {
@@ -311,6 +316,11 @@ void HTCOM::addToModuleList(byte moduleID)
 {
     for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
     {
+        // module already installed ?
+        if (installedModules[x] == moduleID) {
+            break;
+        }
+        // free space 
         if (installedModules[x] == 0)
         {
             installedModules[x] = moduleID;
@@ -367,6 +377,15 @@ byte HTCOM::installedModuleCount()
         count++;
     }
     return count;
+}
+
+byte HTCOM::getInstalledModuleID(byte idx)
+{
+    if (idx >= MAX_INSTALLED_MODULES)
+    {
+        return ID_NONE;
+    }
+    return installedModules[idx];
 }
 
 void HTCOM::addTestModule()

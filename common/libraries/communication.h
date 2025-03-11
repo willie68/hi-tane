@@ -12,7 +12,7 @@ const byte MAX_INSTALLED_MODULES = 12;
 
 enum ModuleState
 {
-    UNKNOWN = 0, 
+    UNKNOWN = 0,
     INIT,
     ARMED,
     STRIKED,
@@ -21,6 +21,7 @@ enum ModuleState
 
 enum MODULEIDS
 {
+    ID_NONE = 0,
     ID_CONTROLLER = 44,
     ID_WIRES = 45,
     ID_MAZE = 46,
@@ -30,14 +31,21 @@ enum MODULEIDS
     ID_MAX_MODULES = 50
 };
 
+const byte MOD_OFFSET = ID_WIRES;
+const char mn_wr[] PROGMEM = "wires";
+const char mn_mz[] PROGMEM = "maze ";
+const char mn_si[] PROGMEM = "simon";
+const char mn_pw[] PROGMEM = "pass ";
+const char mn_mr[] PROGMEM = "morse";
+const char *const MODULE_LABELS[] PROGMEM = {mn_wr, mn_mz, mn_si, mn_pw, mn_mr};
+
 const byte MODULE_COUNT = 6;
 const byte modules[MODULE_COUNT] = {ID_CONTROLLER, ID_WIRES, ID_MAZE, ID_SIMON, ID_PASSWORD, ID_MORSE};
 
 const char e_nn[] PROGMEM = "";
 const char e_we[] PROGMEM = "wires: invalid wire";
 
-const char *const ERROR_MESSAGES[] PROGMEM = {
-    e_nn, e_we};
+const char *const ERROR_MESSAGES[] PROGMEM = {e_nn, e_we};
 
 enum COMMANDS
 {
@@ -104,7 +112,10 @@ public:
     void setCtrlError(byte error);
 
     bool isAllResolved();
+
+    void initModules();
     byte installedModuleCount();
+    byte getInstalledModuleID(byte idx);
 
     void addTestModule();
 

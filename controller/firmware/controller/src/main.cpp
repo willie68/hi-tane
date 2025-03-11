@@ -27,7 +27,7 @@ const uint8_t MND[] = {SEG_G};
 
 TM1637Display display = TM1637Display(CLK, DIO);
 
-const int MAX_TIME = 90*60;
+const int MAX_TIME = 90 * 60;
 
 // Encoder
 const uint8_t PIN_ENCA = 6;
@@ -85,11 +85,12 @@ bool checkFullyStriked();
 void showResolved();
 void showFullyStriked();
 void reset();
+void printModules();
 
 Indicators indicators;
 SerialNumber snr;
 uint32_t color = BLUE;
-int gameTime = 60*60;
+int gameTime = 60 * 60;
 long start;
 char buffer[30];
 Difficulty difficulty = Difficulty::SIMPLE;
@@ -158,6 +159,7 @@ void initGame()
   dbgOutLn("htcom init");
   htcom = HTCOM();
   htcom.attach(ID_CONTROLLER);
+  htcom.sendCtrlInitialisation();
   htcom.setCtrlSerialNumber(snr.Get());
   htcom.setCtrlDifficulty(difficulty);
   htcom.setCtrlIndicators(indicators.Compress());
@@ -180,7 +182,8 @@ bool fullyStriked = false;
 byte brightness = DEFAULT_BRIGHTNESS;
 byte sbr = 0;
 int sgt = 0;
-int act;
+int act;       // actual game time
+byte mcnt = 0; // module count
 
 void loop()
 {
@@ -447,7 +450,8 @@ void manuSetGameTime()
   lcd.noBlink();
 }
 
-void gt2Display() {
+void gt2Display()
+{
   lcd.setCursor(10, 1);
   lcd.print(gameTime / 60);
   lcd.print(" min ");
@@ -460,6 +464,15 @@ void startGame()
   resetStrikes();
   pixel.setBrightness(16 * htcom.getBrightness());
   display.setBrightness(htcom.getBrightness() >> 1);
+  htcom.initModules();
+  htcom.sendCtrlInitialisation();
+  byte count = 100;
+  while (count > 0)
+  {
+    count--;
+    htcom.poll();
+    delay(10);
+  }
   htcom.setCtrlDifficulty(difficulty);
   htcom.sendCtrlGameSettings();
 
@@ -471,11 +484,58 @@ void startGame()
   resolved = false;
   start = millis();
   calculateActGameTime();
-  byte cm = htcom.installedModuleCount();
-  if (cm == 0)
+  mcnt = htcom.installedModuleCount();
+  if (mcnt == 0)
   {
     dbgOutLn(F("no module installed, faking"));
     htcom.addTestModule();
+  }
+#ifdef debug
+  dbgOut(F("found "));
+  dbgOut2(mcnt, DEC);
+  dbgOutLn(F(" modules"));
+
+  for (byte idx = 0; idx < mcnt; idx++)
+  {
+    byte mod = htcom.getInstalledModuleID(idx);
+
+    strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
+    dbgOutLn(buffer);
+  }
+
+#endif
+  printModules();
+}
+
+void printModules()
+{
+  clearRow(1);
+  clearRow(2);
+  dbgOut(F("print modules"));
+  dbgOutLn2(mcnt, DEC);
+  lcd.setCursor(0, 1);
+  for (byte idx = 0; idx < 3; idx++)
+  {
+    if (idx < mcnt)
+    {
+      byte mod = htcom.getInstalledModuleID(idx);
+      dbgOutLn2(mod, DEC);
+      strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
+      lcd.print(buffer);
+      lcd.print(F(" "));
+    }
+  }
+  lcd.setCursor(0, 2);
+  for (byte idx = 3; idx < 6; idx++)
+  {
+    if (idx < mcnt)
+    {
+      byte mod = htcom.getInstalledModuleID(idx);
+
+      strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
+      lcd.print(buffer);
+      lcd.print(F(" "));
+    }
   }
 }
 
