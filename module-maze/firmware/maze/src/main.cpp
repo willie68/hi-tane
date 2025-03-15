@@ -11,7 +11,7 @@
 
 // ---- forward declarations
 void initGame();
-void btnpoll();
+void poll();
 void showBoard(bool smo);
 void showSmile(bool ok);
 void zoomIn();
@@ -35,14 +35,19 @@ Switch btm = Switch(9); // Button middle
 
 Maze maze;
 
+// save brightness
+byte sbr = 1;
+
 void setup()
 {
   Serial.begin(115200);
-  dbgOutLn(F("setup"))
-      game.setState(ModuleState::INIT);
+
+  dbgOutLn(F("setup"));
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(MATRIX_PIN, OUTPUT);
   matrix.setBrightness(64);
+
+  game.init();
   initGame();
 
   game.arm();
@@ -55,8 +60,7 @@ bool strike = false;
 
 void loop()
 {
-  game.poll();
-  btnpoll();
+  poll();
 
   bool strike = false;
   if (btn.singleClick())
@@ -100,8 +104,6 @@ void loop()
   {
     showBoard(showMarks);
   }
-
-  // game.showTime();
 }
 
 byte SM_OK[] = {0x3C, 0x42, 0xA5, 0x81, 0xA5, 0x99, 0x42, 0x3C};
@@ -186,8 +188,7 @@ void showBoard(bool smo)
 void initGame()
 {
   dbgOutLn(F("initGame"));
-  game.init();
-  //game.setGameDifficulty(Difficulty::HARD);
+  // game.setGameDifficulty(Difficulty::HARD);
 
   bool invalid = true;
   while (invalid)
@@ -195,7 +196,7 @@ void initGame()
     invalid = !maze.init(game.getGameDifficulty()); // TODO setting the game settings from HTCOM
     invalid = false;
     if (invalid)
-    
+
     {
       delay(1000);
       Serial.println(F("invalid maze configuration"));
@@ -223,10 +224,10 @@ void zoomIn()
   matrix.clear();
   for (byte x = 0; x < 6; x++)
   {
-    setPixelXY(x+1, 1, PX_GREEN);
-    setPixelXY(1, x+1, PX_GREEN);
-    setPixelXY(6, x+1, PX_GREEN);
-    setPixelXY(x+1, 6, PX_GREEN);
+    setPixelXY(x + 1, 1, PX_GREEN);
+    setPixelXY(1, x + 1, PX_GREEN);
+    setPixelXY(6, x + 1, PX_GREEN);
+    setPixelXY(x + 1, 6, PX_GREEN);
   }
   matrix.show();
   delay(1000);
@@ -234,10 +235,10 @@ void zoomIn()
   matrix.clear();
   for (byte x = 0; x < 4; x++)
   {
-    setPixelXY(x+2, 2, PX_GREEN);
-    setPixelXY(2, x+2, PX_GREEN);
-    setPixelXY(5, x+2, PX_GREEN);
-    setPixelXY(x+2, 5, PX_GREEN);
+    setPixelXY(x + 2, 2, PX_GREEN);
+    setPixelXY(2, x + 2, PX_GREEN);
+    setPixelXY(5, x + 2, PX_GREEN);
+    setPixelXY(x + 2, 5, PX_GREEN);
   }
   matrix.show();
   delay(1000);
@@ -260,8 +261,21 @@ void setPixelXY(byte x, byte y, uint32_t color)
   matrix.setPixelColor((7 - x) + ((7 - y) * 8), color);
 }
 
-void btnpoll()
+void poll()
 {
+  game.poll();
+  if (sbr != game.getBrightness())
+  {
+    sbr = game.getBrightness();
+    matrix.setBrightness(sbr * 16);
+  }
+
+  if (game.isNewGameSettings())
+  {
+    initGame();
+    game.arm();
+  }
+
   btn.poll();
   bte.poll();
   btm.poll();

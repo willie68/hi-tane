@@ -255,3 +255,7 @@ void Game::setGameDifficulty(Difficulty difficulty)
 {
     htcom->setGameDifficulty(difficulty);
 }
+
+byte Game::getBrightness() {
+    return htcom->getBrightness();
+}

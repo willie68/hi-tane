@@ -11,6 +11,7 @@
 // ---- forward declarations
 void initGame();
 byte getSlider();
+void poll();
 
 // RGB LED
 #define LED_PIN 4
@@ -18,10 +19,11 @@ byte getSlider();
 Game game(ModuleTag::MORSE, LED_PIN);
 
 #define MORSE_BEEP_PIN 5
-#define SLIDER_PIN 1 // this is a0
-#define BUTTON_PIN 7
+#define SLIDER_PIN 0 // this is a0
+#define BUTTON_PIN 3
 
-#define MORSE_LED_PIN 6
+#define MORSE_LED_PIN 7
+#define MORSE_LED_GND 6
 
 #define CLK 8
 #define DIO 9
@@ -33,12 +35,15 @@ Switch btn = Switch(BUTTON_PIN); // Button north
 TM1637Display display = TM1637Display(CLK, DIO);
 Morse morse = Morse(MORSE_LED_PIN, MORSE_BEEP_PIN, 250);
 
+byte sbr = 1;
+
 void setup()
 {
   //  initDebug();
   Serial.begin(115200);
 
   pinMode(MORSE_LED_PIN, OUTPUT);
+  pinMode(MORSE_LED_GND, OUTPUT);
   pinMode(MORSE_BEEP_PIN, OUTPUT);
 
   game.init();
@@ -56,23 +61,21 @@ void initGame()
   randomSeed(analogRead(0));
   byte idx = random(WORD_COUNT);
   wordFreq = wordset[idx];
-  Serial.print("word: ");
-  Serial.print(wordFreq.word);
-  Serial.print(", freq:");
-  Serial.println(wordFreq.frq, DEC);
+  dbgOut(F("word: "));
+  dbgOut(wordFreq.word);
+  dbgOut(F(", freq:"));
+  dbgOut2(wordFreq.frq, DEC);
   game.arm();
+  sbr = 0;
 }
 
 long freq, sfreq;
-char SOS[] = {'s', 'o', 's', 0x00};
 char buf[10];
 unsigned long striketime = 0;
 
 void loop()
 {
-  game.poll();
-  btn.poll();
-  morse.poll();
+  poll();
 
   if (game.isState(ModuleState::ARMED) && morse.finished())
   {
@@ -86,8 +89,8 @@ void loop()
     return;
   }
 
-//  freq = map(getSlider(), 0, 128, frqBase, frqBase + 128);
-  freq = getSlider() +  frqBase;
+  //  freq = map(getSlider(), 0, 128, frqBase, frqBase + 128);
+  freq = getSlider() + frqBase;
   if (freq != sfreq)
   {
     dbgOut("freq: ");
@@ -141,4 +144,23 @@ byte getSlider()
   sum -= min;
   sum -= max;
   return sum / (MAX - 1);
+}
+
+void poll()
+{
+  game.poll();
+
+  if (sbr != game.getBrightness())
+  {
+    sbr = game.getBrightness();
+    analogWrite(MORSE_LED_GND, 255 - (sbr * 16));
+    display.setBrightness(sbr >> 1);
+  }
+
+  if (game.isNewGameSettings())
+  {
+    initGame();
+  }
+  btn.poll();
+  morse.poll();
 }

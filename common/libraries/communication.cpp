@@ -49,7 +49,7 @@ void HTCOM::poll()
     if (mcp2515->readMessage(&rcvCanMsg) == MCP2515::ERROR_OK)
     {
         unsigned long canID = rcvCanMsg.can_id;
-        dbgOut("msg from ");
+        dbgOut(F("msg: 0x"));
         dbgOutLn2(canID, HEX);
         byte rcvModule = ID_CONTROLLER;
         if (canID > 0x0000ff)
@@ -84,7 +84,7 @@ void HTCOM::poll()
             newAmbSettings = true;
             break;
         case MID_GAMESETTINGS:
-            dbgOut("gs ");
+            dbgOut("gs:");
             difficulty = rcvCanMsg.data[0];
             dbgOut2(difficulty, HEX);
             inds = rcvCanMsg.data[1] + (rcvCanMsg.data[2] << 8);
@@ -100,14 +100,15 @@ void HTCOM::poll()
             setCtrlError(rcvCanMsg.data[0]);
             break;
         case MID_MODULEINIT:
-            dbgOut("minit: ");
-            dbgOutLn2(rcvModule, HEX);
+            dbgOut(F("mint: "));
+            dbgOutLn2(rcvModule, DEC);
             addToModuleList(rcvModule);
             break;
         case MID_STATE:
-            dbgOut("mstate: ");
-            dbgOut2(rcvModule, HEX);
-            dbgOutLn2(rcvCanMsg.data[1], HEX);
+            dbgOut(F("mst: "));
+            dbgOut2(rcvModule, DEC);
+            dbgOut(F(":"));
+            dbgOutLn2(rcvCanMsg.data[1], DEC);
             updateModule(rcvModule, static_cast<ModuleState>(rcvCanMsg.data[1]));
             break;
 #endif
@@ -117,10 +118,10 @@ void HTCOM::poll()
             newStrike = true;
             break;
         default:
-            dbgOut("unkown: ");
-            dbgOut2(rcvModule, HEX);
-            dbgOut(" ");
-            dbgOutLn2(rcvCanMsg.can_id, HEX);
+            dbgOut(F("unk: "));
+            dbgOut2(rcvModule, DEC);
+            dbgOut(":");
+            dbgOutLn2(rcvCanMsg.can_id, DEC);
             break;
         };
     }
@@ -143,6 +144,8 @@ word HTCOM::getIndicators()
 
 void HTCOM::sendModuleID()
 {
+    byte dl = moduleID - ID_CONTROLLER;
+    delay(dl* 100);
     sndCanMsg.can_id = MID_MODULEINIT + moduleID;
     sndCanMsg.can_dlc = 1;
     sndCanMsg.data[0] = moduleID;

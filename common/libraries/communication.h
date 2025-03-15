@@ -32,11 +32,11 @@ enum MODULEIDS
 };
 
 const byte MOD_OFFSET = ID_WIRES;
-const char mn_wr[] PROGMEM = "wires";
-const char mn_mz[] PROGMEM = "maze ";
-const char mn_si[] PROGMEM = "simon";
-const char mn_pw[] PROGMEM = "pass ";
-const char mn_mr[] PROGMEM = "morse";
+const char mn_wr[] PROGMEM = "wr";
+const char mn_mz[] PROGMEM = "mz";
+const char mn_si[] PROGMEM = "si";
+const char mn_pw[] PROGMEM = "pw";
+const char mn_mr[] PROGMEM = "mo";
 const char *const MODULE_LABELS[] PROGMEM = {mn_wr, mn_mz, mn_si, mn_pw, mn_mr};
 
 const byte MODULE_COUNT = 6;

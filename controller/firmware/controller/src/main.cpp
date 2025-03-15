@@ -511,31 +511,17 @@ void printModules()
 {
   clearRow(1);
   clearRow(2);
-  dbgOut(F("print modules"));
+  dbgOut(F("print modules "));
   dbgOutLn2(mcnt, DEC);
   lcd.setCursor(0, 1);
-  for (byte idx = 0; idx < 3; idx++)
+  for (byte idx = 0; idx < mcnt; idx++)
   {
-    if (idx < mcnt)
-    {
       byte mod = htcom.getInstalledModuleID(idx);
-      dbgOutLn2(mod, DEC);
-      strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
-      lcd.print(buffer);
-      lcd.print(F(" "));
-    }
-  }
-  lcd.setCursor(0, 2);
-  for (byte idx = 3; idx < 6; idx++)
-  {
-    if (idx < mcnt)
-    {
-      byte mod = htcom.getInstalledModuleID(idx);
-
-      strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
-      lcd.print(buffer);
-      lcd.print(F(" "));
-    }
+      if (mod != ID_NONE) {
+        strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
+        lcd.print(buffer);
+        lcd.print(F(" "));
+      }
   }
 }
 

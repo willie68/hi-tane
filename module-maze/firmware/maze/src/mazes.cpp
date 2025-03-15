@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <mazes.h>
 #define debug
+#include <debug.h>
+
 void MazeField::load(Difficulty difficulty, byte idx)
 {
     hard = false;
@@ -73,6 +75,20 @@ bool Maze::init(Difficulty difficulty)
         goal.y = random(0, field.getDim());
         distance = getDistance();
     }
+    dbgOut(F("maze:"));
+    dbgOut(difficulty);
+    dbgOut(":");
+    dbgOutLn(idx);
+    dbgOut(F("player:"));
+    dbgOut(player.x);
+    dbgOut(":");
+    dbgOutLn(player.y);
+    dbgOut(F("goal:"));
+    dbgOut(goal.x);
+    dbgOut(":");
+    dbgOutLn(goal.y);
+    dbgOut(F("dist:"));
+    dbgOutLn(distance);
     return true;
 }
 

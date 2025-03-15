@@ -77,6 +77,7 @@ public:
 
     bool snrHasVocal();
     byte getStrikes();
+    byte getBrightness();
 
     uint32_t getSerialNumber();
 
