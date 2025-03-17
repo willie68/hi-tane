@@ -10,7 +10,6 @@
 
 // RGB LED
 #define LED_PIN 4
-#define COM_PIN 11
 // Game framework
 Game game(ModuleTag::WIRES, LED_PIN);
 
@@ -85,3 +84,4 @@ void initGame()
   }
   panel.printPlugs();
 }
+

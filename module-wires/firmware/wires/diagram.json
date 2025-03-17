@@ -60,7 +60,29 @@
       "left": 66.65,
       "rotate": 90,
       "attrs": { "value": "10000" }
-    }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r7",
+      "top": 71.15,
+      "left": -124.8,
+      "attrs": { "value": "3300" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r8",
+      "top": 119.15,
+      "left": -124.8,
+      "attrs": { "value": "3300" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r9",
+      "top": 167.15,
+      "left": -124.8,
+      "attrs": { "value": "51000" }
+    },
+    { "type": "wokwi-slide-switch", "id": "sw1", "top": 129.2, "left": -217.7, "attrs": {} }
   ],
   "connections": [
     [ "nano:4", "rgb1:DIN", "green", [ "v0" ] ],
@@ -89,7 +111,17 @@
     [ "bb1:2b.j", "bb1:3b.j", "black", [ "h0" ] ],
     [ "bb1:4b.j", "bb1:3b.j", "black", [ "h0" ] ],
     [ "bb1:5b.j", "bb1:4b.j", "black", [ "h0" ] ],
-    [ "bb1:6b.j", "bb1:5b.j", "black", [ "h0" ] ]
+    [ "bb1:6b.j", "bb1:5b.j", "black", [ "h0" ] ],
+    [ "r7:1", "bb1:1b.h", "", [ "$bb" ] ],
+    [ "r7:2", "bb1:1t.d", "", [ "$bb" ] ],
+    [ "r8:1", "bb1:6b.h", "", [ "$bb" ] ],
+    [ "r8:2", "bb1:6t.d", "", [ "$bb" ] ],
+    [ "r9:1", "bb1:11b.h", "", [ "$bb" ] ],
+    [ "r9:2", "bb1:11t.d", "", [ "$bb" ] ],
+    [ "bb1:6b.j", "sw1:1", "green", [ "h-86.4", "v38.4" ] ],
+    [ "sw1:3", "r9:1", "green", [ "v0" ] ],
+    [ "r9:2", "bb1:3t.b", "green", [ "h8.4", "v-76.8" ] ],
+    [ "sw1:2", "sw1:1", "green", [ "v0" ] ]
   ],
   "dependencies": {}
 }

@@ -1,6 +1,8 @@
 // Implementation of the patch panel
 #include <Arduino.h>
 #include <panel.h>
+#define debug
+#include <debug.h>
 
 const byte PLUG_COUNT = 6;
 const byte PLUG_INVALID = 255;
@@ -36,6 +38,8 @@ bool Panel::init(bool is_sn_last_digit_odd)
     // checking if there are enough wires installed
     if (wirecount < 3)
     {
+        dbgOut("wrong wire count: ");
+        dbgOutLn2(wirecount, DEC);
         return false;
     }
 

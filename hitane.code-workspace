@@ -37,6 +37,10 @@
 			"path": "module-showsnr/firmware/showsnr"
 		},
 		{
+			"name": "needy-gas",
+			"path": "module-needy-gas/firmware/needy-gas"
+		},
+		{
 			"name": "hi-tane",
 			"path": "."
 		}
