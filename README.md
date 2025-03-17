@@ -55,8 +55,8 @@ Als Controller dient ein Arduino Nano mit folgender Peripherie:
 
 - 20x4 Display mit Encoder zum Einstellen und Abrufen verschiedener Parameter
 - Ein Lautsprecher als Beeper, später evtl. ein MP3 Modul
-- ein 4-stelliges 7-Segmant Display für die Spielzeitanzeige
-- 3 Dual-Color oder RGB LEDs als Strikecounter
+- ein 4-stelliges 7-Segment Display für die Spielzeitanzeige
+- 3 RGB LEDs als Strikecounter
 
 ## 6x6 Maze: finde den Weg zum Ausgang
 

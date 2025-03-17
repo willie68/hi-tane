@@ -34,6 +34,29 @@
       "left": -22.84,
       "rotate": 180,
       "attrs": {}
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": 127.94,
+      "left": 48.23,
+      "attrs": { "i2cAddress": "0x3c" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 249.5,
+      "left": 32.3,
+      "rotate": 90,
+      "attrs": { "color": "red", "xray": "1" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn2",
+      "top": 249.5,
+      "left": 128.3,
+      "rotate": 90,
+      "attrs": { "color": "red", "xray": "1" }
     }
   ],
   "connections": [
@@ -71,7 +94,15 @@
     [ "nano:GND.2", "sr2:OE", "black", [ "v-72", "h-106.1" ] ],
     [ "sr2:VCC", "nano:5V", "red", [ "v17.2", "h134.4", "v154.4", "h-57.1" ] ],
     [ "sevseg1:COM.2", "sevseg2:COM.2", "black", [ "v-47.16", "h86.4" ] ],
-    [ "sevseg2:COM.1", "sr2:GND", "black", [ "v29.6", "h-77.32" ] ]
+    [ "sevseg2:COM.1", "sr2:GND", "black", [ "v29.6", "h-77.32" ] ],
+    [ "nano:5V", "oled1:VCC", "red", [ "v43.2", "h-29.3" ] ],
+    [ "nano:GND.1", "oled1:GND", "black", [ "v52.8", "h-58.1" ] ],
+    [ "oled1:SCL", "nano:A5", "gold", [ "v-48", "h-9.3" ] ],
+    [ "nano:A4", "oled1:SDA", "green", [ "v33.6", "h28.3" ] ],
+    [ "nano:GND.1", "btn2:2.l", "black", [ "v52.8", "h18.7", "v115.2", "h-9.4" ] ],
+    [ "btn2:2.l", "btn1:1.l", "black", [ "v-9.6", "h-77" ] ],
+    [ "btn2:1.l", "nano:5", "gray", [ "v-6.3", "h51.5", "v-240", "h-134.4" ] ],
+    [ "nano:6", "btn1:2.l", "blue", [ "v-14.4", "h133.9", "v230.4", "h-153.4" ] ]
   ],
   "dependencies": {}
 }
