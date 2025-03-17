@@ -259,3 +259,8 @@ void Game::setGameDifficulty(Difficulty difficulty)
 byte Game::getBrightness() {
     return htcom->getBrightness();
 }
+
+void Game::sendBeep() {
+    dbgOutLn(F("m: beep"));
+    htcom->sendBeep();
+}

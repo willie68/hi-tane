@@ -111,6 +111,10 @@ void HTCOM::poll()
             dbgOutLn2(rcvCanMsg.data[1], DEC);
             updateModule(rcvModule, static_cast<ModuleState>(rcvCanMsg.data[1]));
             break;
+        case MID_BEEP:
+            dbgOutLn(F("beep"));
+            toBeep = true;
+            break;
 #endif
         case MID_STRIKE:
             dbgOutLn(F("s"));
@@ -185,6 +189,15 @@ void HTCOM::sendModuleState(ModuleState state)
 void HTCOM::sendStrike()
 {
     sndCanMsg.can_id = MID_STRIKE + moduleID;
+    sndCanMsg.can_dlc = 1;
+    sndCanMsg.data[0] = moduleID;
+
+    mcp2515->sendMessage(&sndCanMsg);
+}
+
+void HTCOM::sendBeep()
+{
+    sndCanMsg.can_id = MID_BEEP;
     sndCanMsg.can_dlc = 1;
     sndCanMsg.data[0] = moduleID;
 
@@ -389,6 +402,15 @@ byte HTCOM::getInstalledModuleID(byte idx)
         return ID_NONE;
     }
     return installedModules[idx];
+}
+
+bool HTCOM::isBeep()
+{
+    if (toBeep) {
+        toBeep = false;
+        return true;
+    }
+    return false;
 }
 
 void HTCOM::addTestModule()

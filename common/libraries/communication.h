@@ -56,7 +56,8 @@ enum COMMANDS
     MID_ERROR = 0x0300,
     MID_STATE = 0x0400,
     MID_STRIKE = 0x0500,
-    MID_MODULEINIT = 0x0600
+    MID_MODULEINIT = 0x0600,
+    MID_BEEP = 0x0010
 };
 
 enum PARAMETER
@@ -92,6 +93,7 @@ public:
 
     void setGameDifficulty(byte dif);
     void sendModuleID();
+    void sendBeep();
 
 // Controller only functions
 #ifndef HI_MODULE
@@ -117,6 +119,7 @@ public:
     byte installedModuleCount();
     byte getInstalledModuleID(byte idx);
 
+    bool isBeep();
     void addTestModule();
 
 #endif
@@ -150,7 +153,8 @@ protected:
     void addToModuleList(byte moduleID);
     void updateModule(byte moduleID, ModuleState state);
     bool isModuleState(byte moduleID, ModuleState state);
-
+    
+    bool toBeep;
     byte installedModules[MAX_INSTALLED_MODULES];
     byte stateOfModules[MAX_INSTALLED_MODULES];
 #endif

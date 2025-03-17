@@ -32,6 +32,16 @@ void initGame();
 void poll();
 void updateShiftRegister();
 void showEffekt(bool solved);
+void showNeedy();
+
+enum NeedyState
+{
+  NS_INIT,
+  NS_WAIT,
+  NS_USER
+};
+
+NeedyState state = NS_INIT;
 
 void setup()
 {
@@ -58,16 +68,82 @@ void initDisplay()
   delay(1000);
   u8x8.setPowerSave(0);
 }
-void initGame()
-{
-}
 
+unsigned long act;
 bool changed = true;
 byte activeButton;
+const unsigned long waitSec = 10;
+const unsigned long userSec = 60;
+
+void initGame()
+{
+  state = NS_INIT;
+  act = millis() + (1000 * waitSec);
+  state = NS_WAIT;
+
+  u8x8.clearDisplay();
+  changed = true;
+  game.arm();
+}
 
 void loop()
 {
   poll();
+
+  if (state == NS_WAIT)
+  {
+    if (millis() >= act)
+    {
+      changed = true;
+      state = NS_USER;
+      act = millis() + (1000L * userSec);
+    }
+  }
+  if (state == NS_USER)
+  {
+    if (millis() > act)
+    {
+      game.setStrike();
+    }
+    byte timeValue = (act - millis()) / 1000;
+    dbgOut("act: ");
+    dbgOutLn(timeValue);
+    display.showNumber(timeValue);
+    showNeedy();
+
+    if ((btr.singleClick() && (activeButton == 1)) || (btl.singleClick() && (activeButton == 0)))
+    {
+      game.setSolved();
+    }
+    if ((btr.singleClick() && (activeButton == 0)) || (btl.singleClick() && (activeButton == 1)))
+    {
+      game.setStrike();
+    }
+    if (game.isState(ModuleState::STRIKED))
+    {
+      showEffekt(false);
+      for (byte i = 0; i < 60; i++)
+      {
+        game.poll();
+        delay(50);
+      }
+      initGame();
+    }
+    if (game.isState(ModuleState::DISARMED))
+    {
+      showEffekt(true);
+      for (byte i = 0; i < 60; i++)
+      {
+        game.poll();
+        delay(50);
+      }
+      initGame();
+    }
+  }
+}
+
+void showNeedy()
+{
   if (changed)
   {
     u8x8.clearDisplay();
@@ -92,33 +168,6 @@ void loop()
     }
     changed = false;
   }
-
-  display.clear();
-  display.showNumber(-8);
-
-  if ((btr.singleClick() && (activeButton == 1)) ||  (btl.singleClick() && (activeButton == 0))) {
-    game.setSolved();
-  }
-  if ((btr.singleClick() && (activeButton == 0)) ||  (btl.singleClick() && (activeButton == 1))) {
-    game.setStrike();
-  }
-  if (game.isState(ModuleState::STRIKED))
-  {
-    showEffekt(false);
-    for (byte i = 0; i < 60; i++)
-    {
-      game.poll();
-      delay(50);
-    }
-    u8x8.drawString(2, 1, "       ");
-    changed = true;
-    game.arm();
-  }
-  if (game.isState(ModuleState::DISARMED))
-  {
-    showEffekt(true);
-  }
-
 }
 
 void poll()
@@ -135,13 +184,14 @@ void poll()
 
 void showEffekt(bool solved)
 {
-  u8x8.drawString(2, 0, "        ");
+  display.clear();
+  u8x8.clearDisplay();
   if (solved)
   {
-    u8x8.drawString(2, 1, "SOLVED");
+    u8x8.drawString(2, 1, "   SOLVED");
   }
   else
   {
-    u8x8.drawString(2, 1, "STRIKE");
+    u8x8.drawString(2, 1, "   STRIKE");
   }
 }

@@ -102,6 +102,8 @@ public:
 
     void setTestParameter();
 
+    void sendBeep();
+
 private:
     HTCOM *htcom;
 
