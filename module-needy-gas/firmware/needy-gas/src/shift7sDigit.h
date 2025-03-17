@@ -2,7 +2,7 @@
 #define SHIFT7SDIGIT_H
 #include <Arduino.h>
 
-enum Segment 
+enum Segment
 {
     A = 1,
     B = 2,
@@ -35,11 +35,11 @@ const byte Numbers[16] = {
 
 const byte MAX_DIGITS = 8;
 
-class Shift7Segment 
+class Shift7Segment
 {
-    public:
+public:
     Shift7Segment(byte num, byte data, byte clock, byte latch);
-    
+
     void showNumber(int value);
     void showNumberHex(int value);
     void showDigit(byte pos, byte value);
@@ -47,14 +47,17 @@ class Shift7Segment
     void showDot(byte pos, bool show);
     void showSegments(byte pos, byte segments);
 
-    private:
-        byte digits;
-        byte pin_data;
-        byte pin_clk;
-        byte pin_latch;
+private:
+    byte digits;
+    byte pin_data;
+    byte pin_clk;
+    byte pin_latch;
 
-        byte buf[MAX_DIGITS];
-        void updateShiftRegister();
-        byte dec2Digit (byte value);
+    byte buf[MAX_DIGITS];
+    bool dps[MAX_DIGITS];
+    void updateShiftRegister();
+    byte dec2Digit(byte value);
+    void clearDots();
+    void clearValue();
 };
 #endif

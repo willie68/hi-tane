@@ -43,14 +43,18 @@ void initGame()
 void loop()
 {
   poll();
+  display.clear();
   display.showNumber(-8);
   delay(1000);
   display.showNumber(-4);
   delay(1000);
+  display.showDot(0,true);
   display.showNumber(12);
   delay(1000);
   display.showNumber(2);
   delay(1000);
+  display.showDot(1,true);
+  display.showDot(0,false);
   display.showNumber(199);
   delay(1000);
   // put your main code here, to run repeatedly:
