@@ -70,18 +70,27 @@ void initDisplay()
 }
 
 unsigned long act;
+unsigned long stimevalue;
+bool started = false;
 bool changed = true;
 byte activeButton;
-const unsigned long waitSec = 10;
+unsigned long waitSec = 10;
 const unsigned long userSec = 60;
 
 void initGame()
 {
+#ifdef debug
+  started = true;
+#endif
   state = NS_INIT;
+  waitSec = random(180, 600);
+  dbgOutLn("wait: ");
+  dbgOutLn(waitSec);
   act = millis() + (1000 * waitSec);
   state = NS_WAIT;
 
   u8x8.clearDisplay();
+  u8x8.drawString(2, 1, "Nothing to do");
   changed = true;
   game.arm();
 }
@@ -89,9 +98,21 @@ void initGame()
 void loop()
 {
   poll();
-
+  if (!started)
+  {
+    delay(10);
+    return;
+  }
+  
   if (state == NS_WAIT)
   {
+    byte timeValue = (act - millis()) / 1000;
+    if (stimevalue != timeValue)
+    {
+      stimevalue = timeValue;
+      dbgOut("act: ");
+      dbgOutLn(timeValue);
+    }
     if (millis() >= act)
     {
       changed = true;
@@ -106,9 +127,13 @@ void loop()
       game.setStrike();
     }
     byte timeValue = (act - millis()) / 1000;
-    dbgOut("act: ");
-    dbgOutLn(timeValue);
-    display.showNumber(timeValue);
+    if (stimevalue != timeValue)
+    {
+      stimevalue = timeValue;
+      dbgOut("act: ");
+      dbgOutLn(timeValue);
+      display.showNumber(timeValue);
+    }
     showNeedy();
 
     if ((btr.singleClick() && (activeButton == 1)) || (btl.singleClick() && (activeButton == 0)))
@@ -177,6 +202,7 @@ void poll()
   {
     initGame();
     game.arm();
+    started = true;
   }
   btr.poll();
   btl.poll();
