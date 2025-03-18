@@ -4,7 +4,7 @@
 #include <avdweb_Switch.h>
 #include <U8g2lib.h>
 
-#define debug
+// #define debug
 #include <debug.h>
 #include <game.h>
 #include "indicators.h"
@@ -71,7 +71,6 @@ void initDisplay()
 
 unsigned long act;
 unsigned long stimevalue;
-bool started = false;
 bool changed = true;
 byte activeButton;
 unsigned long waitSec = 10;
@@ -79,11 +78,11 @@ const unsigned long userSec = 60;
 
 void initGame()
 {
-#ifdef debug
-  started = true;
-#endif
   state = NS_INIT;
   waitSec = random(180, 600);
+  #ifdef debug
+    waitSec = 10;
+  #endif
   dbgOutLn("wait: ");
   dbgOutLn(waitSec);
   act = millis() + (1000 * waitSec);
@@ -98,19 +97,13 @@ void initGame()
 void loop()
 {
   poll();
-  if (!started)
-  {
-    delay(10);
-    return;
-  }
-  
   if (state == NS_WAIT)
   {
     byte timeValue = (act - millis()) / 1000;
     if (stimevalue != timeValue)
     {
       stimevalue = timeValue;
-      dbgOut("act: ");
+      dbgOut(F("wait tv: "));
       dbgOutLn(timeValue);
     }
     if (millis() >= act)
@@ -118,29 +111,33 @@ void loop()
       changed = true;
       state = NS_USER;
       act = millis() + (1000L * userSec);
+      game.sendBeep();
     }
   }
   if (state == NS_USER)
   {
-    if (millis() > act)
-    {
-      game.setStrike();
-    }
     byte timeValue = (act - millis()) / 1000;
     if (stimevalue != timeValue)
     {
       stimevalue = timeValue;
-      dbgOut("act: ");
+      dbgOut(F("user tv: "));
       dbgOutLn(timeValue);
       display.showNumber(timeValue);
+      if (timeValue <=10) {
+        game.sendBeep();
+      }
     }
     showNeedy();
-
+    
     if ((btr.singleClick() && (activeButton == 1)) || (btl.singleClick() && (activeButton == 0)))
     {
       game.setSolved();
     }
     if ((btr.singleClick() && (activeButton == 0)) || (btl.singleClick() && (activeButton == 1)))
+    {
+      game.setStrike();
+    }
+    if (millis() > act)
     {
       game.setStrike();
     }
@@ -202,7 +199,6 @@ void poll()
   {
     initGame();
     game.arm();
-    started = true;
   }
   btr.poll();
   btl.poll();
