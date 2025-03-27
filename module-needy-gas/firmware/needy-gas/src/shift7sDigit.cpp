@@ -1,17 +1,24 @@
 #include <Arduino.h>
 #include <shift7sDigit.h>
 
-Shift7Segment::Shift7Segment(byte num, byte data, byte clock, byte latch)
+Shift7Segment::Shift7Segment(byte num, byte data, byte clock, byte latch, bool invert)
 {
     this->digits = num;
     this->pin_data = data;
     this->pin_clk = clock;
     this->pin_latch = latch;
+    this->inv = invert;
 
     pinMode(pin_data, OUTPUT);
     pinMode(pin_clk, OUTPUT);
     pinMode(pin_latch, OUTPUT);
     clear();
+}
+
+
+void Shift7Segment::invert(bool invert)
+{
+    inv = invert;
 }
 
 void Shift7Segment::showNumber(int value)
@@ -99,6 +106,9 @@ void Shift7Segment::updateShiftRegister()
             segs |= 0x80;
         else
             segs &= 0x7F;
+        if (inv) {
+            segs =~segs;
+        }
 
         shiftOut(pin_data, pin_clk, MSBFIRST, segs);
     }
