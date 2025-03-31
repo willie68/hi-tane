@@ -84,4 +84,4 @@ Beim Aktivieren ertönt eine Morsecode. Dieser muss dechiffriert werden und ergi
 
 Ein Bild sagt mehr als 1000 Worte, Stand derzeit März 2025
 
-![aufbau_01](H:\privat\git-sourcen\hi-tane\aufbau_01.jpg)
+![aufbau_01](./aufbau_01.jpg)
