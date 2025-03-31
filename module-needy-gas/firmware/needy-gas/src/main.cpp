@@ -4,7 +4,7 @@
 #include <avdweb_Switch.h>
 #include <U8g2lib.h>
 
-// #define debug
+#define debug
 #include <debug.h>
 #include <game.h>
 #include "indicators.h"

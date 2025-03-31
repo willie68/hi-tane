@@ -38,8 +38,8 @@ const byte MAX_DIGITS = 8;
 class Shift7Segment
 {
 public:
-    Shift7Segment(byte num, byte data, byte clock, byte latch);
-
+    Shift7Segment(byte num, byte data, byte clock, byte latch, bool invert = false);
+    void invert(bool invert);
     void showNumber(int value);
     void showNumberHex(int value);
     void showDigit(byte pos, byte value);
@@ -52,6 +52,7 @@ private:
     byte pin_data;
     byte pin_clk;
     byte pin_latch;
+    bool inv;
 
     byte buf[MAX_DIGITS];
     bool dps[MAX_DIGITS];
