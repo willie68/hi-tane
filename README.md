@@ -79,3 +79,9 @@ Bob muss ein Passwort knacken. Anhand der möglichen Buchstaben pro Stelle ergib
 ## Keypad: Höre und Antworte
 
 Beim Aktivieren ertönt eine Morsecode. Dieser muss dechiffriert werden und ergibt dann eine 5-stellige Pin. Bob muss diese dann eingeben.
+
+# Aufbau
+
+Ein Bild sagt mehr als 1000 Worte, Stand derzeit März 2025
+
+![aufbau_01](H:\privat\git-sourcen\hi-tane\aufbau_01.jpg)
