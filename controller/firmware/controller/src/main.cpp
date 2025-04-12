@@ -192,6 +192,10 @@ void loop()
   {
     calculateActGameTime();
     showTime(act);
+    if (htcom.isBeep())
+    {
+      beep();
+    }
   }
   if (htcom.hasCtrlError())
   {
@@ -516,12 +520,13 @@ void printModules()
   lcd.setCursor(0, 1);
   for (byte idx = 0; idx < mcnt; idx++)
   {
-      byte mod = htcom.getInstalledModuleID(idx);
-      if (mod != ID_NONE) {
-        strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
-        lcd.print(buffer);
-        lcd.print(F(" "));
-      }
+    byte mod = htcom.getInstalledModuleID(idx);
+    if (mod != ID_NONE)
+    {
+      strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
+      lcd.print(buffer);
+      lcd.print(F(" "));
+    }
   }
 }
 
