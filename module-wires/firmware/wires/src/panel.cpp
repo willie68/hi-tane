@@ -22,7 +22,7 @@ bool Panel::init(bool is_sn_last_digit_odd)
     // initialise all wires
     for (byte x = 0; x < PLUG_COUNT; x++)
     {
-        plugs[x] = Plug(x);
+        plugs[x] = Plug(5-x); // because i installed the field incorrectly by 180°
     }
 
     byte wirecount = 0;
