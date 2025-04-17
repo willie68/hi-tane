@@ -26,6 +26,32 @@ Shift7Segment display = Shift7Segment(2, dataPin, clockPin, latchPin);
 
 U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(/* clock=A5*/ 19, /* data=A4*/ 18);
 
+// Language Support :-)
+//#define EN
+#define DEU
+
+#ifdef EN
+// English
+const char LB_NOTHING[] = "Nothing to do";
+const char LB_VENTGAS[] = "    VENT GAS";
+const char LB_DETONATE[] = "    DETONATE";
+const char LB_YESNO[] = "YES          NO";
+const char LB_NOYES[] = "NO          YES";
+const char LB_SOLVED[] = "   SOLVED";
+const char LB_STRIKE[] = "   STRIKE";
+#endif
+#ifdef DEU
+// English
+const char LB_NOTHING[]  = "Nichts zu tun  ";
+const char LB_VENTGAS[]  = " Gas ablassen? ";
+const char LB_DETONATE[] = "  Detonieren   ";
+const char LB_YESNO[]    = "Ja         Nein";
+const char LB_NOYES[]    = "Nein         Ja";
+const char LB_SOLVED[]   = "   RICHTIG";
+const char LB_STRIKE[]   = "   FALSCH";
+#endif
+
+
 // --- forward functions
 void initDisplay();
 void initGame();
@@ -64,7 +90,9 @@ void initDisplay()
   // u8x8.setFont(u8x8_font_courB18_2x3_f);
   u8x8.setFont(u8x8_font_8x13_1x2_f);
   u8x8.clearDisplay();
+#ifndef debug
   u8x8.setFlipMode(1);
+#endif
   u8x8.setPowerSave(1);
   delay(1000);
   u8x8.setPowerSave(0);
@@ -90,7 +118,7 @@ void initGame()
   state = NS_WAIT;
 
   u8x8.clearDisplay();
-  u8x8.drawString(2, 1, "Nothing to do");
+  u8x8.drawString(2, 1, LB_NOTHING);
   changed = true;
   game.arm();
 }
@@ -173,13 +201,13 @@ void showNeedy()
     byte t = random(2);
     byte a = random(2);
     if (t == 0)
-      u8x8.drawString(0, 0, "    VENT GAS");
+      u8x8.drawString(0, 0, LB_VENTGAS);
     else
-      u8x8.drawString(0, 0, "    DETONATE");
+      u8x8.drawString(0, 0, LB_DETONATE);
     if (a == 0)
-      u8x8.drawString(0, 2, "YES          NO");
+      u8x8.drawString(0, 2, LB_YESNO);
     else
-      u8x8.drawString(0, 2, "NO          YES");
+      u8x8.drawString(0, 2, LB_NOYES);
     switch (a + t)
     {
     case 0:
@@ -211,10 +239,10 @@ void showEffekt(bool solved)
   u8x8.clearDisplay();
   if (solved)
   {
-    u8x8.drawString(2, 1, "   SOLVED");
+    u8x8.drawString(2, 1, LB_SOLVED);
   }
   else
   {
-    u8x8.drawString(2, 1, "   STRIKE");
+    u8x8.drawString(2, 1, LB_STRIKE);
   }
 }
