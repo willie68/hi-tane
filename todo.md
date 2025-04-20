@@ -11,10 +11,7 @@
 
 ## Maze
 
-
 ## Morse
-
-- der Slider ist falsch herum gelötet
 
 ## Simon Says
 

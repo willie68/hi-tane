@@ -24,8 +24,6 @@ Button btBlue = Button(LED_BLUE, BTN_BLUE, BLUE);
 Button btGreen = Button(LED_GREEN, BTN_GREEN, GREEN);
 Button btYellow = Button(LED_YELLOW, BTN_YELLOW, YELLOW);
 
-const Button color2btn[] = {btRed, btBlue, btGreen, btYellow};
-
 // color validation schema matrixes
 // no validation, simple simon says
 Color mx_si_no[4] = {RED, BLUE, GREEN, YELLOW};
@@ -77,10 +75,10 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("init simon");
-  
+
   randomSeed(analogRead(0));
   game.init();
-  
+
   initGame();
   game.arm();
 }
@@ -108,7 +106,8 @@ void initGame()
   }
   for (byte i = 0; i < STEPS_HARD; i++)
   {
-    if (i >= stepCount) {
+    if (i >= stepCount)
+    {
       steps[i] = Color::NN;
       continue;
     }
@@ -128,14 +127,14 @@ void initGame()
   }
   step = 0;
   sstep = 255;
-//  printMX(mx_hv_ne);
-//  printMX(mx_si_no);
-//  printMX(mx_hv_ne);
-//  printMX(mx_hv_oe);
-//  printMX(mx_hv_te);
-//  printMX(mx_nv_ne);
-//  printMX(mx_nv_oe);
-//  printMX(mx_nv_te);
+  //  printMX(mx_hv_ne);
+  //  printMX(mx_si_no);
+  //  printMX(mx_hv_ne);
+  //  printMX(mx_hv_oe);
+  //  printMX(mx_hv_te);
+  //  printMX(mx_nv_ne);
+  //  printMX(mx_nv_oe);
+  //  printMX(mx_nv_te);
 }
 
 Color actColor;
@@ -344,14 +343,28 @@ void calcValidationSchema()
 
 void LedOn(Color color, bool on)
 {
-  Button btn = color2btn[color];
-  btn.LED(on);
+  switch (color)
+  {
+  case Color::RED:
+    btRed.LED(on);
+    break;
+  case Color::BLUE:
+    btBlue.LED(on);
+    break;
+  case Color::GREEN:
+    btGreen.LED(on);
+    break;
+  case Color::YELLOW:
+    btYellow.LED(on);
+    break;
+  }
 }
 
 void poll()
 {
   game.poll();
-  if (game.isNewGameSettings()) {
+  if (game.isNewGameSettings())
+  {
     initGame();
   }
 
