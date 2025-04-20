@@ -56,6 +56,7 @@ void loop()
         delay(10);
         count--;
       }
+      
     }
   }
   else if (!panel.isStriken() && game.isState(ModuleState::STRIKED))

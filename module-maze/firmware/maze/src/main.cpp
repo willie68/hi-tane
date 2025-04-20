@@ -129,11 +129,11 @@ void showSmile(bool ok)
       {
         if (ok)
         {
-          matrix.setPixelColor(maze.pos2index(x, y), PX_GREEN);
+          matrix.setPixelColor(maze.pos2index(x, y, true), PX_GREEN);
         }
         else
         {
-          matrix.setPixelColor(maze.pos2index(x, y), PX_RED);
+          matrix.setPixelColor(maze.pos2index(x, y, true), PX_RED);
         }
       }
     }

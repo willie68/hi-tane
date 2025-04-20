@@ -6,13 +6,11 @@
 
 ## Drähte
 
-- Das Testfeld ist wohl falsch herum eingebaut.
 - Es gibt einen mehrfachen Strike beim falschen herausziehen
 - Beim Spielneustart wird nicht neu initialisiert
 
 ## Maze
 
-- Das Strike bzw. Solved Icon ist im einfachen Modus um 1,1 versetzt
 
 ## Morse
 

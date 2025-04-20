@@ -99,12 +99,12 @@ bool Maze::isSolved()
 
 byte Maze::pos2index(Position p)
 {
-    return pos2index(p.x, p.y);
+    return pos2index(p.x, p.y, false);
 }
 
-byte Maze::pos2index(byte x, byte y)
+byte Maze::pos2index(byte x, byte y,bool direct)
 {
-    if (difficulty == Difficulty::HARD)
+    if ((difficulty == Difficulty::HARD) || direct)
     {
         return (7 - x) + (y * 8);
     }
@@ -116,7 +116,7 @@ MarkerT Maze::getMarker()
     MarkerT mark;
     for (byte x = 0; x < 2; x++)
     {
-        mark.marker[x] = pos2index(((field.getMarker().marker[x] & 0xF0) >> 4), (field.getMarker().marker[x] & 0x0F));
+        mark.marker[x] = pos2index(((field.getMarker().marker[x] & 0xF0) >> 4), (field.getMarker().marker[x] & 0x0F), false);
     }
     return mark;
 }
@@ -254,5 +254,5 @@ void Maze::printPlayer()
     Serial.print(" / ");
     Serial.print(player.y);
     Serial.print(" = ");
-    Serial.println(pos2index(player.x, player.y));
+    Serial.println(pos2index(player.x, player.y, false));
 }

@@ -227,7 +227,7 @@ public:
   bool plS();
   bool plW();
 
-  byte pos2index(byte x, byte y);
+  byte pos2index(byte x, byte y, bool direct);
 private:
   MazeField field;
   byte startPos;
