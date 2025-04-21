@@ -77,10 +77,8 @@ void setup()
   Serial.println("init simon");
 
   randomSeed(analogRead(0));
-  game.init();
-
+  
   initGame();
-  game.arm();
 }
 
 // the actual step we're in
@@ -89,19 +87,20 @@ byte sstep;
 
 void initGame()
 {
+  game.init();
   dbgOutLn("init game");
   Difficulty dif = game.getGameDifficulty();
   dbgOut("df: ");
   dbgOutLn2(dif, HEX);
   switch (dif)
   {
-  case Difficulty::MEDIUM:
+    case Difficulty::MEDIUM:
     stepCount = STEPS_MEDIUM;
     break;
-  case Difficulty::HARD:
+    case Difficulty::HARD:
     stepCount = STEPS_HARD;
     break;
-  default:
+    default:
     stepCount = STEPS_SIMPLE;
   }
   for (byte i = 0; i < STEPS_HARD; i++)
@@ -127,14 +126,7 @@ void initGame()
   }
   step = 0;
   sstep = 255;
-  //  printMX(mx_hv_ne);
-  //  printMX(mx_si_no);
-  //  printMX(mx_hv_ne);
-  //  printMX(mx_hv_oe);
-  //  printMX(mx_hv_te);
-  //  printMX(mx_nv_ne);
-  //  printMX(mx_nv_oe);
-  //  printMX(mx_nv_te);
+  game.arm();
 }
 
 Color actColor;
@@ -161,6 +153,12 @@ void loop()
   {
   case TRUE:
     nextStep();
+    dbgOut("Step ");
+    dbgOut(step);
+    dbgOut("(");
+    dbgOut(sstep);
+    dbgOutLn(")");
+
     break;
   case FALSE:
     game.setStrike();
@@ -170,7 +168,7 @@ void loop()
     break;
     // do nothing is ok here
   }
-  game.showTime(true);
+  // game.showTime(true);
 }
 
 void showSolveEffekt()
@@ -203,7 +201,7 @@ void showSolveEffekt()
 
 void nextStep()
 {
-  if (step < stepCount)
+  if (step < (stepCount-1))
   {
     step++;
     calcValidationSchema();
@@ -261,6 +259,8 @@ TriState btnColorClicked(Color color)
   case YELLOW:
     if (btGreen.clicked() || btRed.clicked() || btBlue.clicked())
       state = FALSE;
+    break;
+  case NN:
     break;
   }
   return state;
@@ -320,7 +320,7 @@ void calcValidationSchema()
   }
   else
   {
-    dbgOutLn("snr has vocal");
+    dbgOutLn("snr has no vocal");
     switch (game.getStrikes())
     {
     case 0:

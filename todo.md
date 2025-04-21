@@ -15,10 +15,6 @@
 
 ## Simon Says
 
-- die Lichtsignale sind nicht eindeutig. Evtl. muss der aktive Ring blinken?
-
 ## Passwort
-
-- Beim Spielneustart wird nicht neu initialisiert
 
 ## Gas

@@ -61,6 +61,7 @@ bool Button::clicked()
 void Button::LED(bool on)
 {
     active = on;
+    off = false;
 }
 
 void Button::LEDOff()
