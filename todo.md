@@ -18,3 +18,5 @@
 ## Passwort
 
 ## Gas
+
+- wenn nicht aktiv sollte das modul inactive oder solved sein.
