@@ -98,7 +98,7 @@ void initDisplay()
   u8x8.setPowerSave(0);
 }
 
-unsigned long act;
+unsigned long nextTime;
 unsigned long stimevalue;
 bool changed = true;
 byte activeButton;
@@ -114,7 +114,7 @@ void initGame()
   #endif
   dbgOutLn("wait: ");
   dbgOutLn(waitSec);
-  act = millis() + (1000 * waitSec);
+  nextTime = millis() + (1000 * waitSec);
   state = NS_WAIT;
 
   u8x8.clearDisplay();
@@ -128,24 +128,24 @@ void loop()
   poll();
   if (state == NS_WAIT)
   {
-    byte timeValue = (act - millis()) / 1000;
+    byte timeValue = (nextTime - millis()) / 1000;
     if (stimevalue != timeValue)
     {
       stimevalue = timeValue;
       dbgOut(F("wait tv: "));
       dbgOutLn(timeValue);
     }
-    if (millis() >= act)
+    if (millis() >= nextTime)
     {
       changed = true;
       state = NS_USER;
-      act = millis() + (1000L * userSec);
+      nextTime = millis() + (1000L * userSec);
       game.sendBeep();
     }
   }
   if (state == NS_USER)
   {
-    byte timeValue = (act - millis()) / 1000;
+    byte timeValue = (nextTime - millis()) / 1000;
     if (stimevalue != timeValue)
     {
       stimevalue = timeValue;
@@ -166,7 +166,7 @@ void loop()
     {
       game.setStrike();
     }
-    if (millis() > act)
+    if (millis() > nextTime)
     {
       game.setStrike();
     }
