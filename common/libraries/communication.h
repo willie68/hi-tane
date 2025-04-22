@@ -28,7 +28,8 @@ enum MODULEIDS
     ID_SIMON = 47,
     ID_PASSWORD = 48,
     ID_MORSE = 49,
-    ID_MAX_MODULES = 50
+    ID_NGAS = 50,
+    ID_MAX_MODULES = 51
 };
 
 const byte MOD_OFFSET = ID_WIRES;
@@ -37,10 +38,11 @@ const char mn_mz[] PROGMEM = "mz";
 const char mn_si[] PROGMEM = "si";
 const char mn_pw[] PROGMEM = "pw";
 const char mn_mr[] PROGMEM = "mo";
-const char *const MODULE_LABELS[] PROGMEM = {mn_wr, mn_mz, mn_si, mn_pw, mn_mr};
+const char mn_ng[] PROGMEM = "ng";
+const char *const MODULE_LABELS[] PROGMEM = {mn_wr, mn_mz, mn_si, mn_pw, mn_mr, mn_ng};
 
-const byte MODULE_COUNT = 6;
-const byte modules[MODULE_COUNT] = {ID_CONTROLLER, ID_WIRES, ID_MAZE, ID_SIMON, ID_PASSWORD, ID_MORSE};
+const byte MODULE_COUNT = 7;
+const byte modules[MODULE_COUNT] = {ID_CONTROLLER, ID_WIRES, ID_MAZE, ID_SIMON, ID_PASSWORD, ID_MORSE, ID_NGAS};
 
 const char e_nn[] PROGMEM = "";
 const char e_we[] PROGMEM = "wires: invalid wire";

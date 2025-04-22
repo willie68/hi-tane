@@ -13,7 +13,7 @@
 // RGB LED
 #define LED_PIN 4
 // Game framework
-Game game(ModuleTag::WIRES, LED_PIN);
+Game game(ModuleTag::NEEDY_GAS, LED_PIN);
 
 Switch btr = Switch(6); // Button right
 Switch btl = Switch(5); // Button left
