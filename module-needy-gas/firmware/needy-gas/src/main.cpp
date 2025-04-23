@@ -4,7 +4,10 @@
 #include <avdweb_Switch.h>
 #include <U8g2lib.h>
 
-// #define debug
+// operating in Wokwi
+#define WOKWI
+#define debug
+
 #include <debug.h>
 #include <game.h>
 #include "indicators.h"
@@ -15,8 +18,13 @@
 // Game framework
 Game game(ModuleTag::NEEDY_GAS, LED_PIN);
 
+#ifdef WOKWI
+Switch btr = Switch(5); // Button right
+Switch btl = Switch(6); // Button left
+#else
 Switch btr = Switch(6); // Button right
 Switch btl = Switch(5); // Button left
+#endif
 
 const byte latchPin = 8; // latch pin of the 74HC595
 const byte clockPin = 9; // clock pin of the 74HC595
@@ -55,7 +63,6 @@ const char LB_STRIKE[] = "   FALSCH";
 void initDisplay();
 void initGame();
 void poll();
-void updateShiftRegister();
 void showEffekt(bool solved);
 void showNeedy();
 void processWait();
@@ -82,7 +89,6 @@ void setup()
   game.init();
 
   initGame();
-  game.arm();
 }
 
 void initDisplay()
@@ -91,7 +97,7 @@ void initDisplay()
   // u8x8.setFont(u8x8_font_courB18_2x3_f);
   u8x8.setFont(u8x8_font_8x13_1x2_f);
   u8x8.clearDisplay();
-#ifndef debug
+#ifndef WOKWI
   u8x8.setFlipMode(1);
 #endif
   u8x8.setPowerSave(1);
@@ -137,17 +143,21 @@ void loop()
 void processWait()
 {
   byte timeValue = (nextTime - millis()) / 1000;
+  #ifdef debug
   if (stimevalue != timeValue)
   {
     stimevalue = timeValue;
     dbgOut(F("wait tv: "));
     dbgOutLn(timeValue);
   }
+  #endif
   // show the minutes to the next question
   if (btr.singleClick() || btl.singleClick())
   {
     byte min = timeValue / 60;
     display.showNumber(min);
+    dbgOut(min);
+    dbgOutLn(F("min to wait"));
     for (byte i = 0; i < 60; i++)
     {
       game.poll();
