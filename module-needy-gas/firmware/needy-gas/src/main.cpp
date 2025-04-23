@@ -4,7 +4,7 @@
 #include <avdweb_Switch.h>
 #include <U8g2lib.h>
 
-//#define debug
+// #define debug
 #include <debug.h>
 #include <game.h>
 #include "indicators.h"
@@ -27,7 +27,7 @@ Shift7Segment display = Shift7Segment(2, dataPin, clockPin, latchPin);
 U8X8_SSD1306_128X32_UNIVISION_HW_I2C u8x8(/* clock=A5*/ 19, /* data=A4*/ 18);
 
 // Language Support :-)
-//#define EN
+// #define EN
 #define DEU
 
 #ifdef EN
@@ -42,15 +42,14 @@ const char LB_STRIKE[] = "   STRIKE";
 #endif
 #ifdef DEU
 // English
-const char LB_NOTHING[]  = "Nichts zu tun  ";
-const char LB_VENTGAS[]  = " Gas ablassen? ";
+const char LB_NOTHING[] = "Nichts zu tun  ";
+const char LB_VENTGAS[] = " Gas ablassen? ";
 const char LB_DETONATE[] = "  Detonieren   ";
-const char LB_YESNO[]    = "Ja         Nein";
-const char LB_NOYES[]    = "Nein         Ja";
-const char LB_SOLVED[]   = "   RICHTIG";
-const char LB_STRIKE[]   = "   FALSCH";
+const char LB_YESNO[] = "Ja         Nein";
+const char LB_NOYES[] = "Nein         Ja";
+const char LB_SOLVED[] = "   RICHTIG";
+const char LB_STRIKE[] = "   FALSCH";
 #endif
-
 
 // --- forward functions
 void initDisplay();
@@ -59,6 +58,8 @@ void poll();
 void updateShiftRegister();
 void showEffekt(bool solved);
 void showNeedy();
+void processWait();
+void processUser();
 
 enum NeedyState
 {
@@ -109,9 +110,9 @@ void initGame()
 {
   state = NS_INIT;
   waitSec = random(180, 600);
-  #ifdef debug
-    waitSec = 10;
-  #endif
+#ifdef debug
+  waitSec = 10;
+#endif
   dbgOutLn("wait: ");
   dbgOutLn(waitSec);
   nextTime = millis() + (1000 * waitSec);
@@ -120,76 +121,101 @@ void initGame()
   u8x8.clearDisplay();
   u8x8.drawString(2, 1, LB_NOTHING);
   changed = true;
-  game.arm();
+  game.setSolved();
+  game.setPixelColor(PX_BLUE);
 }
 
 void loop()
 {
   poll();
   if (state == NS_WAIT)
+    processWait();
+  if (state == NS_USER)
+    processUser();
+}
+
+void processWait()
+{
+  byte timeValue = (nextTime - millis()) / 1000;
+  if (stimevalue != timeValue)
   {
-    byte timeValue = (nextTime - millis()) / 1000;
-    if (stimevalue != timeValue)
+    stimevalue = timeValue;
+    dbgOut(F("wait tv: "));
+    dbgOutLn(timeValue);
+  }
+  // show the minutes to the next question
+  if (btr.singleClick() || btl.singleClick())
+  {
+    byte min = timeValue / 60;
+    display.showNumber(min);
+    for (byte i = 0; i < 60; i++)
     {
-      stimevalue = timeValue;
-      dbgOut(F("wait tv: "));
-      dbgOutLn(timeValue);
+      game.poll();
+      delay(50);
     }
-    if (millis() >= nextTime)
+    display.clear();
+  }
+  if (millis() >= nextTime)
+  {
+    changed = true;
+    state = NS_USER;
+    nextTime = millis() + (1000L * userSec);
+    game.sendBeep();
+    game.arm();
+  }
+}
+
+void processUser()
+{
+  byte timeValue = (nextTime - millis()) / 1000;
+  if (stimevalue != timeValue)
+  {
+    stimevalue = timeValue;
+    dbgOut(F("user tv: "));
+    dbgOutLn(timeValue);
+    display.showNumber(timeValue);
+    if (timeValue <= 10)
     {
-      changed = true;
-      state = NS_USER;
-      nextTime = millis() + (1000L * userSec);
       game.sendBeep();
     }
   }
-  if (state == NS_USER)
+  showNeedy();
+  // right button clicked
+  if ((btr.singleClick() && (activeButton == 1)) || (btl.singleClick() && (activeButton == 0)))
   {
-    byte timeValue = (nextTime - millis()) / 1000;
-    if (stimevalue != timeValue)
+    game.setSolved();
+  }
+  // Wrong button clicked
+  if ((btr.singleClick() && (activeButton == 0)) || (btl.singleClick() && (activeButton == 1)))
+  {
+    game.setStrike();
+  }
+  // Time over
+  if (millis() > nextTime)
+  {
+    game.setStrike();
+  }
+  // strike, new game
+  if (game.isState(ModuleState::STRIKED))
+  {
+    showEffekt(false);
+    for (byte i = 0; i < 60; i++)
     {
-      stimevalue = timeValue;
-      dbgOut(F("user tv: "));
-      dbgOutLn(timeValue);
-      display.showNumber(timeValue);
-      if (timeValue <=10) {
-        game.sendBeep();
-      }
+      game.poll();
+      delay(50);
     }
-    showNeedy();
-    
-    if ((btr.singleClick() && (activeButton == 1)) || (btl.singleClick() && (activeButton == 0)))
+    initGame();
+  }
+  // solved, new game
+  if (game.isState(ModuleState::DISARMED))
+  {
+    showEffekt(true);
+    for (byte i = 0; i < 60; i++)
     {
-      game.setSolved();
+      game.poll();
+      delay(50);
     }
-    if ((btr.singleClick() && (activeButton == 0)) || (btl.singleClick() && (activeButton == 1)))
-    {
-      game.setStrike();
-    }
-    if (millis() > nextTime)
-    {
-      game.setStrike();
-    }
-    if (game.isState(ModuleState::STRIKED))
-    {
-      showEffekt(false);
-      for (byte i = 0; i < 60; i++)
-      {
-        game.poll();
-        delay(50);
-      }
-      initGame();
-    }
-    if (game.isState(ModuleState::DISARMED))
-    {
-      showEffekt(true);
-      for (byte i = 0; i < 60; i++)
-      {
-        game.poll();
-        delay(50);
-      }
-      initGame();
-    }
+    initGame();
   }
 }
 
