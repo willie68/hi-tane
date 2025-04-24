@@ -45,16 +45,16 @@
     {
       "type": "wokwi-pushbutton",
       "id": "btn1",
-      "top": 249.5,
-      "left": 32.3,
+      "top": 259.1,
+      "left": 99.5,
       "rotate": 90,
       "attrs": { "color": "red", "xray": "1" }
     },
     {
       "type": "wokwi-pushbutton",
       "id": "btn2",
-      "top": 249.5,
-      "left": 128.3,
+      "top": 259.1,
+      "left": 22.7,
       "rotate": 90,
       "attrs": { "color": "red", "xray": "1" }
     }
@@ -99,10 +99,10 @@
     [ "nano:GND.1", "oled1:GND", "black", [ "v52.8", "h-58.1" ] ],
     [ "oled1:SCL", "nano:A5", "gold", [ "v-48", "h-9.3" ] ],
     [ "nano:A4", "oled1:SDA", "green", [ "v33.6", "h28.3" ] ],
-    [ "nano:GND.1", "btn2:2.l", "black", [ "v52.8", "h18.7", "v115.2", "h-9.4" ] ],
-    [ "btn2:2.l", "btn1:1.l", "black", [ "v-9.6", "h-77" ] ],
-    [ "btn2:1.l", "nano:5", "gray", [ "v-6.3", "h51.5", "v-240", "h-134.4" ] ],
-    [ "nano:6", "btn1:2.l", "blue", [ "v-14.4", "h133.9", "v230.4", "h-153.4" ] ]
+    [ "btn2:1.l", "nano:5", "gray", [ "v-28.8", "h124.8", "v-217.5", "h-105.1" ] ],
+    [ "nano:6", "btn1:2.l", "blue", [ "v-14.4", "h133.9", "v240", "h-86.2" ] ],
+    [ "nano:GND.1", "btn1:1.l", "black", [ "v52.8", "h18.7", "v124.8" ] ],
+    [ "btn1:1.l", "btn2:2.l", "black", [ "v-9.6", "h-95.8" ] ]
   ],
   "dependencies": {}
 }

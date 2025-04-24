@@ -5,7 +5,7 @@
 #include <U8g2lib.h>
 
 // operating in Wokwi
-//#define WOKWI
+#define WOKWI
 #define debug
 
 #include <debug.h>
@@ -18,13 +18,8 @@
 // Game framework
 Game game(ModuleTag::NEEDY_GAS, LED_PIN);
 
-#ifdef WOKWI
-Switch btr = Switch(5); // Button right
-Switch btl = Switch(6); // Button left
-#else
 Switch btr = Switch(6); // Button right
 Switch btl = Switch(5); // Button left
-#endif
 
 const byte latchPin = 8; // latch pin of the 74HC595
 const byte clockPin = 9; // clock pin of the 74HC595
@@ -117,7 +112,7 @@ void initGame()
   state = NS_INIT;
   waitSec = random(180, 600);
 #ifdef debug
-  //waitSec = 10;
+  waitSec = 10;
 #endif
   dbgOutLn("wait: ");
   dbgOutLn(waitSec);
@@ -215,6 +210,7 @@ void processUser()
       delay(50);
     }
     initGame();
+    return;
   }
   // solved, new game
   if (game.isState(ModuleState::DISARMED))
@@ -263,7 +259,6 @@ void poll()
   if (game.isNewGameSettings())
   {
     initGame();
-    game.arm();
   }
   btr.poll();
   btl.poll();
