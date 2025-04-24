@@ -26,6 +26,9 @@ void Shift7Segment::showNumber(int value)
     clearValue();
     byte pos = 0;
     word av = abs(value);
+    if (av == 0) {
+        showDigit(pos, 0);
+    }
     while (av > 0)
     {
         showDigit(pos++, byte(av % 10));

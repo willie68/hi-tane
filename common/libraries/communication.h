@@ -70,13 +70,13 @@ enum PARAMETER
 
 class HTCOM
 {
-public:
+    public:
     HTCOM(byte id);
     HTCOM();
-
+    
     void attach(byte id);
     void poll();
-
+    
     // module functions
     void sendArmed();
     void sendError(byte err);
@@ -85,41 +85,42 @@ public:
     int getGameTime();
     byte getDifficulty();
     uint16_t getIndicators();
-
+    
     bool hasNewStrikes();
     byte getStrikes();
     byte getBrightness();
     uint32_t getSerialNumber();
     bool isNewAmbSettings();
     bool isNewGameSettings();
-
+    
     void setGameDifficulty(byte dif);
     void sendModuleID();
     void sendBeep();
-
-// Controller only functions
-#ifndef HI_MODULE
+    
+    // Controller only functions
+    #ifndef HI_MODULE
     void setCtlrStrikes(byte strikes);
     void setCtrlSerialNumber(uint32_t srn);
     void setCtrlDifficulty(byte difficulty);
     void setCtrlBrightness(byte brightness);
     void setCtrlIndicators(word inds);
-
+    
     void sendCtrlHearbeat(word countdown);
     void sendCtrlGameSettings();
     void sendCtrlAmbientSettings();
     void sendCtrlInitialisation();
     void resetCtrlError();
-
+    
     bool hasCtrlError();
     byte getCtrlError();
     void setCtrlError(byte error);
-
+    
     bool isAllResolved();
-
+    
     void initModules();
     byte installedModuleCount();
     byte getInstalledModuleID(byte idx);
+    bool isModuleState(byte moduleID, ModuleState state);
 
     bool isBeep();
     void addTestModule();
@@ -154,7 +155,6 @@ protected:
 #ifndef HI_MODULE
     void addToModuleList(byte moduleID);
     void updateModule(byte moduleID, ModuleState state);
-    bool isModuleState(byte moduleID, ModuleState state);
     
     bool toBeep;
     byte installedModules[MAX_INSTALLED_MODULES];

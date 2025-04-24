@@ -525,7 +525,11 @@ void printModules()
     {
       strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
       lcd.print(buffer);
-      lcd.print(F(" "));
+      if (htcom.isModuleState(mod, ModuleState::DISARMED)) {
+        lcd.print(F(" "));
+      } else {
+        lcd.print(F("*"));
+      }
     }
   }
 }
@@ -596,6 +600,7 @@ void showTime(int act)
   if (act != saveTime)
   {
     saveTime = act;
+    printModules();
 
     htcom.sendCtrlHearbeat(act);
 

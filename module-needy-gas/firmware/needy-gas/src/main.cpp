@@ -5,7 +5,7 @@
 #include <U8g2lib.h>
 
 // operating in Wokwi
-#define WOKWI
+//#define WOKWI
 #define debug
 
 #include <debug.h>
@@ -117,7 +117,7 @@ void initGame()
   state = NS_INIT;
   waitSec = random(180, 600);
 #ifdef debug
-  waitSec = 10;
+  //waitSec = 10;
 #endif
   dbgOutLn("wait: ");
   dbgOutLn(waitSec);
@@ -142,7 +142,7 @@ void loop()
 
 void processWait()
 {
-  byte timeValue = (nextTime - millis()) / 1000;
+  word timeValue = (nextTime - millis()) / 1000;
   #ifdef debug
   if (stimevalue != timeValue)
   {
@@ -155,9 +155,9 @@ void processWait()
   if (btr.singleClick() || btl.singleClick())
   {
     byte min = timeValue / 60;
+    Serial.print(min);
+    Serial.println(F("min to wait"));
     display.showNumber(min);
-    dbgOut(min);
-    dbgOutLn(F("min to wait"));
     for (byte i = 0; i < 60; i++)
     {
       game.poll();
