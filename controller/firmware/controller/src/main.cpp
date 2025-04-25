@@ -7,7 +7,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <avr/wdt.h>
 
-#define debug
+//#define debug
 #include <debug.h>
 #include "indicators.h"
 #include "communication.h"
