@@ -75,9 +75,9 @@ void showStrikes();
 void startGame();
 void calculateActGameTime();
 void showMenu();
-void manuSetBrightness();
+void menuSetBrightness();
 void menuSetDifficulty();
-void manuSetGameTime();
+void menuSetGameTime();
 void gt2Display();
 void LED(bool on);
 bool checkResolved();
@@ -194,6 +194,7 @@ void loop()
     showTime(act);
     if (htcom.isBeep())
     {
+      dbgOutLn(F("beep from external"));
       beep();
     }
   }
@@ -326,7 +327,7 @@ void showMenu()
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
-      manuSetBrightness();
+      menuSetBrightness();
       lcd.setCursor(12, 1);
       lcd.noBlink();
     }
@@ -339,7 +340,7 @@ void showMenu()
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
-      manuSetGameTime();
+      menuSetGameTime();
       lcd.setCursor(10, 1);
       lcd.noBlink();
     }
@@ -387,7 +388,7 @@ void menuSetDifficulty()
   lcd.noBlink();
 }
 
-void manuSetBrightness()
+void menuSetBrightness()
 {
   lcd.setCursor(12, 1);
   lcd.blink();
@@ -423,7 +424,7 @@ void manuSetBrightness()
   lcd.noBlink();
 }
 
-void manuSetGameTime()
+void menuSetGameTime()
 {
   lcd.setCursor(10, 1);
   lcd.blink();
@@ -525,9 +526,12 @@ void printModules()
     {
       strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
       lcd.print(buffer);
-      if (htcom.isModuleState(mod, ModuleState::DISARMED)) {
+      if (htcom.isModuleState(mod, ModuleState::DISARMED))
+      {
         lcd.print(F(" "));
-      } else {
+      }
+      else
+      {
         lcd.print(F("*"));
       }
     }

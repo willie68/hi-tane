@@ -1,7 +1,7 @@
 #include "communication.h"
 #include <SPI.h>
 #include <mcp2515.h>
-//#define debug
+#define debug
 #include <debug.h>
 
 HTCOM::HTCOM()
@@ -56,6 +56,9 @@ void HTCOM::poll()
         {
             rcvModule = canID & 0x0000ff;
             canID = canID & 0x00ff00;
+        }
+        if (canID == MID_BEEP) {
+            rcvModule = ID_MAX_MODULES;
         }
         if (moduleID == ID_CONTROLLER)
         {
@@ -282,6 +285,7 @@ void HTCOM::sendCtrlGameSettings()
     sndCanMsg.data[5] = (snr >> 16) & 0xff;
 
     mcp2515->sendMessage(&sndCanMsg);
+    toBeep = false;
 }
 
 // here all ambient settings will be sended to all modules
