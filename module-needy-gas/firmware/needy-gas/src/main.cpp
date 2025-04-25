@@ -5,8 +5,8 @@
 #include <U8g2lib.h>
 
 // operating in Wokwi
-#define WOKWI
-#define debug
+//#define WOKWI
+//#define debug
 
 #include <debug.h>
 #include <game.h>
