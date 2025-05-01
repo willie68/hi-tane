@@ -1,6 +1,6 @@
 #include "game.h"
 #include <Adafruit_NeoPixel.h>
-// #define debug
+#define debug
 #include <debug.h>
 #include <serialnumber.h>
 #include <indicators.h>
@@ -26,6 +26,10 @@ void prevDiff(Difficulty &diff)
     }
     diff = static_cast<Difficulty>(idx);
 }
+
+#ifdef debug
+char bf1[30];
+#endif
 
 Game::Game(ModuleTag moduleTag, byte pinStatusLED)
 {
@@ -113,6 +117,9 @@ Difficulty Game::getGameDifficulty()
 
 uint32_t Game::getSerialNumber()
 {
+    uint32_t sn = htcom->getSerialNumber();
+    dbgOut(F("G snr:"));
+    dbgOutLn2(sn, HEX);
     return htcom->getSerialNumber();
 }
 
@@ -238,7 +245,18 @@ void Game::showTime(bool fast)
 
 bool Game::snrHasVocal()
 {
-    return false;
+    uint32_t sn = htcom->getSerialNumber();
+    SerialNumber serialNumber;
+    serialNumber.Set(sn);
+    #ifdef debug
+    dbgOut(F("snr:"));
+    dbgOut2(sn, HEX);
+    dbgOut(F(" "));
+    serialNumber.String(bf1);
+    dbgOutLn(bf1)
+    #endif
+
+    return serialNumber.isVocal();
 }
 
 byte Game::getStrikes()

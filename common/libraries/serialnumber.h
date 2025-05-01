@@ -2,7 +2,7 @@
 #define SERIALNUMBER_H
 
 #include <Arduino.h>
-
+//                          0123456789abcdef 
 const char ch1[] PROGMEM = "AEBCGKMPRTVX";
 const char ch2[] PROGMEM = "IUDFHJLNQSWZ";
 
@@ -38,11 +38,16 @@ public:
     }
 
     bool isVocal() {
-        return false;
+        bool vocal = false;
+        vocal = vocal || ((snr[0] & 0x0f) < 2) || (((snr[0] & 0xf0)>> 4)< 2);
+        vocal = vocal || ((snr[1] & 0x0f) < 2) || (((snr[1] & 0xf0)>> 4)< 2);
+        return vocal;
     };
+
     bool isOdd(){
         return false;
     };
+
     bool isEven() {
         return false;
     };

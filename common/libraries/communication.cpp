@@ -1,7 +1,7 @@
 #include "communication.h"
 #include <SPI.h>
 #include <mcp2515.h>
-//#define debug
+#define debug
 #include <debug.h>
 
 HTCOM::HTCOM()
@@ -93,9 +93,16 @@ void HTCOM::poll()
             inds = rcvCanMsg.data[1] + (rcvCanMsg.data[2] << 8);
             dbgOut(" ");
             dbgOut2(inds, HEX);
-            snr = uint32_t(rcvCanMsg.data[3]) + (uint32_t(rcvCanMsg.data[4]) << 8) + (uint32_t(rcvCanMsg.data[5]) << 16);
+            uint32_t sr = uint32_t(rcvCanMsg.data[3]) + (uint32_t(rcvCanMsg.data[4]) << 8) + (uint32_t(rcvCanMsg.data[5]) << 16);
             dbgOut(" ");
-            dbgOutLn2(snr, HEX);
+            dbgOut2(rcvCanMsg.data[3], HEX);
+            dbgOut(" ");
+            dbgOut2(rcvCanMsg.data[4], HEX);
+            dbgOut(" ");
+            dbgOut2(rcvCanMsg.data[5], HEX);
+            dbgOut(" ");
+            dbgOutLn2(sr, HEX);
+            this->snr = sr;
             newGameSettings = true;
             break;
 #ifndef HI_MODULE
@@ -233,9 +240,11 @@ int HTCOM::getGameTime()
 }
 
 #ifndef HI_MODULE
-void HTCOM::setCtrlSerialNumber(uint32_t srn)
+void HTCOM::setCtrlSerialNumber(uint32_t sn)
 {
-    this->snr = snr;
+    dbgOut(F("snr: "));
+    dbgOutLn2(sn, HEX);
+    this->snr = sn;
 }
 
 void HTCOM::sendCtrlHearbeat(word countdown)
@@ -283,6 +292,21 @@ void HTCOM::sendCtrlGameSettings()
     sndCanMsg.data[3] = snr & 0xff;
     sndCanMsg.data[4] = (snr >> 8) & 0xff;
     sndCanMsg.data[5] = (snr >> 16) & 0xff;
+
+    dbgOut("gs:");
+    difficulty = sndCanMsg.data[0];
+    dbgOut2(difficulty, HEX);
+    inds = sndCanMsg.data[1] + (sndCanMsg.data[2] << 8);
+    dbgOut(" ");
+    dbgOut2(inds, HEX);
+    dbgOut(" ");
+    dbgOut2(sndCanMsg.data[3], HEX);
+    dbgOut(" ");
+    dbgOut2(sndCanMsg.data[4], HEX);
+    dbgOut(" ");
+    dbgOut2(sndCanMsg.data[5], HEX);
+    dbgOut(" ");
+    dbgOutLn2(snr, HEX);
 
     mcp2515->sendMessage(&sndCanMsg);
     toBeep = false;

@@ -1,6 +1,4 @@
 #include <button.h>
-#define debug
-#include <debug.h>
 
 const byte BTN_LED_OFF = 0;
 const byte BTN_LED_INACTIVE = 20;
