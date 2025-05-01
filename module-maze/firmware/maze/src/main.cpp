@@ -50,7 +50,6 @@ void setup()
   game.init();
   initGame();
 
-  game.arm();
   matrix.setBrightness(0x20);
   matrix.show();
 }
@@ -271,7 +270,6 @@ void poll()
   if (game.isNewGameSettings())
   {
     initGame();
-    game.arm();
   }
 
   btn.poll();

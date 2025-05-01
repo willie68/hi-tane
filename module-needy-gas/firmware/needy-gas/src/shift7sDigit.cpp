@@ -3,22 +3,22 @@
 
 Shift7Segment::Shift7Segment(byte num, byte data, byte clock, byte latch, bool invert)
 {
-    this->digits = num;
-    this->pin_data = data;
-    this->pin_clk = clock;
-    this->pin_latch = latch;
-    this->inv = invert;
+    this->m_digits = num;
+    this->m_pin_data = data;
+    this->m_pin_clk = clock;
+    this->m_pin_latch = latch;
+    this->m_inv = invert;
 
-    pinMode(pin_data, OUTPUT);
-    pinMode(pin_clk, OUTPUT);
-    pinMode(pin_latch, OUTPUT);
+    pinMode(m_pin_data, OUTPUT);
+    pinMode(m_pin_clk, OUTPUT);
+    pinMode(m_pin_latch, OUTPUT);
     clear();
 }
 
 
 void Shift7Segment::invert(bool invert)
 {
-    inv = invert;
+    m_inv = invert;
 }
 
 void Shift7Segment::showNumber(int value)
@@ -57,7 +57,7 @@ void Shift7Segment::showNumberHex(int value)
 void Shift7Segment::showDigit(byte pos, byte value)
 {
     if (pos < MAX_DIGITS)
-        buf[pos] = dec2Digit(value);
+    m_buf[pos] = dec2Digit(value);
 };
 
 byte Shift7Segment::dec2Digit(byte value)
@@ -76,44 +76,44 @@ void Shift7Segment::clear()
 
 void Shift7Segment::clearValue()
 {
-    for (byte x = 0; x < digits; x++)
-        buf[x] = 0x00;
+    for (byte x = 0; x < m_digits; x++)
+    m_buf[x] = 0x00;
 };
 
 void Shift7Segment::clearDots()
 {
-    for (byte x = 0; x < digits; x++)
-        dps[x] = false;
+    for (byte x = 0; x < m_digits; x++)
+        m_dps[x] = false;
 };
 
 void Shift7Segment::showDot(byte pos, bool show)
 {
-    dps[pos] = show;
+    m_dps[pos] = show;
     updateShiftRegister();
 };
 
 void Shift7Segment::showSegments(byte pos, byte segments)
 {
-    buf[pos] = segments;
+    m_buf[pos] = segments;
     updateShiftRegister();
 };
 
 void Shift7Segment::updateShiftRegister()
 {
     byte segs = 0;
-    digitalWrite(pin_latch, LOW);
-    for (byte x = 0; x < digits; x++)
+    digitalWrite(m_pin_latch, LOW);
+    for (byte x = 0; x < m_digits; x++)
     {
-        segs = buf[x];
-        if (dps[x])
+        segs = m_buf[x];
+        if (m_dps[x])
             segs |= 0x80;
         else
             segs &= 0x7F;
-        if (inv) {
+        if (m_inv) {
             segs =~segs;
         }
 
-        shiftOut(pin_data, pin_clk, MSBFIRST, segs);
+        shiftOut(m_pin_data, m_pin_clk, MSBFIRST, segs);
     }
-    digitalWrite(pin_latch, HIGH);
+    digitalWrite(m_pin_latch, HIGH);
 }

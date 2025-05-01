@@ -229,13 +229,13 @@ public:
 
   byte pos2index(byte x, byte y, bool direct);
 private:
-  MazeField field;
-  byte startPos;
-  byte endPos;
+  MazeField m_field;
+  byte m_startPos;
+  byte m_endPos;
 
-  Position player, goal;
+  Position m_player, m_goal;
 
-  Difficulty difficulty;
+  Difficulty m_difficulty;
 
 
   byte getDistance();

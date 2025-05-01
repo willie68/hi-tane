@@ -9,28 +9,28 @@ const byte PLUG_INVALID = 255;
 
 Panel::Panel()
 {
-    plugs = NULL;
+    m_plugs = NULL;
 };
 
 bool Panel::init(bool is_sn_last_digit_odd)
 {
-    sn_last_digit_odd = is_sn_last_digit_odd;
-    if (plugs == NULL)
+    m_sn_last_digit_odd = is_sn_last_digit_odd;
+    if (m_plugs == NULL)
     {
-        plugs = (struct Plug *)malloc(PLUG_COUNT * sizeof(Plug));
+        m_plugs = (struct Plug *)malloc(PLUG_COUNT * sizeof(Plug));
     }
     // initialise all wires
     for (byte x = 0; x < PLUG_COUNT; x++)
     {
-        plugs[x] = Plug(6-x); // because i installed the field incorrectly by 180°
+        m_plugs[x] = Plug(6-x); // because i installed the field incorrectly by 180°
     }
 
     byte wirecount = 0;
     for (byte x = 0; x < PLUG_COUNT; x++)
     {
-        if (plugs[x].hasWire())
+        if (m_plugs[x].hasWire())
         {
-            plugs[x].number = wirecount;
+            m_plugs[x].m_number = wirecount;
             wirecount++;
         }
     }
@@ -43,30 +43,30 @@ bool Panel::init(bool is_sn_last_digit_odd)
         return false;
     }
 
-    defusePlug = PLUG_INVALID;
+    m_defusePlug = PLUG_INVALID;
 
     // evaluating the plug to unplug
     switch (wirecount)
     {
     case 3:
-        defusePlug = get3WireDefusePlug();
+        m_defusePlug = get3WireDefusePlug();
         Serial.print(F("3 wire "));
         break;
     case 4:
-        defusePlug = get4WireDefusePlug();
+        m_defusePlug = get4WireDefusePlug();
         Serial.print(F("4 wire "));
         break;
     case 5:
-        defusePlug = get5WireDefusePlug();
+        m_defusePlug = get5WireDefusePlug();
         Serial.print(F("5 wire "));
         break;
     case 6:
-        defusePlug = get6WireDefusePlug();
+        m_defusePlug = get6WireDefusePlug();
         Serial.print(F("6 wire "));
         break;
     };
     Serial.print(F("defuse plug: "));
-    Serial.println(defusePlug);
+    Serial.println(m_defusePlug);
     return true;
 }
 
@@ -89,7 +89,7 @@ byte Panel::get3WireDefusePlug()
 
 byte Panel::get4WireDefusePlug()
 {
-    if ((countColor(WIRECOLORS::RED) > 1) && sn_last_digit_odd)
+    if ((countColor(WIRECOLORS::RED) > 1) && m_sn_last_digit_odd)
     {
         return getLastPlugOfColor(WIRECOLORS::RED);
     }
@@ -110,7 +110,7 @@ byte Panel::get4WireDefusePlug()
 
 byte Panel::get5WireDefusePlug()
 {
-    if ((isLastColor(WIRECOLORS::BLACK) && sn_last_digit_odd))
+    if ((isLastColor(WIRECOLORS::BLACK) && m_sn_last_digit_odd))
     {
         return getPlug(4);
     }
@@ -127,7 +127,7 @@ byte Panel::get5WireDefusePlug()
 
 byte Panel::get6WireDefusePlug()
 {
-    if ((countColor(WIRECOLORS::YELLOW) == 0) && sn_last_digit_odd)
+    if ((countColor(WIRECOLORS::YELLOW) == 0) && m_sn_last_digit_odd)
     {
         return getPlug(3);
     }
@@ -147,7 +147,7 @@ byte Panel::getPlug(byte position)
     byte count = 0;
     for (byte x = 0; x < PLUG_COUNT; x++)
     {
-        if (plugs[x].hasWire())
+        if (m_plugs[x].hasWire())
         {
             count++;
             if (count == position)
@@ -163,7 +163,7 @@ byte Panel::getLastPlug()
 {
     for (byte x = PLUG_COUNT; x > 0; x--)
     {
-        if (plugs[x - 1].hasWire())
+        if (m_plugs[x - 1].hasWire())
         {
             return x - 1;
         }
@@ -175,7 +175,7 @@ byte Panel::getLastPlugOfColor(WIRECOLORS color)
 {
     for (byte x = PLUG_COUNT; x > 0; x--)
     {
-        if (plugs[x - 1].hasWire() && (plugs[x - 1].initial().color == color))
+        if (m_plugs[x - 1].hasWire() && (m_plugs[x - 1].initial().color == color))
         {
             return x - 1;
         }
@@ -190,7 +190,7 @@ bool Panel::isLastColor(WIRECOLORS color)
     {
         return false;
     }
-    return plugs[pidx].actual().color == color;
+    return m_plugs[pidx].actual().color == color;
 }
 
 byte Panel::countColor(WIRECOLORS color)
@@ -198,7 +198,7 @@ byte Panel::countColor(WIRECOLORS color)
     byte count = 0;
     for (byte x = 0; x < PLUG_COUNT; x++)
     {
-        if (plugs[x].initial().color == color)
+        if (m_plugs[x].initial().color == color)
         {
             count++;
         }
@@ -208,7 +208,7 @@ byte Panel::countColor(WIRECOLORS color)
 
 bool Panel::isDisarmed()
 {
-    if ((defusePlug < PLUG_INVALID) && !plugs[defusePlug].actualHasWire())
+    if ((m_defusePlug < PLUG_INVALID) && !m_plugs[m_defusePlug].actualHasWire())
     {
         return true;
     }
@@ -218,8 +218,8 @@ bool Panel::isDisarmed()
 bool Panel::isStriken()
 {
     for(byte x = 0; x < PLUG_COUNT; x++) {
-        if (plugs[x].hasWire() && x != defusePlug) {
-            if (!plugs[x].actualHasWire()) {
+        if (m_plugs[x].hasWire() && x != m_defusePlug) {
+            if (!m_plugs[x].actualHasWire()) {
                 return true;
             }
         }
@@ -231,8 +231,8 @@ void Panel::printPlugs() {
     for (byte x = 0; x < PLUG_COUNT; x++)
     {
         Serial.print(x);
-        plugs[x].hasWire() ? Serial.print("* ") : Serial.print("  ");
-        Serial.print(WireNames[plugs[x].actual().color]);
+        m_plugs[x].hasWire() ? Serial.print("* ") : Serial.print("  ");
+        Serial.print(WireNames[m_plugs[x].actual().color]);
         Serial.println();
     }
 }

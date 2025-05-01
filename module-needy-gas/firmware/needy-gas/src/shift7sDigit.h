@@ -48,14 +48,14 @@ public:
     void showSegments(byte pos, byte segments);
 
 private:
-    byte digits;
-    byte pin_data;
-    byte pin_clk;
-    byte pin_latch;
-    bool inv;
+    byte m_digits;
+    byte m_pin_data;
+    byte m_pin_clk;
+    byte m_pin_latch;
+    bool m_inv;
 
-    byte buf[MAX_DIGITS];
-    bool dps[MAX_DIGITS];
+    byte m_buf[MAX_DIGITS];
+    bool m_dps[MAX_DIGITS];
     void updateShiftRegister();
     byte dec2Digit(byte value);
     void clearDots();

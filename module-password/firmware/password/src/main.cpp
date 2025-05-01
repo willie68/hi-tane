@@ -49,6 +49,8 @@ void setup()
 
   randomSeed(analogRead(0));
 
+  game.init();
+
   initGame();
 }
 
@@ -67,8 +69,6 @@ void initDisplay()
 
 void initGame()
 {
-  game.init();
-
   // game.setGameDifficulty(Difficulty::HARD);
   byte wd = random(PWD_COUNT);
   dbgOutLn("init game");

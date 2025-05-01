@@ -16,9 +16,9 @@ public:
     void printPlugs();
 
 private:
-    bool sn_last_digit_odd;
-    Plug *plugs;
-    byte defusePlug;
+    bool m_sn_last_digit_odd;
+    Plug *m_plugs;
+    byte m_defusePlug;
 
     byte get3WireDefusePlug();
     byte get4WireDefusePlug();

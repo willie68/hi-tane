@@ -7,7 +7,7 @@
 class Plug
 {
 public:
-    byte number;
+    byte m_number;
     Plug(byte pin);
 
     bool hasWire();
@@ -19,9 +19,9 @@ public:
     int getValue();
 
 private:
-    byte pin;
-    Wire installed;
-    int value;
+    byte m_pin;
+    Wire m_installed;
+    int m_value;
 };
 
 #endif

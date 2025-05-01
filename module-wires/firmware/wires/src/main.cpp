@@ -26,7 +26,6 @@ void setup()
   game.init();
 
   initGame();
-  game.arm();
 }
 
 void loop()
@@ -34,7 +33,6 @@ void loop()
   game.poll();
   if (game.isNewGameSettings()) {
     initGame();
-    game.arm();
   }
   if (game.isState(ModuleState::ARMED))
   {
@@ -84,5 +82,6 @@ void initGame()
     }
   }
   panel.printPlugs();
+  game.arm();
 }
 

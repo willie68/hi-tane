@@ -48,11 +48,11 @@ Maze::Maze()
 
 bool Maze::init(Difficulty difficulty)
 {
-    this->difficulty = difficulty;
+    this->m_difficulty = difficulty;
     randomSeed(analogRead(0));
     byte idx = random(DEF_COUNT);
-    field = MazeField();
-    field.load(difficulty, idx);
+    m_field = MazeField();
+    m_field.load(difficulty, idx);
 
     byte distance = 0;
     byte minDist = 8;
@@ -69,10 +69,10 @@ bool Maze::init(Difficulty difficulty)
     }
     while ((distance >= maxDist) || (distance < minDist))
     {
-        player.x = random(0, field.getDim());
-        player.y = random(0, field.getDim());
-        goal.x = random(0, field.getDim());
-        goal.y = random(0, field.getDim());
+        m_player.x = random(0, m_field.getDim());
+        m_player.y = random(0, m_field.getDim());
+        m_goal.x = random(0, m_field.getDim());
+        m_goal.y = random(0, m_field.getDim());
         distance = getDistance();
     }
     dbgOut(F("maze:"));
@@ -80,13 +80,13 @@ bool Maze::init(Difficulty difficulty)
     dbgOut(":");
     dbgOutLn(idx);
     dbgOut(F("player:"));
-    dbgOut(player.x);
+    dbgOut(m_player.x);
     dbgOut(":");
-    dbgOutLn(player.y);
+    dbgOutLn(m_player.y);
     dbgOut(F("goal:"));
-    dbgOut(goal.x);
+    dbgOut(m_goal.x);
     dbgOut(":");
-    dbgOutLn(goal.y);
+    dbgOutLn(m_goal.y);
     dbgOut(F("dist:"));
     dbgOutLn(distance);
     return true;
@@ -94,7 +94,7 @@ bool Maze::init(Difficulty difficulty)
 
 bool Maze::isSolved()
 {
-    return ((player.x == goal.x) && (player.y == goal.y));
+    return ((m_player.x == m_goal.x) && (m_player.y == m_goal.y));
 }
 
 byte Maze::pos2index(Position p)
@@ -104,7 +104,7 @@ byte Maze::pos2index(Position p)
 
 byte Maze::pos2index(byte x, byte y,bool direct)
 {
-    if ((difficulty == Difficulty::HARD) || direct)
+    if ((m_difficulty == Difficulty::HARD) || direct)
     {
         return (7 - x) + (y * 8);
     }
@@ -116,26 +116,26 @@ MarkerT Maze::getMarker()
     MarkerT mark;
     for (byte x = 0; x < 2; x++)
     {
-        mark.marker[x] = pos2index(((field.getMarker().marker[x] & 0xF0) >> 4), (field.getMarker().marker[x] & 0x0F), false);
+        mark.marker[x] = pos2index(((m_field.getMarker().marker[x] & 0xF0) >> 4), (m_field.getMarker().marker[x] & 0x0F), false);
     }
     return mark;
 }
 
 byte Maze::getPlayer()
 {
-    return pos2index(player);
+    return pos2index(m_player);
 }
 
 byte Maze::getGoal()
 {
-    return pos2index(goal);
+    return pos2index(m_goal);
 }
 
 byte Maze::getDistance()
 {
 
-    byte x = player.x;
-    byte y = player.y;
+    byte x = m_player.x;
+    byte y = m_player.y;
     byte dist = 0;
 
     while (!recurDist(x, y, 0, &dist))
@@ -146,12 +146,12 @@ byte Maze::getDistance()
 
 bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
 {
-    if ((x == goal.x) && (y == goal.y))
+    if ((x == m_goal.x) && (y == m_goal.y))
     {
         return true;
     }
     bool found = false;
-    byte value = field.getValue(x, y);
+    byte value = m_field.getValue(x, y);
     if (((value & N) == 0) && (dir != S))
     {
         found = recurDist(x, y - 1, N, dist);
@@ -193,9 +193,9 @@ bool Maze::recurDist(byte x, byte y, byte dir, byte *dist)
 
 bool Maze::plN()
 {
-    if ((player.y > 0) && (field.getValue(player.x, player.y) & N) == 0)
+    if ((m_player.y > 0) && (m_field.getValue(m_player.x, m_player.y) & N) == 0)
     {
-        player.y--;
+        m_player.y--;
         printPlayer();
         return false;
     }
@@ -207,9 +207,9 @@ bool Maze::plN()
 
 bool Maze::plE()
 {
-    if ((player.x < (field.getDim() - 1)) && (field.getValue(player.x, player.y) & E) == 0)
+    if ((m_player.x < (m_field.getDim() - 1)) && (m_field.getValue(m_player.x, m_player.y) & E) == 0)
     {
-        player.x++;
+        m_player.x++;
         printPlayer();
         return false;
     }
@@ -221,9 +221,9 @@ bool Maze::plE()
 
 bool Maze::plS()
 {
-    if ((player.y < (field.getDim() - 1)) && (field.getValue(player.x, player.y) & S) == 0)
+    if ((m_player.y < (m_field.getDim() - 1)) && (m_field.getValue(m_player.x, m_player.y) & S) == 0)
     {
-        player.y++;
+        m_player.y++;
         printPlayer();
         return false;
     }
@@ -235,9 +235,9 @@ bool Maze::plS()
 
 bool Maze::plW()
 {
-    if ((player.x > 0) && (field.getValue(player.x, player.y) & W) == 0)
+    if ((m_player.x > 0) && (m_field.getValue(m_player.x, m_player.y) & W) == 0)
     {
-        player.x--;
+        m_player.x--;
         printPlayer();
         return false;
     }
@@ -250,9 +250,9 @@ bool Maze::plW()
 void Maze::printPlayer()
 {
     Serial.print("ply: ");
-    Serial.print(player.x);
+    Serial.print(m_player.x);
     Serial.print(" / ");
-    Serial.print(player.y);
+    Serial.print(m_player.y);
     Serial.print(" = ");
-    Serial.println(pos2index(player.x, player.y, false));
+    Serial.println(pos2index(m_player.x, m_player.y, false));
 }
