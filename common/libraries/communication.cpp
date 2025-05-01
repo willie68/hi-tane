@@ -10,27 +10,27 @@ HTCOM::HTCOM()
 
 HTCOM::HTCOM(uint8_t id)
 {
-    moduleID = id;
+    m_moduleID = id;
 }
 
 void HTCOM::attach(uint8_t id)
 {
-    mcp2515 = new MCP2515(CS_PIN);
-    gametime = 3600;
-    moduleID = id;
+    m_mcp2515 = new MCP2515(CS_PIN);
+    m_gametime = 3600;
+    m_moduleID = id;
 #ifndef HI_MODULE
     resetCtrlError();
     initModules();
 #endif
-    newAmbSettings = false;
-    newGameSettings = false;
-    newStrike = false;
-    strikes = 0;
-    brightness = DEFAULT_BRIGHTNESS;
+    m_newAmbSettings = false;
+    m_newGameSettings = false;
+    m_newStrike = false;
+    m_strikes = 0;
+    m_brightness = DEFAULT_BRIGHTNESS;
 
-    mcp2515->reset();
-    mcp2515->setBitrate(CAN_500KBPS);
-    mcp2515->setNormalMode();
+    m_mcp2515->reset();
+    m_mcp2515->setBitrate(CAN_500KBPS);
+    m_mcp2515->setNormalMode();
 }
 
 #ifndef HI_MODULE
@@ -38,17 +38,17 @@ void HTCOM::initModules()
 {
     for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
     {
-        installedModules[x] = 0;
-        stateOfModules[x] = ModuleState::UNKNOWN;
+        m_installedModules[x] = 0;
+        m_stateOfModules[x] = ModuleState::UNKNOWN;
     }
 }
 #endif
 
 void HTCOM::poll()
 {
-    if (mcp2515->readMessage(&rcvCanMsg) == MCP2515::ERROR_OK)
+    if (m_mcp2515->readMessage(&m_rcvCanMsg) == MCP2515::ERROR_OK)
     {
-        unsigned long canID = rcvCanMsg.can_id;
+        unsigned long canID = m_rcvCanMsg.can_id;
         dbgOut(F("msg: 0x"));
         dbgOutLn2(canID, HEX);
         byte rcvModule = ID_CONTROLLER;
@@ -57,10 +57,11 @@ void HTCOM::poll()
             rcvModule = canID & 0x0000ff;
             canID = canID & 0x00ff00;
         }
-        if (canID == MID_BEEP) {
+        if (canID == MID_BEEP)
+        {
             rcvModule = ID_MAX_MODULES;
         }
-        if (moduleID == ID_CONTROLLER)
+        if (m_moduleID == ID_CONTROLLER)
         {
             // the controller is only interested in non controller messages
             if (rcvModule == ID_CONTROLLER)
@@ -78,36 +79,45 @@ void HTCOM::poll()
             sendModuleID();
             break;
         case MID_HEARTBEAT:
-            dbgOutLn("hb");
-            gametime = (rcvCanMsg.data[0] << 8) + rcvCanMsg.data[1];
-            strikes = rcvCanMsg.data[2];
+            dbgOut(F("hb: "));
+            m_gametime = (m_rcvCanMsg.data[0] << 8) + m_rcvCanMsg.data[1];
+            {
+                byte strikes = m_rcvCanMsg.data[2];
+                if (strikes != m_strikes) {
+                    m_newStrike = true;
+                }
+                m_strikes = strikes;
+            }
+            dbgOut(m_gametime);
+            dbgOut(F(" s:"));
+            dbgOutLn(m_strikes);
             break;
         case MID_AMBIENTSETTINGS:
-            brightness = (rcvCanMsg.data[0]);
-            newAmbSettings = true;
+            m_brightness = (m_rcvCanMsg.data[0]);
+            m_newAmbSettings = true;
             break;
         case MID_GAMESETTINGS:
+            m_difficulty = m_rcvCanMsg.data[0];
+            m_inds = m_rcvCanMsg.data[1] + (m_rcvCanMsg.data[2] << 8);
+            m_snr = uint32_t(m_rcvCanMsg.data[3]) + (uint32_t(m_rcvCanMsg.data[4]) << 8) + (uint32_t(m_rcvCanMsg.data[5]) << 16);
+            m_newGameSettings = true;
+
             dbgOut("gs:");
-            difficulty = rcvCanMsg.data[0];
-            dbgOut2(difficulty, HEX);
-            inds = rcvCanMsg.data[1] + (rcvCanMsg.data[2] << 8);
+            dbgOut2(m_difficulty, HEX);
             dbgOut(" ");
-            dbgOut2(inds, HEX);
-            uint32_t sr = uint32_t(rcvCanMsg.data[3]) + (uint32_t(rcvCanMsg.data[4]) << 8) + (uint32_t(rcvCanMsg.data[5]) << 16);
+            dbgOut2(m_inds, HEX);
             dbgOut(" ");
-            dbgOut2(rcvCanMsg.data[3], HEX);
+            dbgOut2(m_rcvCanMsg.data[3], HEX);
             dbgOut(" ");
-            dbgOut2(rcvCanMsg.data[4], HEX);
+            dbgOut2(m_rcvCanMsg.data[4], HEX);
             dbgOut(" ");
-            dbgOut2(rcvCanMsg.data[5], HEX);
+            dbgOut2(m_rcvCanMsg.data[5], HEX);
             dbgOut(" ");
-            dbgOutLn2(sr, HEX);
-            this->snr = sr;
-            newGameSettings = true;
+            dbgOutLn2(m_snr, HEX);
             break;
 #ifndef HI_MODULE
         case MID_ERROR:
-            setCtrlError(rcvCanMsg.data[0]);
+            setCtrlError(m_rcvCanMsg.data[0]);
             break;
         case MID_MODULEINIT:
             dbgOut(F("mint: "));
@@ -118,62 +128,62 @@ void HTCOM::poll()
             dbgOut(F("mst: "));
             dbgOut2(rcvModule, DEC);
             dbgOut(F(":"));
-            dbgOutLn2(rcvCanMsg.data[1], DEC);
-            updateModule(rcvModule, static_cast<ModuleState>(rcvCanMsg.data[1]));
+            dbgOutLn2(m_rcvCanMsg.data[1], DEC);
+            updateModule(rcvModule, static_cast<ModuleState>(m_rcvCanMsg.data[1]));
             break;
         case MID_BEEP:
             dbgOutLn(F("beep"));
-            toBeep = true;
+            m_toBeep = true;
             break;
-#endif
         case MID_STRIKE:
             dbgOutLn(F("s"));
-            strikes++;
-            newStrike = true;
+            m_strikes++;
+            m_newStrike = true;
             break;
+#endif
         default:
             dbgOut(F("unk: "));
             dbgOut2(rcvModule, DEC);
             dbgOut(":");
-            dbgOutLn2(rcvCanMsg.can_id, DEC);
+            dbgOutLn2(m_rcvCanMsg.can_id, DEC);
             break;
         };
     }
 #ifndef HI_MODULE
     // check if there is an message incoming
-    if (hasError && (millis() > errTime))
+    if (m_hasError && (millis() > m_errTime))
         resetCtrlError();
 #endif
 }
 
 uint32_t HTCOM::getSerialNumber()
 {
-    return snr;
+    return m_snr;
 }
 
 word HTCOM::getIndicators()
 {
-    return inds;
+    return m_inds;
 }
 
 void HTCOM::sendModuleID()
 {
-    byte dl = moduleID - ID_CONTROLLER;
-    delay(dl* 100);
-    sndCanMsg.can_id = MID_MODULEINIT + moduleID;
-    sndCanMsg.can_dlc = 1;
-    sndCanMsg.data[0] = moduleID;
+    byte dl = m_moduleID - ID_CONTROLLER;
+    delay(dl * 100);
+    m_sndCanMsg.can_id = MID_MODULEINIT + m_moduleID;
+    m_sndCanMsg.can_dlc = 1;
+    m_sndCanMsg.data[0] = m_moduleID;
 
-    mcp2515->sendMessage(&sndCanMsg);
+    m_mcp2515->sendMessage(&m_sndCanMsg);
 }
 
 void HTCOM::sendError(byte err)
 {
-    sndCanMsg.can_id = MID_ERROR + moduleID;
-    sndCanMsg.can_dlc = 1;
-    sndCanMsg.data[0] = err;
+    m_sndCanMsg.can_id = MID_ERROR + m_moduleID;
+    m_sndCanMsg.can_dlc = 1;
+    m_sndCanMsg.data[0] = err;
 
-    mcp2515->sendMessage(&sndCanMsg);
+    m_mcp2515->sendMessage(&m_sndCanMsg);
 }
 
 void HTCOM::sendArmed()
@@ -188,55 +198,55 @@ void HTCOM::sendDisarmed()
 
 void HTCOM::sendModuleState(ModuleState state)
 {
-    sndCanMsg.can_id = MID_STATE + moduleID;
-    sndCanMsg.can_dlc = 2;
-    sndCanMsg.data[0] = moduleID;
-    sndCanMsg.data[1] = state;
+    m_sndCanMsg.can_id = MID_STATE + m_moduleID;
+    m_sndCanMsg.can_dlc = 2;
+    m_sndCanMsg.data[0] = m_moduleID;
+    m_sndCanMsg.data[1] = state;
 
-    mcp2515->sendMessage(&sndCanMsg);
+    m_mcp2515->sendMessage(&m_sndCanMsg);
 }
 
 void HTCOM::sendStrike()
 {
-    sndCanMsg.can_id = MID_STRIKE + moduleID;
-    sndCanMsg.can_dlc = 1;
-    sndCanMsg.data[0] = moduleID;
+    m_sndCanMsg.can_id = MID_STRIKE + m_moduleID;
+    m_sndCanMsg.can_dlc = 1;
+    m_sndCanMsg.data[0] = m_moduleID;
 
-    mcp2515->sendMessage(&sndCanMsg);
+    m_mcp2515->sendMessage(&m_sndCanMsg);
 }
 
 void HTCOM::sendBeep()
 {
-    sndCanMsg.can_id = MID_BEEP;
-    sndCanMsg.can_dlc = 1;
-    sndCanMsg.data[0] = moduleID;
+    m_sndCanMsg.can_id = MID_BEEP;
+    m_sndCanMsg.can_dlc = 1;
+    m_sndCanMsg.data[0] = m_moduleID;
 
-    mcp2515->sendMessage(&sndCanMsg);
+    m_mcp2515->sendMessage(&m_sndCanMsg);
 }
 
 byte HTCOM::getBrightness()
 {
-    return this->brightness;
+    return m_brightness;
 }
 
 byte HTCOM::getStrikes()
 {
-    return this->strikes;
+    return m_strikes;
 }
 
 bool HTCOM::hasNewStrikes()
 {
-    if (newStrike)
+    if (m_newStrike)
     {
-        newStrike = false;
+        m_newStrike = false;
         return true;
     }
-    return true;
+    return false;
 }
 
 int HTCOM::getGameTime()
 {
-    return gametime;
+    return m_gametime;
 }
 
 #ifndef HI_MODULE
@@ -244,116 +254,116 @@ void HTCOM::setCtrlSerialNumber(uint32_t sn)
 {
     dbgOut(F("snr: "));
     dbgOutLn2(sn, HEX);
-    this->snr = sn;
+    m_snr = sn;
 }
 
 void HTCOM::sendCtrlHearbeat(word countdown)
 {
-    sndCanMsg.can_id = MID_HEARTBEAT;
-    sndCanMsg.can_dlc = 3;
-    sndCanMsg.data[0] = countdown >> 8;
-    sndCanMsg.data[1] = countdown & 0x00FF;
-    sndCanMsg.data[2] = strikes;
+    m_sndCanMsg.can_id = MID_HEARTBEAT;
+    m_sndCanMsg.can_dlc = 3;
+    m_sndCanMsg.data[0] = countdown >> 8;
+    m_sndCanMsg.data[1] = countdown & 0x00FF;
+    m_sndCanMsg.data[2] = m_strikes;
 
-    mcp2515->sendMessage(&sndCanMsg);
+    m_mcp2515->sendMessage(&m_sndCanMsg);
 }
 
 void HTCOM::setCtrlIndicators(word inds)
 {
-    this->inds = inds;
+    m_inds = inds;
 }
 
 void HTCOM::setCtlrStrikes(byte strikes)
 {
-    this->strikes = strikes;
+    m_strikes = strikes;
 }
 
 void HTCOM::setCtrlDifficulty(byte difficulty)
 {
     dbgOut("df: ");
     dbgOutLn2(difficulty, HEX);
-    this->difficulty = difficulty;
+    m_difficulty = difficulty;
 }
 
 void HTCOM::setCtrlBrightness(byte brightness)
 {
-    this->brightness = brightness;
+    m_brightness = brightness;
     sendCtrlAmbientSettings();
 }
 
 // game settings will be sendet to all modules
 void HTCOM::sendCtrlGameSettings()
 {
-    sndCanMsg.can_id = MID_GAMESETTINGS;
-    sndCanMsg.can_dlc = 6;
-    sndCanMsg.data[0] = this->difficulty;
-    sndCanMsg.data[1] = inds & 0x00FF;
-    sndCanMsg.data[2] = inds >> 8;
-    sndCanMsg.data[3] = snr & 0xff;
-    sndCanMsg.data[4] = (snr >> 8) & 0xff;
-    sndCanMsg.data[5] = (snr >> 16) & 0xff;
+    m_sndCanMsg.can_id = MID_GAMESETTINGS;
+    m_sndCanMsg.can_dlc = 6;
+    m_sndCanMsg.data[0] = m_difficulty;
+    m_sndCanMsg.data[1] = m_inds & 0x00FF;
+    m_sndCanMsg.data[2] = m_inds >> 8;
+    m_sndCanMsg.data[3] = m_snr & 0xff;
+    m_sndCanMsg.data[4] = (m_snr >> 8) & 0xff;
+    m_sndCanMsg.data[5] = (m_snr >> 16) & 0xff;
 
     dbgOut("gs:");
-    difficulty = sndCanMsg.data[0];
+    byte difficulty = m_sndCanMsg.data[0];
     dbgOut2(difficulty, HEX);
-    inds = sndCanMsg.data[1] + (sndCanMsg.data[2] << 8);
+    uint16_t inds = m_sndCanMsg.data[1] + (m_sndCanMsg.data[2] << 8);
     dbgOut(" ");
     dbgOut2(inds, HEX);
     dbgOut(" ");
-    dbgOut2(sndCanMsg.data[3], HEX);
+    dbgOut2(m_sndCanMsg.data[3], HEX);
     dbgOut(" ");
-    dbgOut2(sndCanMsg.data[4], HEX);
+    dbgOut2(m_sndCanMsg.data[4], HEX);
     dbgOut(" ");
-    dbgOut2(sndCanMsg.data[5], HEX);
+    dbgOut2(m_sndCanMsg.data[5], HEX);
     dbgOut(" ");
-    dbgOutLn2(snr, HEX);
+    dbgOutLn2(m_snr, HEX);
 
-    mcp2515->sendMessage(&sndCanMsg);
-    toBeep = false;
+    m_mcp2515->sendMessage(&m_sndCanMsg);
+    m_toBeep = false;
 }
 
 // here all ambient settings will be sended to all modules
 void HTCOM::sendCtrlAmbientSettings()
 {
-    sndCanMsg.can_id = MID_AMBIENTSETTINGS;
-    sndCanMsg.can_dlc = 1;
-    sndCanMsg.data[0] = this->brightness;
+    m_sndCanMsg.can_id = MID_AMBIENTSETTINGS;
+    m_sndCanMsg.can_dlc = 1;
+    m_sndCanMsg.data[0] = m_brightness;
 
-    mcp2515->sendMessage(&sndCanMsg);
+    m_mcp2515->sendMessage(&m_sndCanMsg);
 }
 
 // this will be sended to evaluate which modules are installed.
 void HTCOM::sendCtrlInitialisation()
 {
-    sndCanMsg.can_id = MID_INITIALISATION;
-    sndCanMsg.can_dlc = 1;
-    sndCanMsg.data[0] = 0xff;
+    m_sndCanMsg.can_id = MID_INITIALISATION;
+    m_sndCanMsg.can_dlc = 1;
+    m_sndCanMsg.data[0] = 0xff;
 
-    mcp2515->sendMessage(&sndCanMsg);
+    m_mcp2515->sendMessage(&m_sndCanMsg);
 }
 
 void HTCOM::setCtrlError(byte error)
 {
-    lastError = error;
-    hasError = true;
-    errTime = millis() + 5000;
+    m_lastError = error;
+    m_hasError = true;
+    m_errTime = millis() + 5000;
 }
 
 void HTCOM::resetCtrlError()
 {
-    errTime = 0;
-    hasError = false;
-    lastError = 0;
+    m_errTime = 0;
+    m_hasError = false;
+    m_lastError = 0;
 }
 
 bool HTCOM::hasCtrlError()
 {
-    return hasError;
+    return m_hasError;
 }
 
 byte HTCOM::getCtrlError()
 {
-    return lastError;
+    return m_lastError;
 }
 
 void HTCOM::addToModuleList(byte moduleID)
@@ -361,13 +371,14 @@ void HTCOM::addToModuleList(byte moduleID)
     for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
     {
         // module already installed ?
-        if (installedModules[x] == moduleID) {
+        if (m_installedModules[x] == moduleID)
+        {
             break;
         }
-        // free space 
-        if (installedModules[x] == 0)
+        // free space
+        if (m_installedModules[x] == 0)
         {
-            installedModules[x] = moduleID;
+            m_installedModules[x] = moduleID;
             break;
         }
     }
@@ -377,11 +388,11 @@ void HTCOM::updateModule(byte moduleID, ModuleState state)
 {
     for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
     {
-        if (installedModules[x] == 0)
+        if (m_installedModules[x] == 0)
             break;
-        if (installedModules[x] == moduleID)
+        if (m_installedModules[x] == moduleID)
         {
-            stateOfModules[x] = state;
+            m_stateOfModules[x] = state;
             break;
         }
     }
@@ -391,10 +402,10 @@ bool HTCOM::isModuleState(byte moduleID, ModuleState state)
 {
     for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
     {
-        if (installedModules[x] == 0)
+        if (m_installedModules[x] == 0)
             break;
-        if (installedModules[x] == moduleID)
-            return stateOfModules[x] == (byte)state;
+        if (m_installedModules[x] == moduleID)
+            return m_stateOfModules[x] == (byte)state;
     }
     return false;
 }
@@ -403,9 +414,9 @@ bool HTCOM::isAllResolved()
 {
     for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
     {
-        if (installedModules[x] == 0)
+        if (m_installedModules[x] == 0)
             break;
-        if (stateOfModules[x] != ModuleState::DISARMED)
+        if (m_stateOfModules[x] != ModuleState::DISARMED)
             return false;
     }
     return true;
@@ -416,7 +427,7 @@ byte HTCOM::installedModuleCount()
     byte count = 0;
     for (byte x = 0; x < MAX_INSTALLED_MODULES; x++)
     {
-        if (installedModules[x] == 0)
+        if (m_installedModules[x] == 0)
             break;
         count++;
     }
@@ -429,13 +440,14 @@ byte HTCOM::getInstalledModuleID(byte idx)
     {
         return ID_NONE;
     }
-    return installedModules[idx];
+    return m_installedModules[idx];
 }
 
 bool HTCOM::isBeep()
 {
-    if (toBeep) {
-        toBeep = false;
+    if (m_toBeep)
+    {
+        m_toBeep = false;
         return true;
     }
     return false;
@@ -450,9 +462,9 @@ void HTCOM::addTestModule()
 
 bool HTCOM::isNewAmbSettings()
 {
-    if (newAmbSettings)
+    if (m_newAmbSettings)
     {
-        newAmbSettings = false;
+        m_newAmbSettings = false;
         return true;
     }
     return false;
@@ -460,9 +472,9 @@ bool HTCOM::isNewAmbSettings()
 
 bool HTCOM::isNewGameSettings()
 {
-    if (newGameSettings)
+    if (m_newGameSettings)
     {
-        newGameSettings = false;
+        m_newGameSettings = false;
         return true;
     }
     return false;
@@ -470,10 +482,10 @@ bool HTCOM::isNewGameSettings()
 
 byte HTCOM::getDifficulty()
 {
-    return difficulty;
+    return m_difficulty;
 }
 
 void HTCOM::setGameDifficulty(byte dif)
 {
-    difficulty = dif;
+    m_difficulty = dif;
 }

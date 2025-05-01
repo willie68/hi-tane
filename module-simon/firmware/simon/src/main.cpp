@@ -77,7 +77,9 @@ void setup()
   Serial.println("init simon");
 
   randomSeed(analogRead(0));
-  
+
+  game.init();
+
   initGame();
 }
 
@@ -87,20 +89,18 @@ byte sstep;
 
 void initGame()
 {
-  game.init();
+  game.setState(ModuleState::INIT);
   dbgOutLn("init game");
   Difficulty dif = game.getGameDifficulty();
-  dbgOut("df: ");
-  dbgOutLn2(dif, HEX);
   switch (dif)
   {
-    case Difficulty::MEDIUM:
+  case Difficulty::MEDIUM:
     stepCount = STEPS_MEDIUM;
     break;
-    case Difficulty::HARD:
+  case Difficulty::HARD:
     stepCount = STEPS_HARD;
     break;
-    default:
+  default:
     stepCount = STEPS_SIMPLE;
   }
   for (byte i = 0; i < STEPS_HARD; i++)
@@ -201,7 +201,7 @@ void showSolveEffekt()
 
 void nextStep()
 {
-  if (step < (stepCount-1))
+  if (step < (stepCount - 1))
   {
     step++;
     calcValidationSchema();
@@ -366,6 +366,10 @@ void poll()
   if (game.isNewGameSettings())
   {
     initGame();
+  }
+  if (game.hasNewStrikes())
+  {
+    showStep();
   }
 
   btBlue.poll();

@@ -129,36 +129,36 @@ class HTCOM
 
 protected:
     void sendModuleState(ModuleState state);
-    byte moduleID;
+    byte m_moduleID;
 
-    int gametime;
-    word inds;
+    int m_gametime;
+    word m_inds;
 
-    bool newStrike;
-    byte strikes;
-    byte difficulty;
+    bool m_newStrike;
+    byte m_strikes;
+    byte m_difficulty;
 
-    bool newAmbSettings;  // new ambient settings received
-    bool newGameSettings; // new game settings received
-    byte brightness;
+    bool m_newAmbSettings;  // new ambient settings received
+    bool m_newGameSettings; // new game settings received
+    byte m_brightness;
 
-    bool hasError;
-    byte lastError;
-    unsigned long errTime;
+    bool m_hasError;
+    byte m_lastError;
+    unsigned long m_errTime;
 
-    uint32_t snr;
+    uint32_t m_snr;
 
-    can_frame sndCanMsg;
-    can_frame rcvCanMsg;
-    MCP2515 *mcp2515;
+    can_frame m_sndCanMsg;
+    can_frame m_rcvCanMsg;
+    MCP2515 *m_mcp2515;
 
 #ifndef HI_MODULE
     void addToModuleList(byte moduleID);
     void updateModule(byte moduleID, ModuleState state);
     
-    bool toBeep;
-    byte installedModules[MAX_INSTALLED_MODULES];
-    byte stateOfModules[MAX_INSTALLED_MODULES];
+    bool m_toBeep;
+    byte m_installedModules[MAX_INSTALLED_MODULES];
+    byte m_stateOfModules[MAX_INSTALLED_MODULES];
 #endif
 };
 

@@ -77,6 +77,7 @@ public:
     void setSolved();
 
     bool snrHasVocal();
+    bool hasNewStrikes();
     byte getStrikes();
     byte getBrightness();
 
@@ -106,15 +107,15 @@ public:
     void sendBeep();
 
 private:
-    HTCOM *htcom;
+    HTCOM *m_htcom;
 
-    ModuleTag tag;
-    byte StatusLED;
-    word saveTime;
-    Adafruit_NeoPixel *pixel;
-    ModuleState state;
-    Indicators indicators;
-    byte difficulty;
-    unsigned long strikeTime;
+    ModuleTag m_tag;
+    byte m_statusLED;
+    word m_saveTime;
+    Adafruit_NeoPixel *m_pixel;
+    ModuleState m_state;
+    Indicators m_indicators;
+    byte m_difficulty;
+    unsigned long m_strikeTime;
 };
 #endif

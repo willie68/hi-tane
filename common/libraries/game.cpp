@@ -33,29 +33,31 @@ char bf1[30];
 
 Game::Game(ModuleTag moduleTag, byte pinStatusLED)
 {
-    tag = moduleTag;
-    StatusLED = pinStatusLED;
+    m_state = ModuleState::INIT;
+    m_tag = moduleTag;
+    m_statusLED = pinStatusLED;
+    m_difficulty = Difficulty::HARD;
 };
 
 Game::Game()
 {
-    state = ModuleState::INIT;
-    tag = ModuleTag::WIRES;
-    StatusLED = 4;
-    difficulty = Difficulty::HARD;
+    m_state = ModuleState::INIT;
+    m_tag = ModuleTag::WIRES;
+    m_statusLED = 4;
+    m_difficulty = Difficulty::HARD;
 };
 
 void Game::init()
 {
     pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(StatusLED, OUTPUT);
-    pixel = new Adafruit_NeoPixel(1, StatusLED, NEO_RGB + NEO_KHZ800);
-    pixel->setPixelColor(0, PX_BLACK);
-    pixel->setBrightness(127);
-    pixel->show();
+    pinMode(m_statusLED, OUTPUT);
+    m_pixel = new Adafruit_NeoPixel(1, m_statusLED, NEO_RGB + NEO_KHZ800);
+    m_pixel->setPixelColor(0, PX_BLACK);
+    m_pixel->setBrightness(127);
+    m_pixel->show();
 
-    htcom = new HTCOM();
-    htcom->attach(tag);
+    m_htcom = new HTCOM();
+    m_htcom->attach(m_tag);
 
     setState(ModuleState::INIT);
 };
@@ -65,21 +67,21 @@ void Game::setTestParameter()
     SerialNumber serialNumber;
     serialNumber.Generate();
 
-    indicators.Add(INDICATOR::CLR, false);
-    indicators.Add(INDICATOR::IND, true);
-    indicators.Add(INDICATOR::NSA, false);
+    m_indicators.Add(INDICATOR::CLR, false);
+    m_indicators.Add(INDICATOR::IND, true);
+    m_indicators.Add(INDICATOR::NSA, false);
 }
 
 bool Game::hasIndicator(INDICATOR ind, bool active)
 {
-    word inds = htcom->getIndicators();
-    indicators.Decompress(inds);
-    return indicators.hasIndicator(ind, active);
+    word inds = m_htcom->getIndicators();
+    m_indicators.Decompress(inds);
+    return m_indicators.hasIndicator(ind, active);
 };
 
 Indicators Game::getIndicators()
 {
-    return indicators;
+    return m_indicators;
 }
 
 bool Game::isSerialnumberOdd()
@@ -89,7 +91,7 @@ bool Game::isSerialnumberOdd()
 
 word Game::getGameTime()
 {
-    return htcom->getGameTime();
+    return m_htcom->getGameTime();
 };
 
 void Game::arm()
@@ -112,49 +114,46 @@ void Game::setSolved()
 
 Difficulty Game::getGameDifficulty()
 {
-    return (Difficulty)htcom->getDifficulty();
+    return (Difficulty)m_htcom->getDifficulty();
 }
 
 uint32_t Game::getSerialNumber()
-{
-    uint32_t sn = htcom->getSerialNumber();
-    dbgOut(F("G snr:"));
-    dbgOutLn2(sn, HEX);
-    return htcom->getSerialNumber();
+{   
+    return m_htcom->getSerialNumber();
 }
 
 bool Game::isGameDifficulty(Difficulty difficulty)
 {
-    return htcom->getDifficulty() == byte(difficulty);
+    return m_htcom->getDifficulty() == byte(difficulty);
 };
 
 void Game::setState(ModuleState state)
 {
 #ifdef debug
-    if (this->state != state)
+    if (m_state != state)
     {
         Serial.print(F("Module state:"));
         Serial.println(state);
     }
 #endif
-    this->state = state;
-    switch (state)
+    m_state = state;
+    switch (m_state)
     {
     case UNKNOWN:
     case INIT:
         setPixelColor(PX_BLUE);
         break;
     case ARMED:
-        htcom->sendArmed();
+        m_htcom->sendArmed();
         setPixelColor(PX_RED);
         break;
     case STRIKED:
-        htcom->sendStrike();
+        m_htcom->sendStrike();
         setPixelColor(PX_RED);
-        strikeTime = millis() + 3000;
+        m_strikeTime = millis() + 3000;
         break;
     case DISARMED:
-        htcom->sendDisarmed();
+        m_htcom->sendDisarmed();
         setPixelColor(PX_GREEN);
         break;
     }
@@ -162,28 +161,28 @@ void Game::setState(ModuleState state)
 
 bool Game::isState(ModuleState state)
 {
-    return this->state == state;
+    return m_state == state;
 };
 
 void Game::sendError(byte err)
 {
-    htcom->sendError(err);
+    m_htcom->sendError(err);
 }
 
 void Game::setPixelColor(uint32_t color)
 {
-    pixel->setPixelColor(0, color);
-    pixel->setBrightness(htcom->getBrightness() * 16);
-    pixel->show();
+    m_pixel->setPixelColor(0, color);
+    m_pixel->setBrightness(m_htcom->getBrightness() * 16);
+    m_pixel->show();
 }
 
 void Game::poll()
 {
-    htcom->poll();
-    if (state == ModuleState::STRIKED)
+    m_htcom->poll();
+    if (m_state == ModuleState::STRIKED)
     {
         unsigned long ms = millis();
-        if (((ms % 250) < 125) && (ms < strikeTime))
+        if (((ms % 250) < 125) && (ms < m_strikeTime))
         {
             setPixelColor(PX_RED);
         }
@@ -191,29 +190,29 @@ void Game::poll()
         {
             setPixelColor(PX_BLACK);
         }
-        if (ms > strikeTime)
+        if (ms > m_strikeTime)
         {
             setPixelColor(PX_RED);
-            state = ModuleState::ARMED;
+            m_state = ModuleState::ARMED;
         }
     }
-    if (htcom->isNewAmbSettings())
+    if (m_htcom->isNewAmbSettings())
     {
-        byte brightness = htcom->getBrightness() * 16;
-        if (brightness != pixel->getBrightness())
+        byte brightness = m_htcom->getBrightness() * 16;
+        if (brightness != m_pixel->getBrightness())
         {
-            pixel->setBrightness(brightness);
-            pixel->show();
+            m_pixel->setBrightness(brightness);
+            m_pixel->show();
         }
     }
 }
 
 void Game::showTime(bool fast)
 {
-    word act = htcom->getGameTime();
-    if (act != saveTime)
+    word act = m_htcom->getGameTime();
+    if (act != m_saveTime)
     {
-        saveTime = act;
+        m_saveTime = act;
         if (fast)
         {
             Serial.println(act, DEC);
@@ -245,7 +244,7 @@ void Game::showTime(bool fast)
 
 bool Game::snrHasVocal()
 {
-    uint32_t sn = htcom->getSerialNumber();
+    uint32_t sn = m_htcom->getSerialNumber();
     SerialNumber serialNumber;
     serialNumber.Set(sn);
     #ifdef debug
@@ -259,26 +258,30 @@ bool Game::snrHasVocal()
     return serialNumber.isVocal();
 }
 
+bool  Game::hasNewStrikes() {
+    return m_htcom->hasNewStrikes();
+}
+
 byte Game::getStrikes()
 {
-    return htcom->getStrikes();
+    return m_htcom->getStrikes();
 };
 
 bool Game::isNewGameSettings()
 {
-    return htcom->isNewGameSettings();
+    return m_htcom->isNewGameSettings();
 }
 
 void Game::setGameDifficulty(Difficulty difficulty)
 {
-    htcom->setGameDifficulty(difficulty);
+    m_htcom->setGameDifficulty(difficulty);
 }
 
 byte Game::getBrightness() {
-    return htcom->getBrightness();
+    return m_htcom->getBrightness();
 }
 
 void Game::sendBeep() {
     dbgOutLn(F("m: beep"));
-    htcom->sendBeep();
+    m_htcom->sendBeep();
 }
