@@ -209,6 +209,7 @@ void initGame()
 
 void zoomIn()
 {
+  matrix.clear();
   for (byte x = 0; x < 8; x++)
   {
     setPixelXY(x, 0, PX_GREEN);
