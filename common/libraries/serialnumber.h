@@ -44,12 +44,12 @@ public:
         return vocal;
     };
 
-    bool isOdd(){
-        return false;
+    bool isLastDigitOdd(){
+        return ((snr[2] >> 4) & 0x01) == 1;
     };
 
-    bool isEven() {
-        return false;
+    bool isLastDigitEven() {
+        return !isLastDigitOdd();
     };
 
 private:

@@ -1,6 +1,6 @@
 #include "game.h"
 #include <Adafruit_NeoPixel.h>
-#define debug
+// #define debug
 #include <debug.h>
 #include <serialnumber.h>
 #include <indicators.h>
@@ -36,7 +36,7 @@ Game::Game(ModuleTag moduleTag, byte pinStatusLED)
     m_state = ModuleState::INIT;
     m_tag = moduleTag;
     m_statusLED = pinStatusLED;
-    m_difficulty = Difficulty::HARD;
+    m_difficulty = Difficulty::SIMPLE;
 };
 
 Game::Game()
@@ -44,7 +44,7 @@ Game::Game()
     m_state = ModuleState::INIT;
     m_tag = ModuleTag::WIRES;
     m_statusLED = 4;
-    m_difficulty = Difficulty::HARD;
+    m_difficulty = Difficulty::SIMPLE;
 };
 
 void Game::init()
@@ -118,8 +118,39 @@ Difficulty Game::getGameDifficulty()
 }
 
 uint32_t Game::getSerialNumber()
-{   
+{
     return m_htcom->getSerialNumber();
+}
+
+bool Game::snrHasVocal()
+{
+    uint32_t sn = m_htcom->getSerialNumber();
+    SerialNumber serialNumber;
+    serialNumber.Set(sn);
+#ifdef debug
+    dbgOut(F("snr:"));
+    dbgOut2(sn, HEX);
+    dbgOut(F(" "));
+    serialNumber.String(bf1);
+    dbgOutLn(bf1)
+#endif
+
+        return serialNumber.isVocal();
+}
+
+bool Game::snrIsLastDigitOdd()
+{
+    uint32_t sn = m_htcom->getSerialNumber();
+    SerialNumber serialNumber;
+    serialNumber.Set(sn);
+#ifdef debug
+    dbgOut(F("snr:"));
+    dbgOut2(sn, HEX);
+    dbgOut(F(" "));
+    serialNumber.String(bf1);
+    dbgOutLn(bf1);
+#endif
+    return serialNumber.isLastDigitOdd();
 }
 
 bool Game::isGameDifficulty(Difficulty difficulty)
@@ -242,23 +273,8 @@ void Game::showTime(bool fast)
     }
 }
 
-bool Game::snrHasVocal()
+bool Game::hasNewStrikes()
 {
-    uint32_t sn = m_htcom->getSerialNumber();
-    SerialNumber serialNumber;
-    serialNumber.Set(sn);
-    #ifdef debug
-    dbgOut(F("snr:"));
-    dbgOut2(sn, HEX);
-    dbgOut(F(" "));
-    serialNumber.String(bf1);
-    dbgOutLn(bf1)
-    #endif
-
-    return serialNumber.isVocal();
-}
-
-bool  Game::hasNewStrikes() {
     return m_htcom->hasNewStrikes();
 }
 
@@ -277,11 +293,13 @@ void Game::setGameDifficulty(Difficulty difficulty)
     m_htcom->setGameDifficulty(difficulty);
 }
 
-byte Game::getBrightness() {
+byte Game::getBrightness()
+{
     return m_htcom->getBrightness();
 }
 
-void Game::sendBeep() {
+void Game::sendBeep()
+{
     dbgOutLn(F("m: beep"));
     m_htcom->sendBeep();
 }

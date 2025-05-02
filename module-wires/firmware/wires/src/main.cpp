@@ -70,7 +70,10 @@ void initGame()
   while (invalid)
   {
     game.poll();
-    invalid = !panel.init(true); // TODO setting the sn from HTCOM
+    bool lastDigitOdd = game.snrIsLastDigitOdd();
+    dbgOut(F("last digit odd: "));
+    dbgOutLn(lastDigitOdd);
+    invalid = !panel.init(lastDigitOdd); // TODO setting the sn from HTCOM
     if (invalid)
     {
       if (millis() > sact)

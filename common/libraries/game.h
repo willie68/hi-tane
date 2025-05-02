@@ -76,12 +76,13 @@ public:
     void setStrike();
     void setSolved();
 
-    bool snrHasVocal();
     bool hasNewStrikes();
     byte getStrikes();
     byte getBrightness();
-
+    
     uint32_t getSerialNumber();
+    bool snrHasVocal();
+    bool snrIsLastDigitOdd();
 
     Difficulty getGameDifficulty();
     bool isGameDifficulty(Difficulty difficulty);
