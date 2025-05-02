@@ -64,7 +64,22 @@ void initGame()
   dbgOut(F("word: "));
   dbgOut(wordFreq.word);
   dbgOut(F(", freq:"));
-  dbgOut2(wordFreq.frq, DEC);
+  dbgOutLn2(wordFreq.frq, DEC);
+  switch (game.getGameDifficulty())
+  {
+    case Difficulty::SIMPLE:
+    case Difficulty::NUM_DIFF:
+    morse.setDitLength(400);
+    break;
+    case Difficulty::MEDIUM:
+    morse.setDitLength(250);
+    break;
+    case Difficulty::HARD:
+    morse.setDitLength(150);
+    break;
+  }
+  dbgOut(F("set dit length: "));
+  dbgOutLn(morse.getDitLength());
   game.arm();
   sbr = 0;
 }

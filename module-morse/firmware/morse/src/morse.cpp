@@ -39,6 +39,11 @@ void Morse::setDitLength(word dl)
     calculateLengths();
 }
 
+word Morse::getDitLength()
+{
+    return _dit;
+}
+
 void Morse::calculateLengths()
 {
     _dah = 3 * _dit;

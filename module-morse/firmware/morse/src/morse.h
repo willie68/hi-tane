@@ -53,6 +53,8 @@ class Morse
 public:
     Morse(byte ledPin, byte tonePin, long dit = 150);
     void setDitLength(word millis);
+    word getDitLength();
+
     void sendMessage(const char *msg);
     void poll();
     void reset();
