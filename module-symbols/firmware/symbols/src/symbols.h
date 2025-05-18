@@ -269,11 +269,11 @@ static const unsigned char PROGMEM g0027[] = {
     0x00, 0x70, 0x00, 0x00, 0x00, 0x7F, 0xF8, 0x00, 0x00, 0x3F, 0xF8, 0x00, 0x00, 0x0F, 0xF8, 0x00};
 
 static const unsigned char *const symbols[] = {
-    g0001, g0002, g0003, g0004, 
-    g0005, g0006, g0007, g0008, 
-    g0009, g0010, g0011, g0012, 
-    g0013, g0014, g0015, g0016, 
-    g0017, g0018, g0019, g0020, 
-    g0021, g0022, g0023, g0024, 
-    g0025, g0026, g0027 
-};
+    g0001, g0002, g0003, g0004,
+    g0005, g0006, g0007, g0008,
+    g0009, g0010, g0011, g0012,
+    g0013, g0014, g0015, g0016,
+    g0017, g0018, g0019, g0020,
+    g0021, g0022, g0023, g0024,
+    g0025, g0026, g0027};
+const uint8_t NUM_SYMBOLS = sizeof(symbols) / sizeof(*symbols);

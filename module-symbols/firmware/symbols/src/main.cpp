@@ -24,6 +24,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <symbols.h>
+#define debug
+#include <debug.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -79,7 +81,7 @@ static const unsigned char PROGMEM logo_bmp[] =
 
 void setup()
 {
-  Serial.begin(9600);
+  initDebug();
 
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS))
@@ -88,79 +90,89 @@ void setup()
     for (;;)
       ; // Don't proceed, loop forever
   }
+  dbgOut("symbols: ");
+  dbgOutLn(NUM_SYMBOLS);
 }
+
 void doSegments()
 {
   display.clearDisplay();
   display.drawFastVLine(32, 0, 32, SSD1306_WHITE);
   display.drawFastVLine(64, 0, 32, SSD1306_WHITE);
   display.drawFastVLine(96, 0, 32, SSD1306_WHITE);
+  display.drawFastHLine(0, 0, 127, SSD1306_WHITE);
+  display.drawFastHLine(0, 31, 127, SSD1306_WHITE);
 }
+
 void loop()
 {
-  for (uint8_t y = 0 ; y< 8; y++) {
+
+  for (uint8_t y = 0; y < 8; y++)
+  {
     doSegments();
-    for (uint8_t x = 0; x < 4; x++) {
-      uint8_t idx = y*4 + x;
-      if (x < sizeof(symbols)) {
-        display.drawBitmap(x*32, 0, symbols[idx], 32, 32, SSD1306_WHITE);
+    for (uint8_t x = 0; x < 4; x++)
+    {
+      uint8_t idx = y * 4 + x;
+      if (idx < NUM_SYMBOLS)
+      {
+        display.drawBitmap(x * 32, 0, symbols[idx], 32, 32, SSD1306_WHITE);
       }
     }
     display.display();
     delay(2000);
   }
-/*
-doSegments();
-display.drawBitmap(0, 0, g0005, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(32, 0, g0006, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(64, 0, g0007, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(96, 0, g0008, 32, 32, SSD1306_WHITE);
-
-  display.display();
-  delay(2000);
-  
+  /*
   doSegments();
-  display.drawBitmap(0, 0, g0009, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(32, 0, g0010, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(64, 0, g0011, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(96, 0, g0012, 32, 32, SSD1306_WHITE);
+  display.drawBitmap(0, 0, g0005, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(32, 0, g0006, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(64, 0, g0007, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(96, 0, g0008, 32, 32, SSD1306_WHITE);
 
-  display.display();
-  delay(2000);
+    display.display();
+    delay(2000);
 
-  doSegments();
-  display.drawBitmap(0, 0, g0013, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(32, 0, g0014, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(64, 0, g0015, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(96, 0, g0016, 32, 32, SSD1306_WHITE);
-  
-  display.display();
-  delay(2000);
+    doSegments();
+    display.drawBitmap(0, 0, g0009, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(32, 0, g0010, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(64, 0, g0011, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(96, 0, g0012, 32, 32, SSD1306_WHITE);
 
-  doSegments();
-  display.drawBitmap(0, 0, g0017, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(32, 0, g0018, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(64, 0, g0019, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(96, 0, g0020, 32, 32, SSD1306_WHITE);
+    display.display();
+    delay(2000);
 
-  display.display();
-  delay(2000);
+    doSegments();
+    display.drawBitmap(0, 0, g0013, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(32, 0, g0014, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(64, 0, g0015, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(96, 0, g0016, 32, 32, SSD1306_WHITE);
 
-  doSegments();
-  display.drawBitmap(0, 0, g0021, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(32, 0, g0022, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(64, 0, g0023, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(96, 0, g0024, 32, 32, SSD1306_WHITE);
-  
-  display.display();
-  delay(2000);
-  
-  doSegments();
-  display.drawBitmap(0, 0, g0025, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(32, 0, g0026, 32, 32, SSD1306_WHITE);
-  display.drawBitmap(64, 0, g0027, 32, 32, SSD1306_WHITE);
+    display.display();
+    delay(2000);
 
-  display.display();
-  delay(2000);
-  */
+    doSegments();
+    display.drawBitmap(0, 0, g0017, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(32, 0, g0018, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(64, 0, g0019, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(96, 0, g0020, 32, 32, SSD1306_WHITE);
+
+    display.display();
+    delay(2000);
+
+    doSegments();
+    display.drawBitmap(0, 0, g0021, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(32, 0, g0022, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(64, 0, g0023, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(96, 0, g0024, 32, 32, SSD1306_WHITE);
+
+    display.display();
+    delay(2000);
+
+    doSegments();
+    display.drawBitmap(0, 0, g0025, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(32, 0, g0026, 32, 32, SSD1306_WHITE);
+    display.drawBitmap(64, 0, g0027, 32, 32, SSD1306_WHITE);
+
+    display.display();
+    delay(2000);
+    */
 }
