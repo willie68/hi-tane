@@ -41,6 +41,10 @@
 			"path": "module-needy-gas/firmware/needy-gas"
 		},
 		{
+			"name": "symbols",
+			"path": "module-symbols/firmware/symbols"
+		},
+		{
 			"name": "hi-tane",
 			"path": "."
 		}
