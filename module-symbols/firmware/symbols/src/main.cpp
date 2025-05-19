@@ -49,7 +49,6 @@ Switch btn3 = Switch(8);
 void initGame();
 void poll();
 
-
 void setup()
 {
   initDebug();
@@ -63,7 +62,7 @@ void setup()
   }
   dbgOut("symbols: ");
   dbgOutLn(NUM_SYMBOLS);
-  
+
   randomSeed(analogRead(0));
 
   initGame();
@@ -79,68 +78,96 @@ void doSegments()
   display.drawFastHLine(0, 31, 127, SSD1306_WHITE);
 }
 
+void invert(int16_t x, int16_t y, int16_t w, int16_t h)
+{
+  for (int16_t py = y; py < (y + h); py++)
+  {
+    for (int16_t px = x; px < (x + w); px++)
+    {
+      display.drawPixel(px, py, SSD1306_INVERSE);
+    }
+  }
+}
 
 uint8_t col = 0;
-void initGame() {
+uint8_t selected[4];
+void initGame()
+{
   // select a col
-  col = random(0,5);
+  col = random(0, 5);
+  for (uint8_t x = 0; x < 4; x++)
+  {
+    bool found = false;
+    while (!found)
+    {
+      selected[x] = random(7);
+      found = true;
+      for (uint8_t y = 0; y < x; y++)
+      {
+        if (selected[y] == selected[x])
+        {
+          found = false;
+        }
+      }
+    }
+  }
+  dbgOut(F("selected col: "));
+  dbgOut(col);
+  dbgOut(F(": ")) for (uint8_t x = 0; x < 4; x++)
+  {
+    dbgOut(selected[x]);
+  }
+  dbgOutLn();
 }
 
 uint8_t pos = 0;
 uint8_t spos = 255;
 uint8_t scol = 255;
+bool changed = true;
 
 void loop()
 {
   poll();
-  if (btn0.singleClick()) {
-    if (pos < 6) {
-      pos++;
-    }
+  if (btn0.singleClick())
+  {
+    invert(0, 0, 32, 32);
+    display.display();
   }
-  if (btn1.singleClick()) {
-    if (pos > 0) {
-      pos--;
-    }
+  if (btn1.singleClick())
+  {
+    invert(32, 0, 32, 32);
+    display.display();
   }
-  if (btn2.singleClick()) {
-    if (col < 5) {
-      pos = 0;
-      col++;
-    }
+  if (btn2.singleClick())
+  {
+    invert(64, 0, 32, 32);
+    display.display();
   }
-  if (btn3.singleClick()) {
-    if (col > 0) {
-      pos = 0;
-      col--;
-    }
+  if (btn3.singleClick())
+  {
+    invert(96, 0, 32, 32);
+    display.display();
   }
 
-  if ((pos != spos) || (col != scol)) {
-    dbgOut(F("new col, pos: "));
-    dbgOut(col);
-    dbgOut(F(", "));
-    dbgOut(pos);
-    dbgOut(F(": "));
-    spos = pos;
-    scol = col;
-    doSegments();
+  if (changed)
+  {
+    changed = false;
+    display.clearDisplay();
     for (uint8_t x = 0; x < 4; x++)
     {
-      uint8_t idx = pos + x;
-      if (idx < 7)
-      {
-        uint8_t symb = SYM_TABLE[col][idx];
-        dbgOut(F(", "));dbgOut(symb);
-        display.drawBitmap(x * 32, 0, symbols[symb], 32, 32, SSD1306_WHITE);
-      }
+      uint8_t row = selected[x];
+      uint8_t symb = SYM_TABLE[col][row];
+      dbgOut(F(", "));
+      dbgOut(symb);
+      display.drawBitmap(x * 32, 0, symbols[symb], 32, 32, SSD1306_WHITE);
     }
     dbgOutLn();
     display.display();
   }
 }
 
-void poll() {
+void poll()
+{
   btn0.poll();
   btn1.poll();
   btn2.poll();
