@@ -276,4 +276,26 @@ static const unsigned char *const symbols[] = {
     g0017, g0018, g0019, g0020,
     g0021, g0022, g0023, g0024,
     g0025, g0026, g0027};
+
 const uint8_t NUM_SYMBOLS = sizeof(symbols) / sizeof(*symbols);
+
+const uint8_t SYM_TABLE[6][7] = {
+    {
+        0, 1, 2, 3, 4, 5, 6
+    },
+    {
+        7, 0, 6, 8, 9, 5, 10
+    },
+    {
+        11, 12, 8, 13, 14, 2, 9
+    },
+    {
+        15, 16, 17, 4, 13, 10, 18
+    },
+    {
+        19, 18, 17, 20, 16, 26, 21
+    },
+    {
+        15, 7, 22, 23, 19, 24, 25
+    }
+};

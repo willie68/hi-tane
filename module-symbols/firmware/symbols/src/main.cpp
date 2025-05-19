@@ -23,6 +23,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <avdweb_Switch.h>
 #include <symbols.h>
 #define debug
 #include <debug.h>
@@ -39,45 +40,14 @@
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
+Switch btn0 = Switch(5);
+Switch btn1 = Switch(6);
+Switch btn2 = Switch(7);
+Switch btn3 = Switch(8);
+
 // Forward declarations
-void testdrawline();
+void poll();
 
-void testdrawrect(void);
-void testfillrect(void);
-void testdrawcircle(void);
-void testfillcircle(void);
-void testdrawroundrect(void);
-void testfillroundrect(void);
-void testdrawtriangle(void);
-void testfilltriangle(void);
-void testdrawchar(void);
-void testdrawstyles(void);
-void testscrolltext(void);
-void testdrawbitmap(void);
-void testanimate(const uint8_t *bitmap, uint8_t w, uint8_t h);
-
-#define NUMFLAKES 10 // Number of snowflakes in the animation example
-
-#define LOGO_HEIGHT 16
-#define LOGO_WIDTH 16
-
-static const unsigned char PROGMEM logo_bmp[] =
-    {0b00000000, 0b11000000,
-     0b00000001, 0b11000000,
-     0b00000001, 0b11000000,
-     0b00000011, 0b11100000,
-     0b11110011, 0b11100000,
-     0b11111110, 0b11111000,
-     0b01111110, 0b11111111,
-     0b00110011, 0b10011111,
-     0b00011111, 0b11111100,
-     0b00001101, 0b01110000,
-     0b00011011, 0b10100000,
-     0b00111111, 0b11100000,
-     0b00111111, 0b11110000,
-     0b01111100, 0b11110000,
-     0b01110000, 0b01110000,
-     0b00000000, 0b00110000};
 
 void setup()
 {
@@ -104,75 +74,64 @@ void doSegments()
   display.drawFastHLine(0, 31, 127, SSD1306_WHITE);
 }
 
+uint8_t pos = 0;
+uint8_t spos = 255;
+uint8_t col = 0;
+uint8_t scol = 255;
+
 void loop()
 {
+  poll();
+  if (btn0.singleClick()) {
+    if (pos < 6) {
+      pos++;
+    }
+  }
+  if (btn1.singleClick()) {
+    if (pos > 0) {
+      pos--;
+    }
+  }
+  if (btn2.singleClick()) {
+    if (col < 5) {
+      pos = 0;
+      col++;
+    }
+  }
+  if (btn3.singleClick()) {
+    if (col > 0) {
+      pos = 0;
+      col--;
+    }
+  }
 
-  for (uint8_t y = 0; y < 8; y++)
-  {
+  if ((pos != spos) || (col != scol)) {
+    dbgOut(F("new col, pos: "));
+    dbgOut(col);
+    dbgOut(F(", "));
+    dbgOut(pos);
+    dbgOut(F(": "));
+    spos = pos;
+    scol = col;
     doSegments();
     for (uint8_t x = 0; x < 4; x++)
     {
-      uint8_t idx = y * 4 + x;
-      if (idx < NUM_SYMBOLS)
+      uint8_t idx = pos + x;
+      if (idx < 7)
       {
-        display.drawBitmap(x * 32, 0, symbols[idx], 32, 32, SSD1306_WHITE);
+        uint8_t symb = SYM_TABLE[col][idx];
+        dbgOut(F(", "));dbgOut(symb);
+        display.drawBitmap(x * 32, 0, symbols[symb], 32, 32, SSD1306_WHITE);
       }
     }
+    dbgOutLn();
     display.display();
-    delay(2000);
   }
-  /*
-  doSegments();
-  display.drawBitmap(0, 0, g0005, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(32, 0, g0006, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(64, 0, g0007, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(96, 0, g0008, 32, 32, SSD1306_WHITE);
+}
 
-    display.display();
-    delay(2000);
-
-    doSegments();
-    display.drawBitmap(0, 0, g0009, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(32, 0, g0010, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(64, 0, g0011, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(96, 0, g0012, 32, 32, SSD1306_WHITE);
-
-    display.display();
-    delay(2000);
-
-    doSegments();
-    display.drawBitmap(0, 0, g0013, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(32, 0, g0014, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(64, 0, g0015, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(96, 0, g0016, 32, 32, SSD1306_WHITE);
-
-    display.display();
-    delay(2000);
-
-    doSegments();
-    display.drawBitmap(0, 0, g0017, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(32, 0, g0018, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(64, 0, g0019, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(96, 0, g0020, 32, 32, SSD1306_WHITE);
-
-    display.display();
-    delay(2000);
-
-    doSegments();
-    display.drawBitmap(0, 0, g0021, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(32, 0, g0022, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(64, 0, g0023, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(96, 0, g0024, 32, 32, SSD1306_WHITE);
-
-    display.display();
-    delay(2000);
-
-    doSegments();
-    display.drawBitmap(0, 0, g0025, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(32, 0, g0026, 32, 32, SSD1306_WHITE);
-    display.drawBitmap(64, 0, g0027, 32, 32, SSD1306_WHITE);
-
-    display.display();
-    delay(2000);
-    */
+void poll() {
+  btn0.poll();
+  btn1.poll();
+  btn2.poll();
+  btn3.poll();
 }
