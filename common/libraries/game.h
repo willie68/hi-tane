@@ -32,7 +32,8 @@ enum ModuleTag
     PASSWORD = ID_PASSWORD,
     MORSE = ID_MORSE,
     SIMON = ID_SIMON,
-    NEEDY_GAS = ID_NGAS
+    NEEDY_GAS = ID_NGAS,
+    SYMBOLS = ID_SYMBOLS
 };
 
 enum Difficulty

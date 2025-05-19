@@ -1,43 +1,24 @@
-/**************************************************************************
- This is an example for our Monochrome OLEDs based on SSD1306 drivers
-
- Pick one up today in the adafruit shop!
- ------> http://www.adafruit.com/category/63_98
-
- This example is for a 128x32 pixel display using SPI to communicate
- 4 or 5 pins are required to interface.
-
- Adafruit invests time and resources providing this open
- source code, please support Adafruit and open-source
- hardware by purchasing products from Adafruit!
-
- Written by Limor Fried/Ladyada for Adafruit Industries,
- with contributions from the open source community.
- BSD license, check license.txt for more information
- All text above, and the splash screen below must be
- included in any redistribution.
- **************************************************************************/
-#define SSD1306_NO_SPLASH
-
+#include <Arduino.h>
 #include <SPI.h>
 #include <Wire.h>
+#define SSD1306_NO_SPLASH
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <avdweb_Switch.h>
 #include <symbols.h>
 #define debug
 #include <debug.h>
+#include <game.h>
 
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 32 // OLED display height, in pixels
+// Game framework
+#define LED_PIN 4
+Game game(ModuleTag::SYMBOLS, LED_PIN);
 
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-// The pins for I2C are defined by the Wire-library.
-// On an arduino UNO:       A4(SDA), A5(SCL)
-// On an arduino MEGA 2560: 20(SDA), 21(SCL)
-// On an arduino LEONARDO:   2(SDA),  3(SCL), ...
-#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+#define SCREEN_WIDTH 128 
+#define SCREEN_HEIGHT 32 
+
+#define OLED_RESET -1       
+#define SCREEN_ADDRESS 0x3C 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 Switch btn0 = Switch(5);
@@ -47,8 +28,11 @@ Switch btn3 = Switch(8);
 
 // Forward declarations
 void initGame();
+void invert(uint8_t idx);
 void poll();
 void resetClicked();
+void drawSymbols();
+void showSolveEffekt();
 
 void setup()
 {
@@ -66,22 +50,9 @@ void setup()
 
   randomSeed(analogRead(0));
 
+  game.init();
+
   initGame();
-}
-
-void doSegments()
-{
-  display.clearDisplay();
-  display.drawFastVLine(32, 0, 32, SSD1306_WHITE);
-  display.drawFastVLine(64, 0, 32, SSD1306_WHITE);
-  display.drawFastVLine(96, 0, 32, SSD1306_WHITE);
-  display.drawFastHLine(0, 0, 127, SSD1306_WHITE);
-  display.drawFastHLine(0, 31, 127, SSD1306_WHITE);
-}
-
-void invert(uint8_t idx)
-{
-  display.fillRect(idx * 32, 0, 32, 32, SSD1306_INVERSE);
 }
 
 uint8_t col = 0;
@@ -115,7 +86,12 @@ void initGame()
   dbgOutLn();
 
   resetClicked();
+  drawSymbols();
+  game.arm();
+}
 
+void drawSymbols()
+{
   dbgOut(F("draw symbol: "));
   display.clearDisplay();
   for (uint8_t x = 0; x < 4; x++)
@@ -136,33 +112,87 @@ uint8_t scol = 255;
 bool changed = true;
 bool clicked[4];
 
+void checkBtnClick(uint8_t btn)
+{
+  bool ok = true;
+  for (uint8_t x = 0; x < 4; x++)
+  {
+    if (x != btn)
+    {
+      if (!clicked[x])
+      {
+        uint8_t row = selected[x];
+        if (row < selected[btn])
+        {
+          ok = false;
+          break;
+        }
+      }
+    }
+  }
+  if (ok)
+  {
+    invert(btn);
+    clicked[btn] = true;
+    display.display();
+  }
+  else
+  {
+    dbgOutLn(F("strike"));
+    resetClicked();
+    drawSymbols();
+    game.setStrike();
+  }
+}
+
 void loop()
 {
   poll();
+  if (game.isState(ModuleState::DISARMED))
+    showSolveEffekt();
+
   if (btn0.singleClick())
   {
-    invert(0);
-    display.display();
+    checkBtnClick(0);
   }
   if (btn1.singleClick())
   {
-    invert(1);
-    display.display();
+    checkBtnClick(1);
   }
   if (btn2.singleClick())
   {
-    invert(2);
-    display.display();
+    checkBtnClick(2);
   }
   if (btn3.singleClick())
   {
-    invert(3);
+    checkBtnClick(3);
+  }
+  bool allClicked = true;
+  for (uint8_t x = 0; x < 4; x++)
+  {
+    allClicked = allClicked && clicked[x];
+  }
+  if (allClicked)
+  {
+    dbgOutLn(F("solved"));
+    display.clearDisplay();
+    display.setTextSize(2); // Draw 2X-scale text
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(10, 0);
+    display.println(F("solved"));
     display.display();
+    game.setSolved();
   }
 }
 
 void poll()
 {
+  game.poll();
+  if (game.isNewGameSettings())
+  {
+    initGame();
+  }
+
   btn0.poll();
   btn1.poll();
   btn2.poll();
@@ -173,4 +203,13 @@ void resetClicked()
 {
   for (uint8_t x = 0; x < 4; x++)
     clicked[x] = false;
+}
+
+void invert(uint8_t idx)
+{
+  display.fillRect(idx * 32, 0, 32, 32, SSD1306_INVERSE);
+}
+
+void showSolveEffekt() {
+
 }
