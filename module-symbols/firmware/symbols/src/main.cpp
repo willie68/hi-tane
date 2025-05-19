@@ -46,6 +46,7 @@ Switch btn2 = Switch(7);
 Switch btn3 = Switch(8);
 
 // Forward declarations
+void initGame();
 void poll();
 
 
@@ -62,6 +63,10 @@ void setup()
   }
   dbgOut("symbols: ");
   dbgOutLn(NUM_SYMBOLS);
+  
+  randomSeed(analogRead(0));
+
+  initGame();
 }
 
 void doSegments()
@@ -74,9 +79,15 @@ void doSegments()
   display.drawFastHLine(0, 31, 127, SSD1306_WHITE);
 }
 
+
+uint8_t col = 0;
+void initGame() {
+  // select a col
+  col = random(0,5);
+}
+
 uint8_t pos = 0;
 uint8_t spos = 255;
-uint8_t col = 0;
 uint8_t scol = 255;
 
 void loop()
