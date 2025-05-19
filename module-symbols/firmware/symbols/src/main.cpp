@@ -48,6 +48,7 @@ Switch btn3 = Switch(8);
 // Forward declarations
 void initGame();
 void poll();
+void resetClicked();
 
 void setup()
 {
@@ -78,18 +79,9 @@ void doSegments()
   display.drawFastHLine(0, 31, 127, SSD1306_WHITE);
 }
 
-void invert(int16_t x, int16_t y, int16_t w, int16_t h)
+void invert(uint8_t idx)
 {
-  display.fillRect(x, y, w, h, SSD1306_INVERSE);
-  /*
-  for (int16_t py = y; py < (y + h); py++)
-  {
-    for (int16_t px = x; px < (x + w); px++)
-    {
-      display.drawPixel(px, py, SSD1306_INVERSE);
-    }
-  }
-  */
+  display.fillRect(idx * 32, 0, 32, 32, SSD1306_INVERSE);
 }
 
 uint8_t col = 0;
@@ -121,50 +113,50 @@ void initGame()
     dbgOut(selected[x]);
   }
   dbgOutLn();
+
+  resetClicked();
+
+  dbgOut(F("draw symbol: "));
+  display.clearDisplay();
+  for (uint8_t x = 0; x < 4; x++)
+  {
+    uint8_t row = selected[x];
+    uint8_t symb = SYM_TABLE[col][row];
+    dbgOut(F(", "));
+    dbgOut(symb);
+    display.drawBitmap(x * 32, 0, symbols[symb], 32, 32, SSD1306_WHITE);
+  }
+  dbgOutLn();
+  display.display();
 }
 
 uint8_t pos = 0;
 uint8_t spos = 255;
 uint8_t scol = 255;
 bool changed = true;
+bool clicked[4];
 
 void loop()
 {
   poll();
   if (btn0.singleClick())
   {
-    invert(0, 0, 32, 32);
+    invert(0);
     display.display();
   }
   if (btn1.singleClick())
   {
-    invert(32, 0, 32, 32);
+    invert(1);
     display.display();
   }
   if (btn2.singleClick())
   {
-    invert(64, 0, 32, 32);
+    invert(2);
     display.display();
   }
   if (btn3.singleClick())
   {
-    invert(96, 0, 32, 32);
-    display.display();
-  }
-
-  if (changed)
-  {
-    changed = false;
-    display.clearDisplay();
-    for (uint8_t x = 0; x < 4; x++)
-    {
-      uint8_t row = selected[x];
-      uint8_t symb = SYM_TABLE[col][row];
-      dbgOut(F(", "));
-      dbgOut(symb);
-      display.drawBitmap(x * 32, 0, symbols[symb], 32, 32, SSD1306_WHITE);
-    }
-    dbgOutLn();
+    invert(3);
     display.display();
   }
 }
@@ -175,4 +167,10 @@ void poll()
   btn1.poll();
   btn2.poll();
   btn3.poll();
+}
+
+void resetClicked()
+{
+  for (uint8_t x = 0; x < 4; x++)
+    clicked[x] = false;
 }
