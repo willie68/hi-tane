@@ -80,6 +80,8 @@ void doSegments()
 
 void invert(int16_t x, int16_t y, int16_t w, int16_t h)
 {
+  display.fillRect(x, y, w, h, SSD1306_INVERSE);
+  /*
   for (int16_t py = y; py < (y + h); py++)
   {
     for (int16_t px = x; px < (x + w); px++)
@@ -87,6 +89,7 @@ void invert(int16_t x, int16_t y, int16_t w, int16_t h)
       display.drawPixel(px, py, SSD1306_INVERSE);
     }
   }
+  */
 }
 
 uint8_t col = 0;
