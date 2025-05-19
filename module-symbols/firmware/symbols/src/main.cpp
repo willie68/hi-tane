@@ -115,6 +115,12 @@ bool clicked[4];
 void checkBtnClick(uint8_t btn)
 {
   bool ok = true;
+  if (clicked[btn]) {
+    invert(btn);
+    clicked[btn] = true;
+    display.display();
+    return ;
+  }
   for (uint8_t x = 0; x < 4; x++)
   {
     if (x != btn)
@@ -174,14 +180,16 @@ void loop()
   }
   if (allClicked)
   {
-    dbgOutLn(F("solved"));
-    display.clearDisplay();
-    display.setTextSize(2); // Draw 2X-scale text
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(10, 0);
-    display.println(F("solved"));
-    display.display();
-    game.setSolved();
+    if (game.isState(ModuleState::ARMED)) {
+      dbgOutLn(F("solved"));
+      display.clearDisplay();
+      display.setTextSize(2); // Draw 2X-scale text
+      display.setTextColor(SSD1306_WHITE);
+      display.setCursor(30, 0);
+      display.println(F("solved"));
+      display.display();
+      game.setSolved();
+    }
   }
 }
 
