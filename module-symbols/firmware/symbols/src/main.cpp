@@ -47,7 +47,7 @@ void setup()
   }
   dbgOut("symbols: ");
   dbgOutLn(NUM_SYMBOLS);
-
+  display.setRotation(2);
   randomSeed(analogRead(0));
 
   game.init();
