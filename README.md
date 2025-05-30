@@ -34,7 +34,7 @@ Das ganze Spiel ist in einem Koffer eingebaut. Als Stromversorgung dient ein 186
 
 Die Spielmodule sind in einem Rahmen im eigentlichen Fach montiert und können dort ersetzt werden. Dadurch ist es möglich, verschiedenen Module zu verwenden. Derzeit hat der Rahmen platz für 6 Module. 
 
-Alles zum Drucken findest du hier: https://www.tinkercad.com/users/fKoj7udgQYq-wklaas
+Alles zum Drucken findest du hier: https://www.tinkercad.com/dashboard/collections/iiqCBFKYnLP/3d
 
 
 
