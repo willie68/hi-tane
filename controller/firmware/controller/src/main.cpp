@@ -1,31 +1,17 @@
 #include <Arduino.h>
-#include <TM1637Display.h>
 #include <Adafruit_NeoPixel.h>
 #include <ClickEncoder.h>
 #include <timerOne.h>
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 #include <avr/wdt.h>
 
-//#define debug
+#define debug
 #include <debug.h>
 #include "indicators.h"
 #include "communication.h"
 #include <game.h>
 #include <serialnumber.h>
 #include <pins_arduino.h>
-
-#define Version "V0.1 " // always add an space at the end
-
-// Display
-#define CLK 3
-#define DIO 2
-
-// 7-Segment LED Display
-const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
-const uint8_t MND[] = {SEG_G};
-
-TM1637Display display = TM1637Display(CLK, DIO);
+#include <display.h>
 
 const int MAX_TIME = 90 * 60;
 
@@ -40,11 +26,6 @@ constexpr uint8_t PRINT_BASE = 10;
 static TimerOne timer;
 ClickEncoder clickEnc{PIN_ENCA, PIN_ENCB, PIN_BTN, ENC_STEPSPERNOTCH, BTN_ACTIVESTATE};
 
-// LCD definitions
-const uint8_t COLUMS = 20;
-const uint8_t ROWS = 4;
-LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
-
 // RGB LED
 #define LED_PIN 4
 Adafruit_NeoPixel pixel(3, LED_PIN, NEO_RGB + NEO_KHZ800);
@@ -57,18 +38,18 @@ const uint8_t BEEP_PIN = 9;
 // Communication
 HTCOM htcom;
 
+// Display
+LCDisplay display;  
+
 // --- forward-declared function prototypes:
 void showTime(int act);
 
-void clearRow(uint8_t row);
 void beep();
 void dblBeep();
 void hibeep();
 void generateSerialNumber();
 void generateIndicators();
 void printStatusLine();
-void printHeader(bool withVersion);
-void printWelcome();
 void initGame();
 void resetStrikes();
 void showStrikes();
@@ -110,10 +91,8 @@ void setup()
   Serial.println("init");
   pinMode(LED_BUILTIN, OUTPUT);
   LED(1);
-  display.clear();
-  display.setSegments(TTD, 1, 0);
-  display.setBrightness(DEFAULT_BRIGHTNESS > 1);
-
+  display.init(DEFAULT_BRIGHTNESS);
+  
   pixel.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   pixel.setBrightness(DEFAULT_BRIGHTNESS * 16);
   pixel.show();
@@ -128,14 +107,6 @@ void setup()
   start = 0;
   randomSeed(analogRead(0));
 
-  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) // colums, rows, characters size
-  {
-    Serial.println(F("PCF8574 not connected or lcd pins is wrong."));
-    delay(5000);
-  }
-
-  lcd.clear();
-
   initGame();
   LED(0);
 }
@@ -144,10 +115,10 @@ void initGame()
 {
   started = false;
   paused = false;
-  lcd.clear();
+  display.clear();
 
-  printHeader(true);
-  printWelcome();
+  display.printHeader(true);
+  display.printWelcome();
 
   generateSerialNumber();
 
@@ -204,9 +175,7 @@ void loop()
     if (serr != err)
     {
       serr = err;
-      clearRow(2);
-      strcpy_P(buffer, (char *)pgm_read_word(&(ERROR_MESSAGES[err])));
-      lcd.print(buffer);
+      display.showError(err);
     }
   }
   else
@@ -468,7 +437,7 @@ void startGame()
   dbgOutLn(F("start game"));
   resetStrikes();
   pixel.setBrightness(16 * htcom.getBrightness());
-  display.setBrightness(htcom.getBrightness() >> 1);
+  seg7.setBrightness(htcom.getBrightness() >> 1);
   htcom.initModules();
   htcom.sendCtrlInitialisation();
   byte count = 100;
@@ -534,6 +503,10 @@ void printModules()
       {
         lcd.print(F("*"));
       }
+    }
+    if (idx >= 5)
+    {
+      lcd.setCursor(0, 2);
     }
   }
 }
@@ -616,24 +589,24 @@ void showTime(int act)
     if (neg)
     {
       lcd.print("-");
-      display.setSegments(MND, 1, 0);
+      seg7.setSegments(MND, 1, 0);
       if (min <= 0)
         lcd.print("0");
       lcd.print(min);
-      display.showNumberDec(min, false, 1, 1);
+      seg7.showNumberDec(min, false, 1, 1);
     }
     else
     {
       if (min <= 9)
         lcd.print("0");
       lcd.print(min);
-      display.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
+      seg7.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
     }
     lcd.print(":");
     if (sec <= 9)
       lcd.print("0");
     lcd.print(sec);
-    display.showNumberDec(sec, true, 2, 2);
+    seg7.showNumberDec(sec, true, 2, 2);
     if ((act % 900) == 0)
     {
       dblBeep();
@@ -647,13 +620,6 @@ void showTime(int act)
       hibeep();
     }
   }
-}
-
-void clearRow(uint8_t row)
-{
-  lcd.setCursor(0, row);
-  lcd.print("                    ");
-  lcd.setCursor(0, row);
 }
 
 void dblBeep()
@@ -699,23 +665,6 @@ void showStrikes()
     }
   }
   pixel.show();
-}
-
-void printHeader(bool withVersion)
-{
-  lcd.setCursor(0, 0);
-  lcd.print(F("HI-Tane "));
-  if (withVersion)
-    lcd.print(F(Version));
-
-  strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
-  lcd.print(buffer[0]);
-}
-
-void printWelcome()
-{
-  lcd.setCursor(0, 1);
-  lcd.print(F("Welcome"));
 }
 
 void LED(bool on)
