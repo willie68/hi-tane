@@ -25,7 +25,7 @@
 const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
 const uint8_t MND[] = {SEG_G};
 
-TM1637Display display = TM1637Display(CLK, DIO);
+TM1637Display seg7 = TM1637Display(CLK, DIO);
 
 const int MAX_TIME = 90 * 60;
 
@@ -110,9 +110,9 @@ void setup()
   Serial.println("init");
   pinMode(LED_BUILTIN, OUTPUT);
   LED(1);
-  display.clear();
-  display.setSegments(TTD, 1, 0);
-  display.setBrightness(DEFAULT_BRIGHTNESS > 1);
+  seg7.clear();
+  seg7.setSegments(TTD, 1, 0);
+  seg7.setBrightness(DEFAULT_BRIGHTNESS > 1);
 
   pixel.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   pixel.setBrightness(DEFAULT_BRIGHTNESS * 16);
@@ -468,7 +468,7 @@ void startGame()
   dbgOutLn(F("start game"));
   resetStrikes();
   pixel.setBrightness(16 * htcom.getBrightness());
-  display.setBrightness(htcom.getBrightness() >> 1);
+  seg7.setBrightness(htcom.getBrightness() >> 1);
   htcom.initModules();
   htcom.sendCtrlInitialisation();
   byte count = 100;
@@ -620,24 +620,24 @@ void showTime(int act)
     if (neg)
     {
       lcd.print("-");
-      display.setSegments(MND, 1, 0);
+      seg7.setSegments(MND, 1, 0);
       if (min <= 0)
         lcd.print("0");
       lcd.print(min);
-      display.showNumberDec(min, false, 1, 1);
+      seg7.showNumberDec(min, false, 1, 1);
     }
     else
     {
       if (min <= 9)
         lcd.print("0");
       lcd.print(min);
-      display.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
+      seg7.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
     }
     lcd.print(":");
     if (sec <= 9)
       lcd.print("0");
     lcd.print(sec);
-    display.showNumberDec(sec, true, 2, 2);
+    seg7.showNumberDec(sec, true, 2, 2);
     if ((act % 900) == 0)
     {
       dblBeep();
