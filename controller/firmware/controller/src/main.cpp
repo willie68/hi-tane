@@ -1,19 +1,19 @@
 #include <Arduino.h>
 #include <TM1637Display.h>
 #include <Adafruit_NeoPixel.h>
+#include <U8g2lib.h>
 #include <ClickEncoder.h>
 #include <timerOne.h>
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 #include <avr/wdt.h>
 
-// #define debug
+//#define debug
 #include <debug.h>
 #include "indicators.h"
 #include "communication.h"
 #include <game.h>
 #include <serialnumber.h>
 #include <pins_arduino.h>
+#include <display.h>
 
 #define Version "V0.1 " // always add an space at the end
 
@@ -41,9 +41,7 @@ static TimerOne timer;
 ClickEncoder clickEnc{PIN_ENCA, PIN_ENCB, PIN_BTN, ENC_STEPSPERNOTCH, BTN_ACTIVESTATE};
 
 // LCD definitions
-const uint8_t COLUMS = 20;
-const uint8_t ROWS = 4;
-LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
+HIDisplay display;
 
 // RGB LED
 #define LED_PIN 4
@@ -66,6 +64,7 @@ void dblBeep();
 void hibeep();
 void generateSerialNumber();
 void generateIndicators();
+void initHTCOM();
 void printStatusLine();
 void printHeader(bool withVersion);
 void printWelcome();
@@ -106,36 +105,37 @@ void timerIsr()
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("init");
+  initDebug();
+  dbgOutLn(F("init"));
   pinMode(LED_BUILTIN, OUTPUT);
   LED(1);
+  dbgOutLn(F("init 7seg"));
   seg7.clear();
   seg7.setSegments(TTD, 1, 0);
   seg7.setBrightness(DEFAULT_BRIGHTNESS > 1);
 
+  dbgOutLn(F("init neopixel"));
   pixel.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
   pixel.setBrightness(DEFAULT_BRIGHTNESS * 16);
   pixel.show();
 
   // Setup and configure "full-blown" ClickEncoder
+  dbgOutLn(F("init encoder"));
   clickEnc.setAccelerationEnabled(false);
   clickEnc.setDoubleClickEnabled(true);
   clickEnc.setLongPressRepeatEnabled(false);
 
+  dbgOutLn(F("init timer"));
   timer.initialize(TIMER_NOTIFY_US);
   timer.attachInterrupt(timerIsr);
   start = 0;
   randomSeed(analogRead(0));
 
-  while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) // colums, rows, characters size
-  {
-    Serial.println(F("PCF8574 not connected or lcd pins is wrong."));
-    delay(5000);
-  }
+  dbgOutLn(F("init display"));
+  display.init();
+  display.clear();
 
-  lcd.clear();
-
+  dbgOutLn(F("init game"));
   initGame();
   LED(0);
 }
@@ -144,29 +144,37 @@ void initGame()
 {
   started = false;
   paused = false;
-  lcd.clear();
+  display.clear();
 
+  dbgOutLn(F("print header"));
   printHeader(true);
+  dbgOutLn(F("print welcome"));
   printWelcome();
 
+  dbgOutLn(F("generate serial number"));
   generateSerialNumber();
 
+  dbgOutLn(F("generate indicators"));
   generateIndicators();
 
+  dbgOutLn(F("print status"));
   printStatusLine();
 
   //  htcom = HTCOM(COM_PIN, 44);
   dbgOutLn("htcom init");
+  initHTCOM();
+  resetStrikes();
+  
+  dbgOutLn("htcom init ready");
+}
+
+void initHTCOM() {
   htcom = HTCOM();
   htcom.attach(ID_CONTROLLER);
   htcom.sendCtrlInitialisation();
   htcom.setCtrlSerialNumber(snr.Get());
   htcom.setCtrlDifficulty(difficulty);
   htcom.setCtrlIndicators(indicators.Compress());
-
-  resetStrikes();
-
-  dbgOutLn("htcom init ready");
 }
 
 // menu line to display, with save var
@@ -206,7 +214,7 @@ void loop()
       serr = err;
       clearRow(2);
       strcpy_P(buffer, (char *)pgm_read_word(&(ERROR_MESSAGES[err])));
-      lcd.print(buffer);
+      display.print(buffer);
     }
   }
   else
@@ -255,38 +263,38 @@ void showMenu()
   {
     sline = line;
     clearRow(1);
-    lcd.setCursor(0, 1);
+    display.setCursor(0, 1);
     switch (sline)
     {
     case 0:
-      lcd.print(F("start Game? yes"));
-      lcd.setCursor(12, 1);
-      lcd.cursor();
-      lcd.noBlink();
+      display.print(F("start Game? yes"));
+      display.setCursor(12, 1);
+      display.cursor();
+      display.noBlink();
       break;
     case 1:
-      lcd.print(F("Difficulty:"));
-      lcd.setCursor(12, 1);
+      display.print(F("Difficulty:"));
+      display.setCursor(12, 1);
       strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
-      lcd.print(buffer);
-      lcd.setCursor(12, 1);
-      lcd.cursor();
-      lcd.noBlink();
+      display.print(buffer);
+      display.setCursor(12, 1);
+      display.cursor();
+      display.noBlink();
       break;
     case 2:
-      lcd.print(F("Brigthness:"));
-      lcd.setCursor(12, 1);
-      lcd.print(brightness);
-      lcd.print(" ");
-      lcd.setCursor(12, 1);
-      lcd.cursor();
-      lcd.noBlink();
+      display.print(F("Brigthness:"));
+      display.setCursor(12, 1);
+      display.print(brightness);
+      display.print(" ");
+      display.setCursor(12, 1);
+      display.cursor();
+      display.noBlink();
       break;
     case 3:
-      lcd.print(F("Gametime:  "));
+      display.print(F("Gametime:  "));
       gt2Display();
-      lcd.cursor();
-      lcd.noBlink();
+      display.cursor();
+      display.noBlink();
       break;
     }
   }
@@ -296,8 +304,8 @@ void showMenu()
     if (clickEnc.getButton() == Button::Clicked)
     {
       clearRow(1);
-      lcd.noCursor();
-      lcd.noBlink();
+      display.noCursor();
+      display.noBlink();
       startGame();
     }
     break;
@@ -305,31 +313,31 @@ void showMenu()
     if (difficulty != sdiff)
     {
       sdiff = difficulty;
-      lcd.setCursor(12, 1);
+      display.setCursor(12, 1);
       strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
-      lcd.print(buffer);
+      display.print(buffer);
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
       menuSetDifficulty();
-      lcd.setCursor(12, 1);
-      lcd.noBlink();
+      display.setCursor(12, 1);
+      display.noBlink();
     }
     break;
   case 2:
     if (brightness != sbr)
     {
       sbr = brightness;
-      lcd.setCursor(12, 1);
-      lcd.print(brightness);
-      lcd.print(" ");
-      lcd.setCursor(12, 1);
+      display.setCursor(12, 1);
+      display.print(brightness);
+      display.print(" ");
+      display.setCursor(12, 1);
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
       menuSetBrightness();
-      lcd.setCursor(12, 1);
-      lcd.noBlink();
+      display.setCursor(12, 1);
+      display.noBlink();
     }
     break;
   case 3:
@@ -341,8 +349,8 @@ void showMenu()
     if (clickEnc.getButton() == Button::Clicked)
     {
       menuSetGameTime();
-      lcd.setCursor(10, 1);
-      lcd.noBlink();
+      display.setCursor(10, 1);
+      display.noBlink();
     }
     break;
   }
@@ -359,8 +367,8 @@ void showMenu()
 
 void menuSetDifficulty()
 {
-  lcd.setCursor(12, 1);
-  lcd.blink();
+  display.setCursor(12, 1);
+  display.blink();
   sbr = 0;
   bool ok = false;
   while (!ok)
@@ -375,9 +383,9 @@ void menuSetDifficulty()
     {
       sdiff = difficulty;
       strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
-      lcd.setCursor(12, 1);
-      lcd.print(buffer);
-      lcd.setCursor(12, 1);
+      display.setCursor(12, 1);
+      display.print(buffer);
+      display.setCursor(12, 1);
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
@@ -385,13 +393,13 @@ void menuSetDifficulty()
       ok = true;
     }
   }
-  lcd.noBlink();
+  display.noBlink();
 }
 
 void menuSetBrightness()
 {
-  lcd.setCursor(12, 1);
-  lcd.blink();
+  display.setCursor(12, 1);
+  display.blink();
   sbr = 0;
   bool ok = false;
   while (!ok)
@@ -409,10 +417,10 @@ void menuSetBrightness()
     if (brightness != sbr)
     {
       sbr = brightness;
-      lcd.setCursor(12, 1);
-      lcd.print(brightness);
-      lcd.print(" ");
-      lcd.setCursor(12, 1);
+      display.setCursor(12, 1);
+      display.print(brightness);
+      display.print(" ");
+      display.setCursor(12, 1);
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
@@ -421,13 +429,13 @@ void menuSetBrightness()
       ok = true;
     }
   }
-  lcd.noBlink();
+  display.noBlink();
 }
 
 void menuSetGameTime()
 {
-  lcd.setCursor(10, 1);
-  lcd.blink();
+  display.setCursor(10, 1);
+  display.blink();
   sgt = 0;
   bool ok = false;
   while (!ok)
@@ -452,15 +460,15 @@ void menuSetGameTime()
       ok = true;
     }
   }
-  lcd.noBlink();
+  display.noBlink();
 }
 
 void gt2Display()
 {
-  lcd.setCursor(10, 1);
-  lcd.print(gameTime / 60);
-  lcd.print(" min ");
-  lcd.setCursor(10, 1);
+  display.setCursor(10, 1);
+  display.print(gameTime / 60);
+  display.print(" min ");
+  display.setCursor(10, 1);
 }
 
 void startGame()
@@ -518,26 +526,26 @@ void printModules()
   clearRow(2);
   dbgOut(F("print modules "));
   dbgOutLn2(mcnt, DEC);
-  lcd.setCursor(0, 1);
+  display.setCursor(0, 1);
   for (byte idx = 0; idx < mcnt; idx++)
   {
     byte mod = htcom.getInstalledModuleID(idx);
     if (mod != ID_NONE)
     {
       strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
-      lcd.print(buffer);
+      display.print(buffer);
       if (htcom.isModuleState(mod, ModuleState::DISARMED))
       {
-        lcd.print(F(" "));
+        display.print(F(" "));
       }
       else
       {
-        lcd.print(F("*"));
+        display.print(F("*"));
       }
     }
     if (idx >= 5)
     {
-      lcd.setCursor(0, 2);
+      display.setCursor(0, 2);
     }
   }
 }
@@ -584,21 +592,21 @@ void printStatusLine()
 {
   clearRow(3);
   snr.String(buffer);
-  lcd.print(buffer);
+  display.print(buffer);
 
   for (byte x = 0; x < indicators.Count(); x++)
   {
     byte idx = indicators.Get(x);
-    lcd.print(" ");
+    display.print(" ");
     if (indicators.IsActive(x))
     {
-      lcd.print(char(0x23));
+      display.print(char(0x23));
     }
     else
     {
     }
     strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
-    lcd.print(buffer);
+    display.print(buffer);
   }
 }
 
@@ -612,31 +620,31 @@ void showTime(int act)
 
     htcom.sendCtrlHearbeat(act);
 
-    lcd.setCursor(15, 0);
+    display.setCursor(15, 0);
     bool neg = act < 0;
     int t = abs(act);
     byte sec = t % 60;
     byte min = (t - sec) / 60;
     if (neg)
     {
-      lcd.print("-");
+      display.print("-");
       seg7.setSegments(MND, 1, 0);
       if (min <= 0)
-        lcd.print("0");
-      lcd.print(min);
+        display.print("0");
+      display.print(min);
       seg7.showNumberDec(min, false, 1, 1);
     }
     else
     {
       if (min <= 9)
-        lcd.print("0");
-      lcd.print(min);
+        display.print("0");
+      display.print(min);
       seg7.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
     }
-    lcd.print(":");
+    display.print(":");
     if (sec <= 9)
-      lcd.print("0");
-    lcd.print(sec);
+      display.print("0");
+    display.print(sec);
     seg7.showNumberDec(sec, true, 2, 2);
     if ((act % 900) == 0)
     {
@@ -655,9 +663,9 @@ void showTime(int act)
 
 void clearRow(uint8_t row)
 {
-  lcd.setCursor(0, row);
-  lcd.print("                    ");
-  lcd.setCursor(0, row);
+  display.setCursor(0, row);
+  display.print("                    ");
+  display.setCursor(0, row);
 }
 
 void dblBeep()
@@ -698,8 +706,8 @@ void showStrikes()
     if (x < strikes)
     {
       pixel.setPixelColor(x, RED);
-      lcd.setCursor(10 + x, 0);
-      lcd.print('*');
+      display.setCursor(10 + x, 0);
+      display.print('*');
     }
   }
   pixel.show();
@@ -707,19 +715,19 @@ void showStrikes()
 
 void printHeader(bool withVersion)
 {
-  lcd.setCursor(0, 0);
-  lcd.print(F("HI-Tane "));
+  display.setCursor(0, 0);
+  display.print(F("HI-Tane "));
   if (withVersion)
-    lcd.print(F(Version));
+    display.print(F(Version));
 
   strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
-  lcd.print(buffer[0]);
+  display.print(buffer[0]);
 }
 
 void printWelcome()
 {
-  lcd.setCursor(0, 1);
-  lcd.print(F("Welcome"));
+  display.setCursor(0, 1);
+  display.print(F("Welcome"));
 }
 
 void LED(bool on)
@@ -745,12 +753,12 @@ void showResolved()
   clearRow(1);
   clearRow(2);
   clearRow(3);
-  lcd.setCursor(0, 1);
-  lcd.print(F("Hurray, you have"));
-  lcd.setCursor(0, 2);
-  lcd.print(F("unarmed the bomb"));
-  lcd.setCursor(0, 3);
-  lcd.print(F("Another game? <yes>"));
+  display.setCursor(0, 1);
+  display.print(F("Hurray, you have"));
+  display.setCursor(0, 2);
+  display.print(F("unarmed the bomb"));
+  display.setCursor(0, 3);
+  display.print(F("Another game? <yes>"));
   beep();
   while (true)
   {
@@ -770,10 +778,10 @@ void showFullyStriked()
   clearRow(1);
   clearRow(2);
   clearRow(3);
-  lcd.setCursor(0, 1);
-  lcd.print(F("sorry, you explodes!"));
-  lcd.setCursor(0, 3);
-  lcd.print(F("Another game? <yes>"));
+  display.setCursor(0, 1);
+  display.print(F("sorry, you explodes!"));
+  display.setCursor(0, 3);
+  display.print(F("Another game? <yes>"));
   beep();
   while (true)
   {
