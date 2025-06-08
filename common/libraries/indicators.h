@@ -1,5 +1,8 @@
 #ifndef INDICATORS_H
 #define INDICATORS_H
+
+// #define debug
+
 const uint8_t INDICATOR_COUNT = 11;
 
 // defining the flags
@@ -50,6 +53,15 @@ public:
         return count;
     }
 
+    void Generate()
+    {
+        byte indCount = random(1, 4);
+        for (byte x = 0; x < indCount; x++)
+        {
+            Add(random(INDICATOR_COUNT) + 1, random(2) == 0);
+        }
+    }
+
     void Add(byte ind, bool active)
     {
         if (count < 3)
@@ -78,7 +90,7 @@ public:
             if (indicators[i] > 0)
                 count++;
     }
-    
+
     bool IsActive(byte idx)
     {
         if (idx >= count)
@@ -93,18 +105,23 @@ public:
         return indicators[idx];
     }
 
-    bool hasIndicator(INDICATOR ind, bool active) {
+    bool hasIndicator(INDICATOR ind, bool active)
+    {
         int8_t pos = -1;
         // check if the indicator is in the list
-        for (byte x = 0; x < 3; x++) {
-            if (indicators[x] == ind) {
+        for (byte x = 0; x < 3; x++)
+        {
+            if (indicators[x] == ind)
+            {
                 pos = x;
             }
         }
-        if (pos < 0) return false; // indicator not found
+        if (pos < 0)
+            return false; // indicator not found
         // check if the state is equal
         return (indicatorsActive[pos] == active);
     }
+
 private:
     byte count;
     uint8_t indicators[3];

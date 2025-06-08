@@ -3,15 +3,17 @@
 #define debug
 #include <debug.h>
 
-
 #ifdef NN
 
 HIDisplay::HIDisplay()
 {
 }
 
-void HIDisplay::init()
+void HIDisplay::init(HTCOM &htcom, Indicators &indicators, SerialNumber &serialnumber)
 {
+    m_htcom = &htcom;
+    m_indicators = &indicators;
+    m_serialnumber = &serialnumber;
     Serial.begin(115200);
     Serial.println("----------");
     Serial.println("Welcome");

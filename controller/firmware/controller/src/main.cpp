@@ -6,18 +6,17 @@
 #include <timerOne.h>
 #include <avr/wdt.h>
 
-//#define debug
+// #define debug
 #include <debug.h>
+#include <globals.h>
 #include "indicators.h"
 #include "communication.h"
+#include "serialnumber.h"
 #include <game.h>
-#include <serialnumber.h>
 #include <pins_arduino.h>
 #include <display.h>
 
-#define Version "V0.1 " // always add an space at the end
-
-// Display
+// 7 seg  Display
 #define CLK 3
 #define DIO 2
 
@@ -52,22 +51,14 @@ const uint32_t GREEN = pixel.Color(0, 0xff, 0);
 
 // Tone
 const uint8_t BEEP_PIN = 9;
-// Communication
-HTCOM htcom;
 
 // --- forward-declared function prototypes:
 void showTime(int act);
 
-void clearRow(uint8_t row);
 void beep();
 void dblBeep();
 void hibeep();
-void generateSerialNumber();
-void generateIndicators();
 void initHTCOM();
-void printStatusLine();
-void printHeader(bool withVersion);
-void printWelcome();
 void initGame();
 void resetStrikes();
 void showStrikes();
@@ -86,12 +77,15 @@ void showFullyStriked();
 void reset();
 void printModules();
 
+// Communication
+HTCOM htcom;
 Indicators indicators;
-SerialNumber snr;
+SerialNumber serialnumber;
+char buffer[30];
+
 uint32_t color = BLUE;
 int gameTime = 60 * 60;
 long start;
-char buffer[30];
 Difficulty difficulty = Difficulty::SIMPLE;
 Difficulty sdiff = Difficulty::SIMPLE;
 bool started, paused;
@@ -132,7 +126,7 @@ void setup()
   randomSeed(analogRead(0));
 
   dbgOutLn(F("init display"));
-  display.init();
+  display.init(htcom, indicators, serialnumber);
   display.clear();
 
   dbgOutLn(F("init game"));
@@ -147,32 +141,36 @@ void initGame()
   display.clear();
 
   dbgOutLn(F("print header"));
-  printHeader(true);
+  display.printHeader(true);
   dbgOutLn(F("print welcome"));
-  printWelcome();
+  display.printWelcome();
 
   dbgOutLn(F("generate serial number"));
-  generateSerialNumber();
+  serialnumber.Generate();
+#ifdef debug
+  dbgOut(F("Serialnumber is: "));
+  serialnumber.String(buffer);
+  dbgOut(buffer);
+  dbgOutLn();
+#endif
 
   dbgOutLn(F("generate indicators"));
-  generateIndicators();
+  indicators.Generate();
 
-  dbgOutLn(F("print status"));
-  printStatusLine();
-
-  //  htcom = HTCOM(COM_PIN, 44);
   dbgOutLn("htcom init");
   initHTCOM();
   resetStrikes();
-  
+
   dbgOutLn("htcom init ready");
+  delay(1000);
 }
 
-void initHTCOM() {
+void initHTCOM()
+{
   htcom = HTCOM();
   htcom.attach(ID_CONTROLLER);
   htcom.sendCtrlInitialisation();
-  htcom.setCtrlSerialNumber(snr.Get());
+  htcom.setCtrlSerialNumber(serialnumber.Get());
   htcom.setCtrlDifficulty(difficulty);
   htcom.setCtrlIndicators(indicators.Compress());
 }
@@ -212,9 +210,7 @@ void loop()
     if (serr != err)
     {
       serr = err;
-      clearRow(2);
-      strcpy_P(buffer, (char *)pgm_read_word(&(ERROR_MESSAGES[err])));
-      display.print(buffer);
+      display.printError(err);
     }
   }
   else
@@ -222,7 +218,7 @@ void loop()
     if (serr > 0)
     {
       serr = 0;
-      clearRow(2);
+      display.clearError();
     }
   }
   if (!started)
@@ -239,13 +235,10 @@ void loop()
     }
   }
   if (resolved)
-  {
     showResolved();
-  }
+
   if (fullyStriked)
-  {
     showFullyStriked();
-  }
 }
 
 void calculateActGameTime()
@@ -262,7 +255,7 @@ void showMenu()
   if (line != sline)
   {
     sline = line;
-    clearRow(1);
+    display.clearrow(1);
     display.setCursor(0, 1);
     switch (sline)
     {
@@ -303,7 +296,7 @@ void showMenu()
   case 0:
     if (clickEnc.getButton() == Button::Clicked)
     {
-      clearRow(1);
+      display.clearrow(1);
       display.noCursor();
       display.noBlink();
       startGame();
@@ -477,6 +470,8 @@ void startGame()
   resetStrikes();
   pixel.setBrightness(16 * htcom.getBrightness());
   seg7.setBrightness(htcom.getBrightness() >> 1);
+  display.setBrightness(16 * htcom.getBrightness());
+  
   htcom.initModules();
   htcom.sendCtrlInitialisation();
   byte count = 100;
@@ -489,8 +484,7 @@ void startGame()
   htcom.setCtrlDifficulty(difficulty);
   htcom.sendCtrlGameSettings();
 
-  clearRow(0);
-  printHeader(false);
+  display.printHeader(false);
 
   dblBeep();
   started = true;
@@ -517,97 +511,10 @@ void startGame()
   }
 
 #endif
-  printModules();
-}
+  // printModules();
 
-void printModules()
-{
-  clearRow(1);
-  clearRow(2);
-  dbgOut(F("print modules "));
-  dbgOutLn2(mcnt, DEC);
-  display.setCursor(0, 1);
-  for (byte idx = 0; idx < mcnt; idx++)
-  {
-    byte mod = htcom.getInstalledModuleID(idx);
-    if (mod != ID_NONE)
-    {
-      strcpy_P(buffer, (char *)pgm_read_word(&(MODULE_LABELS[mod - MOD_OFFSET])));
-      display.print(buffer);
-      if (htcom.isModuleState(mod, ModuleState::DISARMED))
-      {
-        display.print(F(" "));
-      }
-      else
-      {
-        display.print(F("*"));
-      }
-    }
-    if (idx >= 5)
-    {
-      display.setCursor(0, 2);
-    }
-  }
-}
-
-void generateSerialNumber()
-{
-  snr.Generate();
-  Serial.print("Serialnumber is: ");
-  snr.String(buffer);
-  Serial.println(buffer);
-}
-
-void generateIndicators()
-{
-  byte indCount = random(1, 4);
-#ifdef debug
-  Serial.print("ind: ");
-  Serial.print(indCount);
-  Serial.println();
-#endif
-
-  for (byte x = 0; x < indCount; x++)
-  {
-    indicators.Add(random(INDICATOR_COUNT) + 1, random(2) == 0);
-  }
-#ifdef debug
-  for (byte x = 0; x < indicators.Count(); x++)
-  {
-    byte idx = indicators.Get(x);
-    strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
-    Serial.print(idx);
-    Serial.print(" ");
-    if (indicators.IsActive(x))
-    {
-      Serial.print("#");
-    }
-    Serial.println(buffer);
-  }
-  Serial.println(indicators.Compress(), BIN);
-#endif
-}
-
-void printStatusLine()
-{
-  clearRow(3);
-  snr.String(buffer);
-  display.print(buffer);
-
-  for (byte x = 0; x < indicators.Count(); x++)
-  {
-    byte idx = indicators.Get(x);
-    display.print(" ");
-    if (indicators.IsActive(x))
-    {
-      display.print(char(0x23));
-    }
-    else
-    {
-    }
-    strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
-    display.print(buffer);
-  }
+  dbgOutLn(F("print status"));
+  display.printStatus();
 }
 
 int saveTime = 0;
@@ -616,35 +523,24 @@ void showTime(int act)
   if (act != saveTime)
   {
     saveTime = act;
-    printModules();
+    // printModules();
 
     htcom.sendCtrlHearbeat(act);
+    display.showTime(act);
 
-    display.setCursor(15, 0);
     bool neg = act < 0;
     int t = abs(act);
     byte sec = t % 60;
     byte min = (t - sec) / 60;
     if (neg)
     {
-      display.print("-");
       seg7.setSegments(MND, 1, 0);
-      if (min <= 0)
-        display.print("0");
-      display.print(min);
       seg7.showNumberDec(min, false, 1, 1);
     }
     else
     {
-      if (min <= 9)
-        display.print("0");
-      display.print(min);
       seg7.showNumberDecEx(min, 0b01000000 & (sec % 2) << 6, false, 2, 0);
     }
-    display.print(":");
-    if (sec <= 9)
-      display.print("0");
-    display.print(sec);
     seg7.showNumberDec(sec, true, 2, 2);
     if ((act % 900) == 0)
     {
@@ -659,13 +555,6 @@ void showTime(int act)
       hibeep();
     }
   }
-}
-
-void clearRow(uint8_t row)
-{
-  display.setCursor(0, row);
-  display.print("                    ");
-  display.setCursor(0, row);
 }
 
 void dblBeep()
@@ -699,35 +588,15 @@ void resetStrikes()
 
 void showStrikes()
 {
+  display.showStrikes();
   byte strikes = htcom.getStrikes();
   for (uint8_t x = 0; x < 3; x++)
   {
     pixel.setPixelColor(x, GREEN);
     if (x < strikes)
-    {
       pixel.setPixelColor(x, RED);
-      display.setCursor(10 + x, 0);
-      display.print('*');
-    }
   }
   pixel.show();
-}
-
-void printHeader(bool withVersion)
-{
-  display.setCursor(0, 0);
-  display.print(F("HI-Tane "));
-  if (withVersion)
-    display.print(F(Version));
-
-  strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
-  display.print(buffer[0]);
-}
-
-void printWelcome()
-{
-  display.setCursor(0, 1);
-  display.print(F("Welcome"));
 }
 
 void LED(bool on)
@@ -747,18 +616,10 @@ bool checkFullyStriked()
 
 void showResolved()
 {
-  clearRow(0);
-  printHeader(true);
+  display.clear();
+  display.printHeader(true);
+  display.resolved();
 
-  clearRow(1);
-  clearRow(2);
-  clearRow(3);
-  display.setCursor(0, 1);
-  display.print(F("Hurray, you have"));
-  display.setCursor(0, 2);
-  display.print(F("unarmed the bomb"));
-  display.setCursor(0, 3);
-  display.print(F("Another game? <yes>"));
   beep();
   while (true)
   {
@@ -772,16 +633,10 @@ void showResolved()
 
 void showFullyStriked()
 {
-  clearRow(0);
-  printHeader(true);
+  display.clear();
+  display.printHeader(true);
+  display.fullyStriked();
 
-  clearRow(1);
-  clearRow(2);
-  clearRow(3);
-  display.setCursor(0, 1);
-  display.print(F("sorry, you explodes!"));
-  display.setCursor(0, 3);
-  display.print(F("Another game? <yes>"));
   beep();
   while (true)
   {

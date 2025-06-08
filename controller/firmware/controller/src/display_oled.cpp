@@ -1,9 +1,10 @@
 #include <display.h>
+
+#ifdef OLED
+
 #include "Arduino.h"
 #define debug
 #include <debug.h>
-
-#ifdef OLED
 #include <U8g2lib.h>
 
 #define CHAR_WIDTH 1
@@ -15,8 +16,11 @@ HIDisplay::HIDisplay()
 {
 }
 
-void HIDisplay::init()
+void HIDisplay::init(HTCOM &htcom, Indicators &indicators, SerialNumber &serialnumber)
 {
+    m_htcom = &htcom;
+    m_indicators = &indicators;
+    m_serialnumber = &serialnumber;
     initDebug();
     dbgOutLn("init display");
     oled.begin();
