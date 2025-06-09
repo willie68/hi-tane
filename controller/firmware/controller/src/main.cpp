@@ -255,50 +255,39 @@ void showMenu()
   if (line != sline)
   {
     sline = line;
-    display.clearrow(1);
-    display.setCursor(0, 1);
+    display.showMenuKey(sline);
     switch (sline)
     {
     case 0:
-      display.print(F("start Game? yes"));
-      display.setCursor(12, 1);
-      display.cursor();
-      display.noBlink();
+      display.showValueCursor();
+      display.setCursorToValue();
+      display.print(F("yes"));
       break;
     case 1:
-      display.print(F("Difficulty:"));
-      display.setCursor(12, 1);
+      display.hideValueCursor();
+      display.setCursorToValue();
       strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
       display.print(buffer);
-      display.setCursor(12, 1);
-      display.cursor();
-      display.noBlink();
       break;
     case 2:
-      display.print(F("Brigthness:"));
-      display.setCursor(12, 1);
+      display.hideValueCursor();
+      display.setCursorToValue();
       display.print(brightness);
-      display.print(" ");
-      display.setCursor(12, 1);
-      display.cursor();
-      display.noBlink();
       break;
     case 3:
-      display.print(F("Gametime:  "));
+      display.hideValueCursor();
       gt2Display();
-      display.cursor();
-      display.noBlink();
       break;
     }
   }
+  //display.showValueCursor();
+
   switch (sline)
   {
   case 0:
     if (clickEnc.getButton() == Button::Clicked)
     {
-      display.clearrow(1);
-      display.noCursor();
-      display.noBlink();
+      display.hideMenu();
       startGame();
     }
     break;
@@ -306,14 +295,14 @@ void showMenu()
     if (difficulty != sdiff)
     {
       sdiff = difficulty;
-      display.setCursor(12, 1);
+      display.setCursorToValue();
       strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
       display.print(buffer);
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
       menuSetDifficulty();
-      display.setCursor(12, 1);
+      display.hideValueCursor();
       display.noBlink();
     }
     break;
@@ -321,15 +310,14 @@ void showMenu()
     if (brightness != sbr)
     {
       sbr = brightness;
-      display.setCursor(12, 1);
+      display.setCursorToValue();
       display.print(brightness);
       display.print(" ");
-      display.setCursor(12, 1);
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
       menuSetBrightness();
-      display.setCursor(12, 1);
+      display.hideValueCursor();
       display.noBlink();
     }
     break;
@@ -342,7 +330,7 @@ void showMenu()
     if (clickEnc.getButton() == Button::Clicked)
     {
       menuSetGameTime();
-      display.setCursor(10, 1);
+      display.hideValueCursor();
       display.noBlink();
     }
     break;
@@ -360,7 +348,7 @@ void showMenu()
 
 void menuSetDifficulty()
 {
-  display.setCursor(12, 1);
+  display.showValueCursor();
   display.blink();
   sbr = 0;
   bool ok = false;
@@ -376,9 +364,9 @@ void menuSetDifficulty()
     {
       sdiff = difficulty;
       strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[difficulty])));
-      display.setCursor(12, 1);
+      display.setCursorToValue();
       display.print(buffer);
-      display.setCursor(12, 1);
+      display.showValueCursor();
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
@@ -387,11 +375,12 @@ void menuSetDifficulty()
     }
   }
   display.noBlink();
+  display.printHeader(true);
 }
 
 void menuSetBrightness()
 {
-  display.setCursor(12, 1);
+  display.showValueCursor();
   display.blink();
   sbr = 0;
   bool ok = false;
@@ -410,15 +399,15 @@ void menuSetBrightness()
     if (brightness != sbr)
     {
       sbr = brightness;
-      display.setCursor(12, 1);
+      display.setCursorToValue();
       display.print(brightness);
-      display.print(" ");
-      display.setCursor(12, 1);
+      display.showValueCursor();
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
       htcom.setCtrlBrightness(brightness);
       pixel.setBrightness(brightness * 16);
+      display.setBrightness(brightness);
       ok = true;
     }
   }
@@ -427,7 +416,7 @@ void menuSetBrightness()
 
 void menuSetGameTime()
 {
-  display.setCursor(10, 1);
+  display.setCursorToValue();
   display.blink();
   sgt = 0;
   bool ok = false;
@@ -447,21 +436,22 @@ void menuSetGameTime()
     {
       sgt = gameTime;
       gt2Display();
+      display.showValueCursor();
     }
     if (clickEnc.getButton() == Button::Clicked)
     {
       ok = true;
     }
   }
+  display.hideValueCursor();
   display.noBlink();
 }
 
 void gt2Display()
 {
-  display.setCursor(10, 1);
+  display.setCursorToValue();
   display.print(gameTime / 60);
-  display.print(" min ");
-  display.setCursor(10, 1);
+  display.print(" min");
 }
 
 void startGame()
@@ -471,7 +461,7 @@ void startGame()
   pixel.setBrightness(16 * htcom.getBrightness());
   seg7.setBrightness(htcom.getBrightness() >> 1);
   display.setBrightness(16 * htcom.getBrightness());
-  
+
   htcom.initModules();
   htcom.sendCtrlInitialisation();
   byte count = 100;

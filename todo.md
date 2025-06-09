@@ -6,9 +6,6 @@
 
 ## Drähte
 
-- Es gibt einen mehrfachen Strike beim falschen herausziehen
-- Beim Spielneustart wird nicht neu initialisiert
-
 ## Maze
 
 ## Morse
@@ -16,6 +13,7 @@
 ## Simon Says
 
 ## Passwort
+- beim Umstellen der Schwierigkeit wird das Display nicht gelöscht.
 
 ## Gas
 

@@ -14,9 +14,7 @@ const uint8_t COLUMS = 20;
 const uint8_t ROWS = 4;
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 
-HIDisplay::HIDisplay()
-{
-}
+HIDisplay::HIDisplay() {}
 
 void HIDisplay::init(HTCOM &htcom, Indicators &indicators, SerialNumber &serialnumber)
 {
@@ -33,18 +31,14 @@ void HIDisplay::init(HTCOM &htcom, Indicators &indicators, SerialNumber &serialn
     lcd.clear();
 }
 
-void HIDisplay::setBrightness(uint8_t brightness) {
+void HIDisplay::setBrightness(uint8_t brightness)
+{
     m_brightness = brightness;
 }
 
 void HIDisplay::clear()
 {
     lcd.clear();
-}
-
-void HIDisplay::setCursor(uint8_t column, uint8_t row)
-{
-    lcd.setCursor(column, row);
 }
 
 void HIDisplay::noBlink()
@@ -57,21 +51,12 @@ void HIDisplay::blink()
     lcd.blink();
 };
 
-void HIDisplay::noCursor()
-{
-    lcd.noCursor();
-};
-
-void HIDisplay::cursor()
-{
-    lcd.cursor();
-};
-
 size_t HIDisplay::write(uint8_t character)
 {
     return lcd.write(character);
 }
 
+// convenient functions for the game controller
 void HIDisplay::printHeader(bool withVersion)
 {
     clearrow(0);
@@ -189,6 +174,38 @@ void HIDisplay::clearrow(uint8_t row)
     lcd.setCursor(0, row);
     lcd.print("                    ");
     lcd.setCursor(0, row);
+}
+
+void HIDisplay::showMenuKey(byte mk)
+{
+    char buffer[30];
+    clearrow(1);
+    strcpy_P(buffer, (char *)pgm_read_word(&(MENU_KEYS[mk])));
+    lcd.print(buffer);
+}
+
+void HIDisplay::setCursorToValue()
+{
+    clearrow(2);
+    lcd.setCursor(0, 2);
+}
+
+void HIDisplay::showValueCursor()
+{
+    lcd.setCursor(0, 2);
+    lcd.cursor();
+};
+
+void HIDisplay::hideValueCursor()
+{
+    lcd.noCursor();
+    lcd.noBlink();
+};
+
+void HIDisplay::hideMenu() {
+    clearrow(1);
+    clearrow(2);
+    hideValueCursor();
 }
 
 void HIDisplay::printModules()

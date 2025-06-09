@@ -26,7 +26,8 @@ Folgende Module sind geplant:
 - Simon says: ähnlich unserem Senso
 - Password: finde das richtige Passwort
 - Morse: Höre und Antworte
-- 
+- Needy Gas: ein Modul was ab und zu mal etwas Aufmerksamkeit benötigt
+- Symbols: Ordne die Symbole
 
 ## Allgemein
 
@@ -57,6 +58,8 @@ Als Controller dient ein Arduino Nano mit folgender Peripherie:
 - Ein Lautsprecher als Beeper, später evtl. ein MP3 Modul
 - ein 4-stelliges 7-Segment Display für die Spielzeitanzeige
 - 3 RGB LEDs als Strikecounter
+### Controller, die 2.
+Es gibt eine weitere Version des COntrollers. Diese arbeitet nur mit einem 128x64 OLED Display. Sämtliche Angaben sind auf diesem zu finden. Die OLED VErsion wird über einen Schalter in der display.h aktiviert. Der Controler 2 ist genau ein Modul groß.Hauptsächlich dient er der Entwicklung neuer Module. 
 
 ## 6x6 Maze: finde den Weg zum Ausgang
 

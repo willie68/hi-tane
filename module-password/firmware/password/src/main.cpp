@@ -69,6 +69,7 @@ void initDisplay()
 
 void initGame()
 {
+  u8x8.clearDisplay();
   // game.setGameDifficulty(Difficulty::HARD);
   byte wd = random(PWD_COUNT);
   dbgOutLn("init game");

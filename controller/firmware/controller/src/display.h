@@ -9,7 +9,7 @@
 // only one of this should be active
 // #define NN
 #define LCD
-// #define OLED
+//#define OLED
 
 class HIDisplay : public Print
 {
@@ -20,13 +20,9 @@ public:
     void setBrightness(uint8_t brightness);
 
     void clear();
-    void setCursor(uint8_t column, uint8_t row);
-    void clearrow(uint8_t row);
 
     void noBlink();
     void blink();
-    void noCursor();
-    void cursor();
 
     void printHeader(bool withVersion);
     void printStatus();
@@ -42,6 +38,19 @@ public:
 
     size_t write(uint8_t character);
 
+    // setting up the menu mode
+    // showing the menu key
+    void showMenuKey(byte mk);
+    // clear the value, position the cursor to the value start point, ready for printing a value
+    void setCursorToValue();
+    // position the cursor to the value start and show a cursor
+    void showValueCursor();
+    // hiding the cursor
+    void hideValueCursor();
+    // hiding the whole menu
+    void hideMenu();
+
+    // something for debugging
     void printModules();
 
 private:
@@ -49,6 +58,8 @@ private:
     Indicators *m_indicators;
     SerialNumber *m_serialnumber;
     uint8_t m_brightness;
+
+    void clearrow(uint8_t row);
 };
 
 #endif
