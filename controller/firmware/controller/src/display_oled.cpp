@@ -11,9 +11,7 @@
 
 U8X8_SH1106_128X64_NONAME_HW_I2C oled(19, 18);
 
-HIDisplay::HIDisplay()
-{
-}
+HIDisplay::HIDisplay(){}
 
 void HIDisplay::init(HTCOM &htcom, Indicators &indicators, SerialNumber &serialnumber)
 {
@@ -42,13 +40,9 @@ void HIDisplay::clear()
     oled.clear();
 }
 
-void HIDisplay::noBlink() {
-    // lcd.noBlink();
-};
+void HIDisplay::noBlink() {};
 
-void HIDisplay::blink() {
-    // lcd.blink();
-};
+void HIDisplay::blink() {};
 
 size_t HIDisplay::write(uint8_t character)
 {
@@ -58,98 +52,92 @@ size_t HIDisplay::write(uint8_t character)
 // convenient functions for the game controller
 void HIDisplay::printHeader(bool withVersion)
 {
-    clearrow(0);
     char buffer[30];
-    oled.setCursor(0, 0);
-    oled.print(F("HI-Tane "));
-    if (withVersion)
-        oled.print(F(Version));
-
+    clearrow(0);
+    oled.print(F(lb_game_name));
     oled.print(" ");
+    if (withVersion)
+    {
+        oled.print(F(lb_version));
+        oled.print(" ");
+    }
+
     strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[m_htcom->getDifficulty()])));
     oled.print(buffer[0]);
 }
 
-void HIDisplay::printStatus() {
-    /*
+void HIDisplay::printStatus()
+{
     char buffer[30];
-    clearrow(3);
+    clearrow(4);
     m_serialnumber->String(buffer);
-    lcd.print(buffer);
-
+    oled.print(buffer);
+    clearrow(6);
     // print indicators
     for (byte x = 0; x < m_indicators->Count(); x++)
     {
         byte idx = m_indicators->Get(x);
-        lcd.print(" ");
+        if (x > 0)
+        {
+            oled.print(" ");
+        }
         if (m_indicators->IsActive(x))
         {
-            lcd.print(char(0x23));
-        }
-        else
-        {
+            oled.print(char(0x23));
         }
         strcpy_P(buffer, (char *)pgm_read_word(&(INDICATORNAMES[idx])));
-        lcd.print(buffer);
+        oled.print(buffer);
     }
-    */
 };
 
 void HIDisplay::printWelcome()
 {
     clearrow(2);
-    oled.setCursor(0, 2);
-    oled.print(F("Welcome"));
+    oled.print(F(lb_welcome));
 }
 
 void HIDisplay::showTime(int act)
 {
-    /*
-    lcd.setCursor(15, 0);
+    oled.setCursor(11, 0);
     bool neg = act < 0;
     int t = abs(act);
     byte sec = t % 60;
     byte min = (t - sec) / 60;
     if (neg)
     {
-        lcd.print("-");
+        oled.print("-");
         if (min <= 0)
-        lcd.print("0");
-        lcd.print(min);
+            oled.print("0");
+        oled.print(min);
     }
     else
     {
         if (min <= 9)
-        lcd.print("0");
-        lcd.print(min);
+            oled.print("0");
+        oled.print(min);
     }
-    lcd.print(":");
+    oled.print(":");
     if (sec <= 9)
-    lcd.print("0");
-    lcd.print(sec);
-    */
+        oled.print("0");
+    oled.print(sec);
 }
 
 void HIDisplay::showStrikes()
 {
-    /*
+    clearrow(2);
     byte strikes = m_htcom->getStrikes();
     for (uint8_t x = 0; x < strikes; x++)
     {
-        lcd.setCursor(11 + x, 0);
-        lcd.print('*');
+        oled.print('*');
     }
-    */
 }
 
 void HIDisplay::printError(byte err)
 {
-    /*
     char buffer[30];
     clearrow(2);
     strcpy_P(buffer, (char *)pgm_read_word(&(ERROR_MESSAGES[err])));
-    lcd.print(buffer);
-    */
+    oled.print(buffer);
 }
 
 void HIDisplay::clearError()
@@ -157,24 +145,24 @@ void HIDisplay::clearError()
     clearrow(2);
 }
 
-void HIDisplay::resolved() {
-    /*
-    lcd.setCursor(0, 1);
-    lcd.print(F("Hurray, you "));
-    lcd.setCursor(0, 2);
-    lcd.print(F("defused the bomb"));
-    lcd.setCursor(0, 3);
-    lcd.print(F("Another game? <yes>"));
-    */
+void HIDisplay::resolved()
+{
+    oled.clearDisplay();
+    oled.setCursor(0, 2);
+    oled.print(F(lb_resolved_1));
+    oled.setCursor(0, 4);
+    oled.print(F(lb_resolved_2));
+    oled.setCursor(0, 6);
+    oled.print(F(lb_resolved_3));
 };
 
-void HIDisplay::fullyStriked() {
-    /*
-    lcd.setCursor(0, 1);
-    lcd.print(F("sorry, you exploded!"));
-    lcd.setCursor(0, 3);
-    lcd.print(F("Another game? <yes>"));
-    */
+void HIDisplay::fullyStriked()
+{
+    oled.clearDisplay();
+    oled.setCursor(0, 3);
+    oled.print(F(lb_striked_1));
+    oled.setCursor(0, 6);
+    oled.print(F(lb_resolved_3));
 };
 
 void HIDisplay::clearrow(uint8_t row)
@@ -204,7 +192,8 @@ void HIDisplay::showValueCursor()
     oled.print("*");
 };
 
-void HIDisplay::hideValueCursor() {
+void HIDisplay::hideValueCursor()
+{
     oled.setCursor(0, 4);
     oled.print(" ");
 };

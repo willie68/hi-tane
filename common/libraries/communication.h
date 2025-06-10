@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <mcp2515.h>
+#include <globals.h>
 
 const byte DEFAULT_BRIGHTNESS = 4;
 const byte CS_PIN = 10;
@@ -47,7 +48,7 @@ const byte MODULE_COUNT = 8;
 const byte modules[MODULE_COUNT] = {ID_CONTROLLER, ID_WIRES, ID_MAZE, ID_SIMON, ID_PASSWORD, ID_MORSE, ID_NGAS, ID_SYMBOLS};
 
 const char e_nn[] PROGMEM = "";
-const char e_we[] PROGMEM = "wires: invalid wire";
+const char e_we[] PROGMEM = lb_err_invalid_wires;
 
 const char *const ERROR_MESSAGES[] PROGMEM = {e_nn, e_we};
 

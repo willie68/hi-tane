@@ -261,7 +261,7 @@ void showMenu()
     case 0:
       display.showValueCursor();
       display.setCursorToValue();
-      display.print(F("yes"));
+      display.print(F(lb_yes));
       break;
     case 1:
       display.hideValueCursor();
@@ -451,7 +451,7 @@ void gt2Display()
 {
   display.setCursorToValue();
   display.print(gameTime / 60);
-  display.print(" min");
+  display.print(lb_short_minutes);
 }
 
 void startGame()

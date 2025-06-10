@@ -7,9 +7,9 @@
 #include "serialnumber.h"
 
 // only one of this should be active
-// #define NN
-#define LCD
-//#define OLED
+//#define NN
+//#define LCD
+#define OLED
 
 class HIDisplay : public Print
 {

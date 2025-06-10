@@ -12,6 +12,7 @@
 #include <indicators.h>
 #include <Adafruit_NeoPixel.h>
 #include <communication.h>
+#include "globals.h"
 
 using serial_t = char[6];
 
@@ -44,9 +45,9 @@ enum Difficulty
     NUM_DIFF = 3
 };
 
-const char gm_simple[] PROGMEM = "SIMPLE";
-const char gm_medium[] PROGMEM = "MEDIUM";
-const char gm_hard[] PROGMEM = "HARD  ";
+const char gm_simple[] PROGMEM = lb_gamemode_simple;
+const char gm_medium[] PROGMEM = lb_gamemode_medium;
+const char gm_hard[] PROGMEM = lb_gamemode_hard;
 const char gm_num[] PROGMEM = "      ";
 const char *const GAMEMODE_NAMES[] PROGMEM = {gm_simple, gm_medium, gm_hard, gm_num};
 

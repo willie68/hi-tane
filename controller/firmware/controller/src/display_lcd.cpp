@@ -62,9 +62,9 @@ void HIDisplay::printHeader(bool withVersion)
     clearrow(0);
     char buffer[30];
     lcd.setCursor(0, 0);
-    lcd.print(F("HI-Tane "));
+    lcd.print(F(lb_game_name));
     if (withVersion)
-        lcd.print(F(Version));
+        lcd.print(F(lb_version));
 
     lcd.print(" ");
     strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[m_htcom->getDifficulty()])));
@@ -99,7 +99,7 @@ void HIDisplay::printWelcome()
 {
     clearrow(1);
     lcd.setCursor(0, 1);
-    lcd.print(F("Welcome"));
+    lcd.print(F(lb_welcome));
 }
 
 void HIDisplay::showTime(int act)
@@ -154,25 +154,27 @@ void HIDisplay::clearError()
 void HIDisplay::resolved()
 {
     lcd.setCursor(0, 1);
-    lcd.print(F("Hurray, you "));
+    lcd.print(F(lb_resolved_1));
     lcd.setCursor(0, 2);
-    lcd.print(F("defused the bomb"));
+    lcd.print(F(lb_resolved_2));
     lcd.setCursor(0, 3);
-    lcd.print(F("Another game? <yes>"));
+    lcd.print(F(lb_resolved_3));
 };
 
 void HIDisplay::fullyStriked()
 {
     lcd.setCursor(0, 1);
-    lcd.print(F("sorry, you exploded!"));
+    lcd.print(F(lb_striked_1));
+    lcd.setCursor(0, 2);
+    lcd.print(F(lb_striked_2));
     lcd.setCursor(0, 3);
-    lcd.print(F("Another game? <yes>"));
+    lcd.print(F(lb_resolved_3));
 };
 
 void HIDisplay::clearrow(uint8_t row)
 {
     lcd.setCursor(0, row);
-    lcd.print("                    ");
+    lcd.print(F("                    "));
     lcd.setCursor(0, row);
 }
 
