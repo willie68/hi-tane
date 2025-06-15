@@ -88,3 +88,48 @@ Beim Aktivieren ertönt eine Morsecode. Dieser muss dechiffriert werden und ergi
 Ein Bild sagt mehr als 1000 Worte, Stand derzeit März 2025
 
 ![aufbau_01](./aufbau_01.jpg)
+
+Anhang
+
+Farbzuordnung
+
+CAN Bus
+
+| PIN  | Signal | Kabel   |
+| ---- | ------ | ------- |
+| 1    | INT    | grau    |
+| 2    | SCK    | gelb    |
+| 3    | SI     | orange  |
+| 4    | SO     | grün    |
+| 5    | CS     | weiß    |
+| 6    | GND    | schwarz |
+| 7    | VCC    | rot     |
+
+Power/CAN
+
+| PIN  | Signal | Kabel   |
+| ---- | ------ | ------- |
+| 1    | GND    | schwarz |
+| 2    | VCC    | rot     |
+| 3    | CAN-LO | weiß    |
+| 4    | CAN-HI | gelb    |
+
+RGB-LED
+
+| PIN  | Signal | Kabel   |
+| ---- | ------ | ------- |
+| 1    | VCC    | rot     |
+| 2    | GND    | schwarz |
+| 3    | Din    | gelb    |
+
+RJ12
+
+| PIN  | Signal | Kabel   |
+| ---- | ------ | ------- |
+| 1    | GND    | schwarz |
+| 2    | GND    | schwarz |
+| 3    | CAN-LO | weiß    |
+| 4    | CAN-HI | gelb    |
+| 5    | VCC    | rot     |
+| 6    | VCC    | rot     |
+
