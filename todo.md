@@ -12,9 +12,7 @@
 
 ## Simon Says
 
+- echtes Senso implementieren
+
 ## Passwort
-- beim Umstellen der Schwierigkeit wird das Display nicht gelöscht.
-
 ## Gas
-
-- wenn nicht aktiv sollte das modul inactive oder solved sein.
