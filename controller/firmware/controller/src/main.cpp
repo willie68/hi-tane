@@ -57,6 +57,7 @@ void showTime(int act);
 
 void beep();
 void dblBeep();
+void longbeep();
 void hibeep();
 void initHTCOM();
 void initGame();
@@ -76,6 +77,7 @@ void showResolved();
 void showFullyStriked();
 void reset();
 void printModules();
+void menuPaused();
 
 // Communication
 HTCOM htcom;
@@ -122,8 +124,10 @@ void setup()
   dbgOutLn(F("init timer"));
   timer.initialize(TIMER_NOTIFY_US);
   timer.attachInterrupt(timerIsr);
-  start = 0;
   randomSeed(analogRead(0));
+
+  htcom = HTCOM();
+  htcom.attach(ID_CONTROLLER);
 
   dbgOutLn(F("init display"));
   display.init(htcom, indicators, serialnumber);
@@ -134,8 +138,26 @@ void setup()
   LED(0);
 }
 
+// menu line to display, with save var
+int8_t line = 0;
+int8_t sline = 255;
+
+// save error number
+byte serr = 0;
+
+bool cmdStartGame = true;
+bool resolved = false;
+bool fullyStriked = false;
+byte brightness = DEFAULT_BRIGHTNESS;
+byte sbr = 0;
+int sgt = 0;
+int act;       // actual game time
+byte mcnt = 0; // module count
+
 void initGame()
 {
+  sline = 255;
+  start = 0;
   started = false;
   paused = false;
   display.clear();
@@ -167,41 +189,33 @@ void initGame()
 
 void initHTCOM()
 {
-  htcom = HTCOM();
-  htcom.attach(ID_CONTROLLER);
   htcom.sendCtrlInitialisation();
   htcom.setCtrlSerialNumber(serialnumber.Get());
   htcom.setCtrlDifficulty(difficulty);
   htcom.setCtrlIndicators(indicators.Compress());
 }
 
-// menu line to display, with save var
-int8_t line = 0;
-byte sline = 255;
-
-// save error number
-byte serr = 0;
-
-bool cmdStartGame = true;
-bool resolved = false;
-bool fullyStriked = false;
-byte brightness = DEFAULT_BRIGHTNESS;
-byte sbr = 0;
-int sgt = 0;
-int act;       // actual game time
-byte mcnt = 0; // module count
-
 void loop()
 {
   htcom.poll();
   if (started && !(paused))
   {
-    calculateActGameTime();
-    showTime(act);
-    if (htcom.isBeep())
+    if (!paused)
     {
-      dbgOutLn(F("beep from external"));
-      beep();
+      calculateActGameTime();
+      showTime(act);
+      if (htcom.isBeep())
+      {
+        dbgOutLn(F("beep from external"));
+        beep();
+      }
+    }
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      if (!paused)
+      {
+        menuPaused();
+      }
     }
   }
   if (htcom.hasCtrlError())
@@ -250,6 +264,58 @@ void calculateActGameTime()
   }
 }
 
+int8_t mpv, smpv; // menu paused value
+
+void menuPaused()
+{
+  longbeep();
+  paused = true;
+  htcom.setCtrlGamePaused(paused);
+  display.showMenuKey(4);
+  mpv = 0;
+  smpv = -1;
+  long st = millis();
+
+  while (paused)
+  {
+    htcom.poll();
+    if (mpv != smpv)
+    {
+      display.showValueCursor();
+      display.setCursorToValue();
+      strcpy_P(buffer, (char *)pgm_read_word(&(PAUSE_MENU_VALUES[mpv])));
+      display.print(buffer);
+      dbgOut(F("pause menu: "));
+      dbgOutLn(buffer);
+      smpv = mpv;
+    }
+    int16_t value = clickEnc.getIncrement();
+    if (value != 0)
+    {
+      value > 0 ? mpv++ : mpv--;
+      if (mpv > 1)
+        mpv = 1;
+      if (mpv < 0)
+        mpv = 0;
+    }
+    if (clickEnc.getButton() == Button::Clicked)
+    {
+      paused = false;
+    }
+  }
+  if (mpv == 1)
+  {
+    dblBeep();
+    initGame();                                         
+    return;
+  }
+  beep();
+  htcom.setCtrlGamePaused(paused);
+  display.printStatus();
+  long delta = millis() - st;
+  start = start + delta;
+}
+
 void showMenu()
 {
   if (line != sline)
@@ -280,7 +346,7 @@ void showMenu()
       break;
     }
   }
-  //display.showValueCursor();
+  // display.showValueCursor();
 
   switch (sline)
   {
@@ -560,6 +626,13 @@ void beep()
 {
   tone(BEEP_PIN, 440, 100);
   delay(100);
+  pinMode(BEEP_PIN, INPUT);
+}
+
+void longbeep()
+{
+  tone(BEEP_PIN, 440, 500);
+  delay(500);
   pinMode(BEEP_PIN, INPUT);
 }
 

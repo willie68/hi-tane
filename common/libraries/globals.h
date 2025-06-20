@@ -4,7 +4,7 @@
 #define deutsch
 //#define english
 
-#define lb_version "V 0.2"
+#define lb_version "V0.2a"
 #define lb_game_name "HI-Tane"
 
 #ifdef deutsch
@@ -13,6 +13,8 @@
 #define lb_difficulty "Schwierigkeit"
 #define lb_brigthness "Helligkeit"
 #define lb_gametime "Spielzeit"
+#define lb_paused "Spielpause"
+
 #define lb_yes "Ja"
 #define lb_gamemode_simple "Einfach"
 #define lb_gamemode_medium "Mittel "
@@ -28,6 +30,9 @@
 #define lb_striked_1 "Die Bombe"
 #define lb_striked_2 "ist explodiert."
 
+#define lb_pause_return "weiter"
+#define lb_pause_reset "abbrechen"
+
 #endif
 
 #ifdef english
@@ -36,6 +41,8 @@
 #define lb_difficulty "Difficulty"
 #define lb_brigthness "Brigthness"
 #define lb_gametime "Game time"
+#define lb_paused "Game paused"
+
 #define lb_yes "yes"
 #define lb_gamemode_simple "Easy  "
 #define lb_gamemode_medium "Medium"
@@ -51,6 +58,9 @@
 #define lb_striked_1 "sorry, you exploded!"
 #define lb_striked_2 ""
 
+#define lb_pause_return "return"
+#define mk_pause_reset "cancel"
+
 #endif
 
 
@@ -62,12 +72,22 @@ const char mk_start_game[] PROGMEM = lb_start_game;
 const char mk_difficulty[] PROGMEM = lb_difficulty;
 const char mk_brigthness[] PROGMEM = lb_brigthness;
 const char mk_gametime[] PROGMEM = lb_gametime;
+const char mk_paused[] PROGMEM = lb_paused;
 
 PGM_P const MENU_KEYS[] PROGMEM = {
     mk_start_game,
     mk_difficulty,
     mk_brigthness,
-    mk_gametime
+    mk_gametime,
+    mk_paused
 };
+
+const char mk_pause_return[] PROGMEM = lb_pause_return;
+const char mk_pause_reset[] PROGMEM = lb_pause_reset;
+PGM_P const PAUSE_MENU_VALUES[] PROGMEM = {
+    mk_pause_return,
+    mk_pause_reset
+};
+
 
 #endif

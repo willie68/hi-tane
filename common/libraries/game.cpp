@@ -195,6 +195,11 @@ bool Game::isState(ModuleState state)
     return m_state == state;
 };
 
+bool Game::isPaused()
+{
+    return m_htcom->isPaused();
+};
+
 void Game::sendError(byte err)
 {
     m_htcom->sendError(err);

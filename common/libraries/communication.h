@@ -58,6 +58,7 @@ enum COMMANDS
     MID_AMBIENTSETTINGS = 0x0002,
     MID_GAMESETTINGS = 0x0003,
     MID_INITIALISATION = 0x0004,
+    MID_GAME_PAUSED = 0x0005,
     MID_ERROR = 0x0300,
     MID_STATE = 0x0400,
     MID_STRIKE = 0x0500,
@@ -73,13 +74,13 @@ enum PARAMETER
 
 class HTCOM
 {
-    public:
+public:
     HTCOM(byte id);
     HTCOM();
-    
+
     void attach(byte id);
     void poll();
-    
+
     // module functions
     void sendArmed();
     void sendError(byte err);
@@ -88,38 +89,40 @@ class HTCOM
     int getGameTime();
     byte getDifficulty();
     uint16_t getIndicators();
-    
+
     bool hasNewStrikes();
     byte getStrikes();
     byte getBrightness();
     uint32_t getSerialNumber();
     bool isNewAmbSettings();
     bool isNewGameSettings();
-    
+    bool isPaused();
+
     void setGameDifficulty(byte dif);
     void sendModuleID();
     void sendBeep();
-    
-    // Controller only functions
-    #ifndef HI_MODULE
+
+// Controller only functions
+#ifndef HI_MODULE
     void setCtlrStrikes(byte strikes);
     void setCtrlSerialNumber(uint32_t srn);
     void setCtrlDifficulty(byte difficulty);
     void setCtrlBrightness(byte brightness);
     void setCtrlIndicators(word inds);
-    
+    void setCtrlGamePaused(bool paused);
+
     void sendCtrlHearbeat(word countdown);
     void sendCtrlGameSettings();
     void sendCtrlAmbientSettings();
     void sendCtrlInitialisation();
     void resetCtrlError();
-    
+
     bool hasCtrlError();
     byte getCtrlError();
     void setCtrlError(byte error);
-    
+
     bool isAllResolved();
-    
+
     void initModules();
     byte installedModuleCount();
     byte getInstalledModuleID(byte idx);
@@ -158,10 +161,12 @@ protected:
 #ifndef HI_MODULE
     void addToModuleList(byte moduleID);
     void updateModule(byte moduleID, ModuleState state);
-    
+
     bool m_toBeep;
     byte m_installedModules[MAX_INSTALLED_MODULES];
     byte m_stateOfModules[MAX_INSTALLED_MODULES];
+
+    bool m_paused;
 #endif
 };
 

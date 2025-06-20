@@ -90,6 +90,7 @@ public:
     bool isGameDifficulty(Difficulty difficulty);
     void setState(ModuleState state);
     bool isState(ModuleState state);
+    bool isPaused();
 
     void sendError(byte err);
 

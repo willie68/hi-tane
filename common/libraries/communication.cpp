@@ -25,6 +25,7 @@ void HTCOM::attach(uint8_t id)
     m_newAmbSettings = false;
     m_newGameSettings = false;
     m_newStrike = false;
+    m_paused = false;
     m_strikes = 0;
     m_brightness = DEFAULT_BRIGHTNESS;
 
@@ -80,10 +81,12 @@ void HTCOM::poll()
             break;
         case MID_HEARTBEAT:
             dbgOut(F("hb: "));
+            m_paused = false;
             m_gametime = (m_rcvCanMsg.data[0] << 8) + m_rcvCanMsg.data[1];
             {
                 byte strikes = m_rcvCanMsg.data[2];
-                if (strikes != m_strikes) {
+                if (strikes != m_strikes)
+                {
                     m_newStrike = true;
                 }
                 m_strikes = strikes;
@@ -115,6 +118,10 @@ void HTCOM::poll()
             dbgOut(" ");
             dbgOutLn2(m_snr, HEX);
             break;
+        case MID_GAME_PAUSED:
+            m_paused = true;
+            dbgOut("p:");
+            break;
 #ifndef HI_MODULE
         case MID_ERROR:
             setCtrlError(m_rcvCanMsg.data[0]);
@@ -137,8 +144,11 @@ void HTCOM::poll()
             break;
         case MID_STRIKE:
             dbgOutLn(F("s"));
-            m_strikes++;
-            m_newStrike = true;
+            if (!m_paused)
+            {
+                m_strikes++;
+                m_newStrike = true;
+            }
             break;
 #endif
         default:
@@ -289,6 +299,20 @@ void HTCOM::setCtrlBrightness(byte brightness)
 {
     m_brightness = brightness;
     sendCtrlAmbientSettings();
+}
+
+// the game is paused, will continue with a new heartbeat
+void HTCOM::setCtrlGamePaused(bool paused)
+{
+    m_paused = paused;
+    if (paused)
+    {
+        m_sndCanMsg.can_id = MID_GAME_PAUSED;
+        m_sndCanMsg.can_dlc = 1;
+        m_sndCanMsg.data[0] = 0x00;
+
+        m_mcp2515->sendMessage(&m_sndCanMsg);
+    }
 }
 
 // game settings will be sendet to all modules
@@ -478,6 +502,10 @@ bool HTCOM::isNewGameSettings()
         return true;
     }
     return false;
+}
+
+bool HTCOM::isPaused() {
+    return m_paused;
 }
 
 byte HTCOM::getDifficulty()
