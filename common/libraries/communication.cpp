@@ -24,6 +24,7 @@ void HTCOM::attach(uint8_t id)
 #endif
     m_newAmbSettings = false;
     m_newGameSettings = false;
+    m_difficulty = 0; // Difficulty::SIMPLE
     m_newStrike = false;
     m_paused = false;
     m_strikes = 0;

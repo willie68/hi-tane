@@ -3,7 +3,7 @@
 #ifdef LCD
 
 #include "Arduino.h"
-#define debug
+//#define debug
 #include <debug.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -22,10 +22,10 @@ void HIDisplay::init(HTCOM &htcom, Indicators &indicators, SerialNumber &serialn
     m_indicators = &indicators;
     m_serialnumber = &serialnumber;
     initDebug();
-    dbgOutLn("Welcome");
+    dbgOutLn(F("init display"));
     while (lcd.begin(COLUMS, ROWS, LCD_5x8DOTS) != 1) // colums, rows, characters size
     {
-        Serial.println(F("PCF8574 not connected or lcd pins is wrong."));
+        dbgOutLn(F("PCF8574 not connected or lcd pins is wrong."));
         delay(5000);
     }
     lcd.clear();
@@ -63,9 +63,10 @@ void HIDisplay::printHeader(bool withVersion)
     char buffer[30];
     lcd.setCursor(0, 0);
     lcd.print(F(lb_game_name));
-    if (withVersion)
+    if (withVersion) {
+        lcd.print(" ");
         lcd.print(F(lb_version));
-
+    }
     lcd.print(" ");
     strcpy_P(buffer, (char *)pgm_read_word(&(GAMEMODE_NAMES[m_htcom->getDifficulty()])));
     lcd.print(buffer[0]);
@@ -94,6 +95,11 @@ void HIDisplay::printStatus()
         lcd.print(buffer);
     }
 };
+
+void HIDisplay::hideStatus()
+{
+    clearrow(3);
+}
 
 void HIDisplay::printWelcome()
 {
@@ -141,14 +147,14 @@ void HIDisplay::showStrikes()
 void HIDisplay::printError(byte err)
 {
     char buffer[30];
-    clearrow(2);
+    clearrow(3);
     strcpy_P(buffer, (char *)pgm_read_word(&(ERROR_MESSAGES[err])));
     lcd.print(buffer);
 }
 
 void HIDisplay::clearError()
 {
-    clearrow(2);
+    clearrow(3);
 }
 
 void HIDisplay::resolved()

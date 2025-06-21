@@ -6,7 +6,7 @@
 #include <timerOne.h>
 #include <avr/wdt.h>
 
-// #define debug
+#define debug
 #include <debug.h>
 #include <globals.h>
 #include "indicators.h"
@@ -78,6 +78,7 @@ void showFullyStriked();
 void reset();
 void printModules();
 void menuPaused();
+void pixelHide();
 
 // Communication
 HTCOM htcom;
@@ -161,6 +162,8 @@ void initGame()
   started = false;
   paused = false;
   display.clear();
+  seg7.clear();
+  pixelHide();
 
   dbgOutLn(F("print header"));
   display.printHeader(true);
@@ -182,8 +185,8 @@ void initGame()
   dbgOutLn("htcom init");
   initHTCOM();
   resetStrikes();
-
   dbgOutLn("htcom init ready");
+
   delay(1000);
 }
 
@@ -271,7 +274,9 @@ void menuPaused()
   longbeep();
   paused = true;
   htcom.setCtrlGamePaused(paused);
+  display.hideStatus();
   display.showMenuKey(4);
+
   mpv = 0;
   smpv = -1;
   long st = millis();
@@ -306,11 +311,12 @@ void menuPaused()
   if (mpv == 1)
   {
     dblBeep();
-    initGame();                                         
+    initGame();
     return;
   }
   beep();
   htcom.setCtrlGamePaused(paused);
+  display.hideMenu();
   display.printStatus();
   long delta = millis() - st;
   start = start + delta;
@@ -719,3 +725,9 @@ void reset()
   {
   }
 }
+
+void pixelHide()
+{
+  pixel.clear();
+  pixel.show();
+};

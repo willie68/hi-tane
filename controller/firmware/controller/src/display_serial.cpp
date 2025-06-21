@@ -91,6 +91,12 @@ void HIDisplay::printStatus()
     terminal.println();
 };
 
+void HIDisplay::hideStatus()
+{
+    clearrow(2);
+}
+
+
 void HIDisplay::printWelcome()
 {
     clearrow(1);

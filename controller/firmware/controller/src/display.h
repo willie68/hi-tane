@@ -27,6 +27,7 @@ public:
     void printHeader(bool withVersion);
     void printStatus();
     void printWelcome();
+    void hideStatus();
     void showTime(int t);
     void showStrikes();
 
@@ -53,11 +54,13 @@ public:
     // something for debugging
     void printModules();
 
+
 private:
     HTCOM *m_htcom;
     Indicators *m_indicators;
     SerialNumber *m_serialnumber;
     uint8_t m_brightness;
+    uint8_t m_sstrikes;
 
     void clearrow(uint8_t row);
 };

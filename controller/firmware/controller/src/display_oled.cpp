@@ -11,7 +11,7 @@
 
 U8X8_SH1106_128X64_NONAME_HW_I2C oled(19, 18);
 
-HIDisplay::HIDisplay(){}
+HIDisplay::HIDisplay() {}
 
 void HIDisplay::init(HTCOM &htcom, Indicators &indicators, SerialNumber &serialnumber)
 {
@@ -90,6 +90,12 @@ void HIDisplay::printStatus()
     }
 };
 
+void HIDisplay::hideStatus()
+{
+    clearrow(4);
+    clearrow(6);
+}
+
 void HIDisplay::printWelcome()
 {
     clearrow(2);
@@ -124,11 +130,13 @@ void HIDisplay::showTime(int act)
 
 void HIDisplay::showStrikes()
 {
-    clearrow(2);
-    byte strikes = m_htcom->getStrikes();
-    for (uint8_t x = 0; x < strikes; x++)
-    {
-        oled.print('*');
+    if (m_htcom->hasNewStrikes()) {
+        clearrow(2);
+        byte strikes = m_htcom->getStrikes();
+        for (uint8_t x = 0; x < strikes; x++)
+        {
+            oled.print('*');
+        }
     }
 }
 
