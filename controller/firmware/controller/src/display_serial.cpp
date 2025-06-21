@@ -7,7 +7,7 @@
 #include <debug.h>
 #include <globals.h>
 #include <game.h>
-#include <retroTerm.h> 
+#include <retroTerm.h>
 
 retroTerm terminal;
 
@@ -96,7 +96,6 @@ void HIDisplay::hideStatus()
     clearrow(2);
 }
 
-
 void HIDisplay::printWelcome()
 {
     clearrow(1);
@@ -162,15 +161,20 @@ void HIDisplay::resolved()
     terminal.print(F(lb_resolved_1));
     terminal.print(' ');
     terminal.println(F(lb_resolved_2));
-    terminal.println(F(lb_resolved_3));
+    newGame();
 };
 
 void HIDisplay::fullyStriked()
 {
     clear();
     terminal.println(F(lb_striked_1));
-    terminal.println(F(lb_resolved_3));
+    newGame();
 };
+
+void HIDisplay::newGame()
+{
+    terminal.println(F(lb_new_game));
+}
 
 void HIDisplay::clearrow(uint8_t row)
 {

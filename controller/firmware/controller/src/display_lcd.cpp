@@ -3,7 +3,7 @@
 #ifdef LCD
 
 #include "Arduino.h"
-//#define debug
+// #define debug
 #include <debug.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -63,7 +63,8 @@ void HIDisplay::printHeader(bool withVersion)
     char buffer[30];
     lcd.setCursor(0, 0);
     lcd.print(F(lb_game_name));
-    if (withVersion) {
+    if (withVersion)
+    {
         lcd.print(" ");
         lcd.print(F(lb_version));
     }
@@ -163,8 +164,7 @@ void HIDisplay::resolved()
     lcd.print(F(lb_resolved_1));
     lcd.setCursor(0, 2);
     lcd.print(F(lb_resolved_2));
-    lcd.setCursor(0, 3);
-    lcd.print(F(lb_resolved_3));
+    newGame();
 };
 
 void HIDisplay::fullyStriked()
@@ -173,9 +173,14 @@ void HIDisplay::fullyStriked()
     lcd.print(F(lb_striked_1));
     lcd.setCursor(0, 2);
     lcd.print(F(lb_striked_2));
-    lcd.setCursor(0, 3);
-    lcd.print(F(lb_resolved_3));
+    newGame();
 };
+
+void HIDisplay::newGame()
+{
+    lcd.setCursor(0, 3);
+    lcd.print(F(lb_new_game));
+}
 
 void HIDisplay::clearrow(uint8_t row)
 {
@@ -210,7 +215,8 @@ void HIDisplay::hideValueCursor()
     lcd.noBlink();
 };
 
-void HIDisplay::hideMenu() {
+void HIDisplay::hideMenu()
+{
     clearrow(1);
     clearrow(2);
     hideValueCursor();

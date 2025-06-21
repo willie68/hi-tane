@@ -130,7 +130,8 @@ void HIDisplay::showTime(int act)
 
 void HIDisplay::showStrikes()
 {
-    if (m_htcom->hasNewStrikes()) {
+    if (m_htcom->hasNewStrikes())
+    {
         clearrow(2);
         byte strikes = m_htcom->getStrikes();
         for (uint8_t x = 0; x < strikes; x++)
@@ -160,18 +161,24 @@ void HIDisplay::resolved()
     oled.print(F(lb_resolved_1));
     oled.setCursor(0, 4);
     oled.print(F(lb_resolved_2));
-    oled.setCursor(0, 6);
-    oled.print(F(lb_resolved_3));
+    newGame();
 };
 
 void HIDisplay::fullyStriked()
 {
     oled.clearDisplay();
-    oled.setCursor(0, 3);
+    oled.setCursor(0, 2);
     oled.print(F(lb_striked_1));
-    oled.setCursor(0, 6);
-    oled.print(F(lb_resolved_3));
+    oled.setCursor(0, 4);
+    oled.print(F(lb_striked_2));
+    newGame();
 };
+
+void HIDisplay::newGame()
+{
+    oled.setCursor(0, 6);
+    oled.print(F(lb_new_game));
+}
 
 void HIDisplay::clearrow(uint8_t row)
 {

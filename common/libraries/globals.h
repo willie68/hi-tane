@@ -24,8 +24,8 @@
 #define lb_err_invalid_wires "wires: falsche Kabel"
 
 #define lb_resolved_1 "Prima, die Bombe"
-#define lb_resolved_2 "ist entschÃ¤rft."
-#define lb_resolved_3 "neues Spiel? Ja"
+#define lb_resolved_2 "ist entschärft."
+#define lb_new_game "neues Spiel? Ja"
 
 #define lb_striked_1 "Die Bombe"
 #define lb_striked_2 "ist explodiert."

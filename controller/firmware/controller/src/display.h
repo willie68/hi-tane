@@ -63,6 +63,7 @@ private:
     uint8_t m_sstrikes;
 
     void clearrow(uint8_t row);
+    void newGame();
 };
 
 #endif
