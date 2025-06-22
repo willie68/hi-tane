@@ -32,7 +32,7 @@ Folgende Module sind geplant:
 
 ## Kommunikation
 
-Wie schon weiter oben beschrieben, alle Module und der Controller kommunizieren miteinander. Die Kommunikation basiert auf Nachrichten, die zwischen den Modulen ausgetauscht werden. Da alle Module sowohl untereinander wie auch zentral mit dem Controller kommunizieren müssen, bietet aich ein Bussystem an. Jeder Beteiligte kann über diesen Bus Nachrichten senden und empfangen. Soweit die Theorie. Zunächst einmal welche Nachrichten werden ausgetauscht:
+Wie schon weiter oben beschrieben, alle Module und der Controller kommunizieren miteinander. Die Kommunikation basiert auf Nachrichten, die zwischen den Modulen ausgetauscht werden. Da alle Module sowohl untereinander wie auch zentral mit dem Controller kommunizieren müssen, bietet sich ein Bussystem an. Jeder Beteiligte kann über diesen Bus Nachrichten senden und empfangen. Soweit die Theorie. Zunächst einmal welche Nachrichten werden ausgetauscht:
 
 - Heartbeat: Während des Spieles sendet der Controller regelmäßig eine Heartbeat Signal. Dieses enthält die aktuelle Zeit und die bereits registrierten Strikes.
 - Ambientsettings: diese Message sendet der Controller allen Modulen. Sie enthält Einstellungen für das Spiel, wie z.B. Helligkeit, Farben usw.
@@ -44,21 +44,56 @@ Wie schon weiter oben beschrieben, alle Module und der Controller kommunizieren 
 - Modulinit: Antwort des Modules auf die Initialisation Meldung
 - Beep: Das Modul sendet diese Meldung an den Controller, wenn dieser einmal piepen soll.
 
-Nachdem wir nun wissen, was so alles an Nachrichten ausgetauscht werden soll, ging es an die Auswahl des Busses. Zunächst habe ich es mit PJON versucht. 
+Nachdem wir nun wissen, was so alles an Nachrichten ausgetauscht werden soll, ging es an die Auswahl des Busses. Dabei gibt es verschiedenen Möglichkeiten. Da ich ein Freund von KISS bin (keep it simple smart), habe ich zunächst mit den verschiedenen Möglichkeiten, die der Controller selber bietet, gespielt.
 
-PJON ist ein übergreifendes BUS-System, was mit einem PIN an dem Microcontroller auskommt. Die PINs der beteiligten Controller werden alle als Bus zusammen geschaltet, und diese Leitung an beiden Enden mit einem entsprechenden Widerstand terminiert. Der Hardwareaufwand ist sehr gering. Alles weitere passiert in der Software. Leider ist das auch schon das größte Problem. Wenn das Modul neben der eigentlichen Spielesteuerung auch noch durch die Kommunikation belastet wird, kommt es häufig dazu, dass die Kommunikation leidet. PJON ist super für Sensor oder Aktor Bussysteme, wo die Slaves nicht viel weiteres zu tun haben, als die Sensoren/Aktoren zu bedienen. Für meinen Anwendungsfall war die Fehlerrate allerdings zu hoch. 
+Zunächst aber ein paar Umgebungsfaktoren
 
-Das nächste Protokoll, das ich versucht habe, ist RS485. Nachteile hier: die USART basierte serielle Schnittstelle wird auch für den Programmupload verwendet, was gerade beim Debugging sehr störend ist. Die Busarbitrierung ist bei RS485 schwierig. Man muss ein eigenes Halbduplex-Protokoll selber schreiben. Z.B. ein Token-Protokoll oder ein reines Master-Slave. Letztendlich war mir die Zeit dazu zu knapp. 
+- Einfache Handhabung auf der Hardwareseite. Am besten wären da 1 oder 2 Leitungen als Bus. Das macht die Verkabelung im Koffer einfacher. 
+- Einfaches API, d.h. ich hätte gerne nur wenig auf der Softwareseite zu programmieren. Nanos haben nun mal auch wenig Platz, 32KB Flash, 2KB RAM das ist z.B. für einen kompletten TCP-Stack zu wenig. 
+- Wenig CPU Ressourcen, optimal steuert sich die Kommunikationsschnittstelle selber, ohne das auf der CPU Seite viel Ressourcen verbraucht werden. 
 
-Letztendlich bin ich beim CAN-Bus gelandet. Vorteile:
+Nun welche einfachen Bussysteme im Nano Universum gibt es denn so:
 
-- eigene Hardware für die komplette Busverwaltung 
-- Messagefilter
-- kleine Modulgröße
-- einfache Programmierung
-- eigenes Protokoll beschränkt sich auf die Messagedefinition und -verarbeitung.
+### USB
 
-Alle Module sowie der Controller benutzen für den Bus das gleiche CAN-Bus Modul mit dem MCP2515. Deswegen konnte die gesamte Kommunikation in einer eigenen Bibliothek ausgelagert werden.
+USB, ja klar, jeder Nano hat ja bereits ein USB Interface eingebaut, zwar ist das "nur" ein Übersetzer der seriellen Schnittstelle auf USB, aber das wäre schon da. Und die serielle Kommunikation ist recht simple im Arduino implementierbar. 
+
+Nachteil: Man braucht ein Gegenüber, d.h. einen USB Host, der dann auch noch die ganzen vielen seriellen Schnittstellen verwaltet. Jedes Modul würde dann auf Hostseite eine serielle Schnittstelle erzeugen. Es gibt ja einen zentralen Controller, der müsste dann aber z.B. in einem Raspberry PI oder was ähnliches implementiert werden. Ein simpler Nano reicht da leider nicht aus. 
+
+Und USB ist kein wirkliches BUS System, da es Sternförmig aufgebaut ist, im Zentrum sitzt der Host, der zu allen Clients eine Verbindung besitzt. Jedwede Kommunikation läuft über diesen Host.
+
+### Serielle Schnittstelle
+
+Natürlich könnte man auch direkt mit der seriellen Schnittstelle ein Bussystem aufbauen. Ein Nachteil aller seriellen Lösungen, die mit der internen Schnittstelle vom Nano arbeiten , ist, dass man zum Programmupload eine evtl. angeschlossene Hardware von den Pins 0,1 trennen muss, damit nicht die Programmierung fehl schlägt.
+
+Variante 1: Ich verbinde die serielle Schnittstelle eines Moduls direkt mit dem Controller. Naja, da haben wir dann ein ähnliches Problem wie beim USB. Nur das wir jetzt so viele serielle Schnittstellen am Controller haben müssten, wie wir Module haben. Softwareseitig wäre das im Modul simpel, auf der Controllerseite aber recht herausfordernd. Mindestens  ein Mega müsste da her. Aber auch der hat nur 4 Hardwareschnittstellen, die weiteren müssten per SoftSerial erzeugt werden.
+
+Variante 2: Serielles Chaining, d.h. Controller TX -> RX1, TX1 -> RX2, TX2 -> RX3, ... TXn -> Controller RX, das ergibt einen Ring. Controller sendet nur an das erste Modul, das sendet an das 2. Modul ... das letzte Modul sendet an den Controller. OK, ich brauche pro Module nur 1. Schnittstelle und der Controller bräuchte auch nur eine. Das Protokoll müsste man wieder selber implementieren, Messages müssen ja durch alle Module durchgeleitet werden. Jede Meldung auf den "BUS" würde alle Module beschäftigen, weil das Modul die Meldung natürlich zumindest durchschleifen müsste. Das verzögert natürlich die Meldungen. Die Leitungen müssen aber immer einen Ring bilden. D.h. wenn ich ein Modul entferne muss ich die Leitungen irgendwie wieder zusammen fügen. Technisch zwar machbar, aber doch aufwendig. UNd leider müßte ich für eine effiziente Implementierung die hardware serielle Schnittstelle benutzen, die aber auch für die Porgrammierung der Boards verwendung findet. Zwar alles irgendwie lösbare Probleme, aber warum sollte man sich das Leben schwer machen. Weiter ging die Suche.
+
+### PJON
+
+Nicht vergessen möchte ich das Projekt PJON. (https://github.com/gioblu/PJON) Das Projekt implementiert einen 1 Pin Bus. D.h. man benötigt nur einen Pin am Nano und kann damit kommunizieren. Ich habe PJON schon in mehreren Projekten erfolgreich eingesetzt. Deswegen dachte ich, hier funktioniert das auch. Leider falsch. PJON funktioniert mit reinen Master/Slave System sehr gut. Ein Master verteilt Anforderungen, die Slaves hören nur darauf oder antworten nur, wenn der Master das fordert. Und nebenher haben die Slaves sonst nicht viel zu machen. Typische PJON Slaves wären Aktoren, wie z.B. Motoren, Schrittmotoren... oder Sensoren, z.B. das Auslesen eines Temperatursensors auf Aufforderung des Masters. In diesem Szenario funktioniert PJON gut. Wenn der Slave aber primär andere Sachen zu tun hat, wie in meinem Projekt ein kleines Spiel kontrollieren, dann wird die zeitnahe Aufnahme der Kommunikation zum Problem. PJON arbeitet ohne Interrupts, indem es einen langen Startimpuls sendet. Innerhalb dieses Impulses müssen alle angesprochenen Clients einmal auf den Bus hören, damit sie Empfangsbereit sind. Leider war das in einigen meiner Module nicht so möglich, ohne dass ich die einige Klimmzüge in der Bibliothek hätte machen müssen. Eine Umstellung auf Interruptbetrieb, zumindest für den Start der Kommunikation, führte auch nicht zum Erfolg. Immer wieder gingen Messages verloren. Vor allem der Heartbeat für die Spielzeit und die Strikes kamen nicht immer rechtzeitig an. Also das nächste einfache Bussystem.
+
+### RS485 
+
+RS485 wäre da eine weitere serielle Möglichkeit. Das ist ein echtes serielles Bussystem mit eigenen Modulen. Man kann zumindest jetzt ein einzelnes Modul entfernen ohne die anderen Module zu stören. Dazu braucht es aber spezielle Hardwaremodule. (https://de.wikipedia.org/wiki/EIA-485) 
+![RS485_module](./RS485_module.png)
+
+Was bleibt ist aber, jedes Modul muss immer noch alle Daten verarbeiten, zumindest um zu schauen, ob die Message für ihn interessant ist. Und auch ein entsprechendes Protokoll muss man selber implementieren. 
+
+Ich habe auch mit der RS485 in diesem Projekt experimentiert, die Ergebnisse waren durchwachsen. Theoretisch kann jeder Knoten einfach senden und empfangen, aber die Fehlerbehandlung, wenn z.B. 2 Module gleichzeitig senden muss man selber machen. Und man glaubt gar nicht, wie viel Kommunikation selbst bei so einem kleinen Projekt auf der Leitung landet. Nadelöhr war auch hier der Heartbeat. Der belastet das System so stark, dass es zu etlichen Busfehlern kommt. Ohne einen eindeutigen Master, der die Kommunikation regelt, geht es dabei nicht. 
+
+### CAN BUS
+
+So langsam wurde klar, ich brauche ein echtes BUS-System mit Modulen, die zumindest einen Teil der Kommunikation schon von der Hardwareseite aus unterstützen. Evtl. ein eigenes Protokoll implementieren, das Messageformat schon definiert haben und hardwareseitig unterstützen (Damit der MCU das nicht machen muss und sich um seine eigenen Aufgaben kümmern kann). Super wäre auch, wenn man direkt einen Filter auf der Hardwareseite konfigurieren könnte, damit die MCU nicht mit unnötigen Messages belastet wird. Wichtig und sinnvoll wäre da auch ein Multi Master Bus, d.h. es gibt keinen BUS-Master oder sowas, sondern jeder Knoten kann selbst ständig senden und kümmert sich auch selber um die BUS Verwaltung und das Resend im Fehlerfall. Alles das kann der CAN BUS. Und die entsprechenden Module sind sogar noch super günstig. (Kosten tatsächlich sogar weniger als die RS485 Module) Ich verwende diese MCP2515 Module: 
+
+<img src="./MCP2515_PCB.png" alt="MCP2515_PCB" style="zoom: 25%;" />
+
+Der MCP (plus den Transceiver) kümmert sich um die ganze Buslogik und hat sogar 2 verschiedene Filter implementiert. 
+
+CAN-BUS ist Nachrichten orientiert. Jede Nachricht hat eine eindeutige ID und darf nur von einem Sender gesendet werden. Wer was sendet und wer was empfängt muss man in seiner Applikation selber definieren. Dem BUS ist das erstmal egal. Da ich überall die gleichen MCUs (ATMega328, Arduino Nano) verwende und ich überall die gleiche Pinbelegung für den MCP benutzt, konnte ich eine einzige Bibliothek erstellen, die den gesamten Busverkehr aller beteiligten Module inkl. Controller zentral implementiert. 
+
+Noch ein großer Vorteil der CAN-BUS-Lösung ist, dass die serielle Schnittstelle frei bleibt und man jederzeit die Nanos neu programmieren kann. Einen Nachteil haben diese Module allerdings, Sie benötigen min. 4 Pins, CLK, SO, SI, CS. Den INT (interrupt) Pin braucht man nicht unbedingt. 
 
 ## Gehäuse
 
