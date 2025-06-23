@@ -17,8 +17,8 @@
 #include <display.h>
 
 // 7 seg  Display
-#define CLK 3
-#define DIO 2
+const uint8_t CLK = 3;
+const uint8_t DIO = 2;
 
 // 7-Segment LED Display
 const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
@@ -43,7 +43,7 @@ ClickEncoder clickEnc{PIN_ENCA, PIN_ENCB, PIN_BTN, ENC_STEPSPERNOTCH, BTN_ACTIVE
 HIDisplay display;
 
 // RGB LED
-#define LED_PIN 4
+const uint8_t LED_PIN = 4;
 Adafruit_NeoPixel pixel(3, LED_PIN, NEO_RGB + NEO_KHZ800);
 const uint32_t RED = pixel.Color(0xff, 0, 0);
 const uint32_t BLUE = pixel.Color(0, 0, 0xff);
@@ -65,7 +65,7 @@ void resetStrikes();
 void showStrikes();
 void startGame();
 void calculateActGameTime();
-void showMenu();
+void showSettingsMenu();
 void menuSetBrightness();
 void menuSetDifficulty();
 void menuSetGameTime();
@@ -77,7 +77,7 @@ void showResolved();
 void showFullyStriked();
 void reset();
 void printModules();
-void menuPaused();
+void showPausedMenu();
 void pixelHide();
 
 // Communication
@@ -217,7 +217,7 @@ void loop()
     {
       if (!paused)
       {
-        menuPaused();
+        showPausedMenu();
       }
     }
   }
@@ -239,7 +239,7 @@ void loop()
     }
   }
   if (!started)
-    showMenu();
+    showSettingsMenu();
 
   if (started)
   {
@@ -269,7 +269,7 @@ void calculateActGameTime()
 
 int8_t mpv, smpv; // menu paused value
 
-void menuPaused()
+void showPausedMenu()
 {
   longbeep();
   paused = true;
@@ -322,7 +322,7 @@ void menuPaused()
   start = start + delta;
 }
 
-void showMenu()
+void showSettingsMenu()
 {
   if (line != sline)
   {

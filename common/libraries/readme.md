@@ -1,6 +1,6 @@
 # Messages
 
-## CMD_HEARTBEAT
+## HEARTBEAT
 
 Heartbeat will be send every second to syncronise all modiules to the controller game time
 
@@ -10,11 +10,11 @@ Heartbeat will be send every second to syncronise all modiules to the controller
 
 **Priority:** high
 
-**ID:** 0x010
+**ID:** 0x0001
 
 **Payload:** gametime high, gametime low, strikes
 
-## CMD_GAMESETTINGS
+## GAMESETTINGS
 
 Game settings will be send short before starting the game. 
 
@@ -24,11 +24,11 @@ Game settings will be send short before starting the game.
 
 **Priority:** high
 
-**ID:** 0x011
+**ID:** 0x0003
 
-**Payload:** difficulty, indicators low, indicator high, snr  low, snr middle, snr high 
+**Payload:** (byte) difficulty, indicators low, indicator high, snr  low, snr middle, snr high 
 
-## CMD_AMBIENTSETTINGS
+## AMBIENTSETTINGS
 
 Ambient settings will be send if changed. 
 
@@ -38,13 +38,67 @@ Ambient settings will be send if changed.
 
 **Priority:** medium
 
-**ID:** 0x020
+**ID:** 0x0002
 
-**Payload:** brightness
+**Payload:** (byte) brightness
 
+## INITIALISATION
 
+this will be sended to evaluate which modules are installed.
 
-## CMD_STRIKE
+**Sender:** controller
+
+**Receiver:** every module
+
+**Priority:** medium
+
+**ID:** 0x0004
+
+**Payload:** n.n.
+
+## GAME PAUSED
+
+the game is paused until a new heartbeat occurs.
+
+**Sender:** controller
+
+**Receiver:** every module
+
+**Priority:** medium
+
+**ID:** 0x0005
+
+**Payload:** n.n.
+
+## ERROR
+
+Module error
+
+**Sender:** modul
+
+**Receiver:** controller
+
+**Priority:** medium
+
+**ID:** 0x03## (where ## is the module id)
+
+**Payload:** error number
+
+## STATE
+
+Module state
+
+**Sender:** modul
+
+**Receiver:** controller
+
+**Priority:** medium
+
+**ID:** 0x04## (where ## is the module id)
+
+**Payload:** module_id, state
+
+## STRIKE
 
 The module has a strike occured
 
@@ -54,13 +108,13 @@ The module has a strike occured
 
 **Priority:** medium
 
-**ID:** 0x03# (where # is the module id)
+**ID:** 0x05## (where ## is the module id)
 
 **Payload:** moduleID
 
-## CMD_DISARM
+## MODULEINIT
 
-The module has been disarmed
+The module confirms the init command
 
 **Sender:** every module
 
@@ -68,13 +122,13 @@ The module has been disarmed
 
 **Priority:** medium
 
-**ID:** 0x04# (where # is the module id)
+**ID:** 0x06## (where ## is the module id)
 
 **Payload:** moduleID
 
-## CMD_ERROR
+## BEEP
 
-The module has encountered an error
+Send a beep to the controller
 
 **Sender:** every module
 
@@ -82,7 +136,7 @@ The module has encountered an error
 
 **Priority:** medium
 
-**ID:** 0x05# (where # is the module id)
+**ID:** 0x0010
 
-**Payload:** moduleID, error number
+**Payload:** moduleID
 

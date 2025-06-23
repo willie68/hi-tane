@@ -15,7 +15,7 @@ bool answerCorrect();
 void showEffekt(bool solved);
 
 // RGB LED
-#define LED_PIN 4
+const byte LED_PIN = 4;
 // Game framework
 Game game(ModuleTag::PASSWORD, LED_PIN);
 
@@ -59,7 +59,7 @@ void initGame()
 
   uint32_t snr = game.getSerialNumber();
   serialNumber.Set(snr);
-  
+
   indicators = game.getIndicators();
 
   for (byte x = 0; x < indicators.Count(); x++)
@@ -93,7 +93,8 @@ void loop()
     u8x8.setCursor(5, 2);
     for (byte x = 0; x < indicators.Count(); x++)
     {
-      if (x > 0) {
+      if (x > 0)
+      {
         u8x8.print(" ");
       }
       byte idx = indicators.Get(x);
@@ -105,7 +106,7 @@ void loop()
       u8x8.print(buffer);
       u8x8.noInverse();
     }
-    }
+  }
 }
 
 void poll()

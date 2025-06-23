@@ -9,7 +9,7 @@
 #include <panel.h>
 
 // RGB LED
-#define LED_PIN 4
+const uint8_t LED_PIN = 4;
 // Game framework
 Game game(ModuleTag::WIRES, LED_PIN);
 
@@ -31,7 +31,8 @@ void setup()
 void loop()
 {
   game.poll();
-  if (game.isNewGameSettings()) {
+  if (game.isNewGameSettings())
+  {
     initGame();
   }
   if (game.isState(ModuleState::ARMED))
@@ -44,17 +45,18 @@ void loop()
     {
       dbgOutLn("Strike");
       game.setStrike();
-      while (panel.isStriken()) {
+      while (panel.isStriken())
+      {
         game.poll();
         delay(10);
       }
       byte count = 100;
-      while (count > 0) {
+      while (count > 0)
+      {
         game.poll();
         delay(10);
         count--;
       }
-      
     }
   }
   else if (!panel.isStriken() && game.isState(ModuleState::STRIKED))
@@ -87,4 +89,3 @@ void initGame()
   panel.printPlugs();
   game.arm();
 }
-

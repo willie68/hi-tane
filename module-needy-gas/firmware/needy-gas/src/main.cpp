@@ -4,17 +4,13 @@
 #include <avdweb_Switch.h>
 #include <U8g2lib.h>
 
-// operating in Wokwi
-//#define WOKWI
-//#define debug
-
 #include <debug.h>
 #include <game.h>
 #include "indicators.h"
 #include "communication.h"
 
 // RGB LED
-#define LED_PIN 4
+const byte LED_PIN = 4;
 // Game framework
 Game game(ModuleTag::NEEDY_GAS, LED_PIN);
 
@@ -138,14 +134,14 @@ void loop()
 void processWait()
 {
   word timeValue = (nextTime - millis()) / 1000;
-  #ifdef debug
+#ifdef debug
   if (stimevalue != timeValue)
   {
     stimevalue = timeValue;
     dbgOut(F("wait tv: "));
     dbgOutLn(timeValue);
   }
-  #endif
+#endif
   // show the minutes to the next question
   if (btr.singleClick() || btl.singleClick())
   {

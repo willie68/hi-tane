@@ -68,7 +68,7 @@ public:
     Game();
 
     void init();
-    
+
     bool hasIndicator(INDICATOR ind);
     Indicators getIndicators();
 
@@ -81,7 +81,7 @@ public:
     bool hasNewStrikes();
     byte getStrikes();
     byte getBrightness();
-    
+
     uint32_t getSerialNumber();
     bool snrHasVocal();
     bool snrIsLastDigitOdd();

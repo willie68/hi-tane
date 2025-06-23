@@ -11,14 +11,14 @@
 #include <game.h>
 
 // Game framework
-#define LED_PIN 4
+const uint8_t LED_PIN = 4;
 Game game(ModuleTag::SYMBOLS, LED_PIN);
 
-#define SCREEN_WIDTH 128 
-#define SCREEN_HEIGHT 32 
+const uint8_t SCREEN_WIDTH = 128;
+const uint8_t SCREEN_HEIGHT = 32;
 
-#define OLED_RESET -1       
-#define SCREEN_ADDRESS 0x3C 
+const int8_t OLED_RESET = -1;
+const uint8_t SCREEN_ADDRESS = 0x3C;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 Switch btn0 = Switch(5);
@@ -115,11 +115,12 @@ bool clicked[4];
 void checkBtnClick(uint8_t btn)
 {
   bool ok = true;
-  if (clicked[btn]) {
+  if (clicked[btn])
+  {
     invert(btn);
     clicked[btn] = true;
     display.display();
-    return ;
+    return;
   }
   for (uint8_t x = 0; x < 4; x++)
   {
@@ -180,7 +181,8 @@ void loop()
   }
   if (allClicked)
   {
-    if (game.isState(ModuleState::ARMED)) {
+    if (game.isState(ModuleState::ARMED))
+    {
       dbgOutLn(F("solved"));
       display.clearDisplay();
       display.setTextSize(2); // Draw 2X-scale text
@@ -218,6 +220,6 @@ void invert(uint8_t idx)
   display.fillRect(idx * 32, 0, 32, 32, SSD1306_INVERSE);
 }
 
-void showSolveEffekt() {
-
+void showSolveEffekt()
+{
 }

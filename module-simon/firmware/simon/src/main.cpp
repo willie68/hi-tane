@@ -7,17 +7,17 @@
 #include <button.h>
 
 // RGB LED
-#define LED_PIN 4
-#define COM_PIN 2
+const uint8_t LED_PIN = 4;
+const uint8_t COM_PIN = 2;
 
-#define LED_RED 3
-#define BTN_RED 14
-#define LED_BLUE 5
-#define BTN_BLUE 7
-#define LED_YELLOW 6
-#define BTN_YELLOW 8
-#define LED_GREEN 9
-#define BTN_GREEN 15
+const uint8_t LED_RED = 3;
+const uint8_t BTN_RED = 14;
+const uint8_t LED_BLUE = 5;
+const uint8_t BTN_BLUE = 7;
+const uint8_t LED_YELLOW = 6;
+const uint8_t BTN_YELLOW = 8;
+const uint8_t LED_GREEN = 9;
+const uint8_t BTN_GREEN = 15;
 
 Button btRed = Button(LED_RED, BTN_RED, RED);
 Button btBlue = Button(LED_BLUE, BTN_BLUE, BLUE);

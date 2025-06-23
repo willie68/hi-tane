@@ -18,8 +18,8 @@ void zoomIn();
 void setPixelXY(byte x, byte y, uint32_t color);
 
 // RGB LED
-#define LED_PIN 4
-#define COM_PIN 11
+const uint8_t LED_PIN = 4;
+const uint8_t COM_PIN = 11;
 // Game framework
 Game game(ModuleTag::MAZE, LED_PIN);
 

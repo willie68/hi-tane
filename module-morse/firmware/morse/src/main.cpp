@@ -14,19 +14,19 @@ byte getSlider();
 void poll();
 
 // RGB LED
-#define LED_PIN 4
+const uint8_t LED_PIN = 4;
 // Game framework
 Game game(ModuleTag::MORSE, LED_PIN);
 
-#define MORSE_BEEP_PIN 5
-#define SLIDER_PIN 0 // this is a0
-#define BUTTON_PIN 3
+const uint8_t MORSE_BEEP_PIN = 5;
+const uint8_t SLIDER_PIN = 0; // this is a0
+const uint8_t BUTTON_PIN = 3;
 
-#define MORSE_LED_PIN 7
-#define MORSE_LED_GND 6
+const uint8_t MORSE_LED_PIN = 7;
+const uint8_t MORSE_LED_GND = 6;
 
-#define CLK 8
-#define DIO 9
+const uint8_t CLK = 8;
+const uint8_t DIO = 9;
 // 7-Segment LED Display
 const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
 const uint8_t MND[] = {SEG_G};
@@ -67,14 +67,14 @@ void initGame()
   dbgOutLn2(wordFreq.frq, DEC);
   switch (game.getGameDifficulty())
   {
-    case Difficulty::SIMPLE:
-    case Difficulty::NUM_DIFF:
+  case Difficulty::SIMPLE:
+  case Difficulty::NUM_DIFF:
     morse.setDitLength(400);
     break;
-    case Difficulty::MEDIUM:
+  case Difficulty::MEDIUM:
     morse.setDitLength(250);
     break;
-    case Difficulty::HARD:
+  case Difficulty::HARD:
     morse.setDitLength(150);
     break;
   }

@@ -17,7 +17,7 @@ bool answerCorrect();
 void showEffekt(bool solved);
 
 // RGB LED
-#define LED_PIN 4
+const uint8_t LED_PIN = 4;
 // Game framework
 Game game(ModuleTag::PASSWORD, LED_PIN);
 
@@ -121,7 +121,7 @@ void initGame()
   dbgOutLn(input);
 
   solved = false;
-  
+
   game.arm();
 }
 
