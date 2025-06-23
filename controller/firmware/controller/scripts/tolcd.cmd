@@ -1,0 +1,1 @@
+copy diagram_lcd.json diagram.json
