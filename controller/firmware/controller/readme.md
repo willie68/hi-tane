@@ -31,3 +31,4 @@ oder das LCD
 
 Will man auch die wokwi Simulation entsprechend umschalten, öffne bitte ein terminal auf dem firmware-root und benutze die beiden Scripte `.\scripts\tooled.cmd` bzw `.\scripts\tolcd.cmd`.
 Diese kopieren die entsprechende diagram.json. Ein Reload des Simulators ist notwendig.
+
