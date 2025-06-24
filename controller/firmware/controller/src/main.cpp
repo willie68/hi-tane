@@ -9,10 +9,10 @@
 #define debug
 #include <debug.h>
 #include <globals.h>
-#include "indicators.h"
-#include "communication.h"
-#include "serialnumber.h"
-#include <game.h>
+#include <indicators.h>
+#include <communication.h>
+#include <serialnumber.h>
+#include <difficulty.h>
 #include <pins_arduino.h>
 #include <display.h>
 

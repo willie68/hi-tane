@@ -12,7 +12,8 @@
 #include <indicators.h>
 #include <Adafruit_NeoPixel.h>
 #include <communication.h>
-#include "globals.h"
+#include <difficulty.h>
+#include <globals.h>
 
 using serial_t = char[6];
 
@@ -37,22 +38,6 @@ enum ModuleTag
     SYMBOLS = ID_SYMBOLS
 };
 
-enum Difficulty
-{
-    SIMPLE = 0,
-    MEDIUM = 1,
-    HARD = 2,
-    NUM_DIFF = 3
-};
-
-const char gm_simple[] PROGMEM = lb_gamemode_simple;
-const char gm_medium[] PROGMEM = lb_gamemode_medium;
-const char gm_hard[] PROGMEM = lb_gamemode_hard;
-const char gm_num[] PROGMEM = "      ";
-const char *const GAMEMODE_NAMES[] PROGMEM = {gm_simple, gm_medium, gm_hard, gm_num};
-
-void nextDiff(Difficulty &diff);
-void prevDiff(Difficulty &diff);
 
 enum ERRORS
 {
@@ -72,7 +57,6 @@ public:
     bool hasIndicator(INDICATOR ind);
     Indicators getIndicators();
 
-    bool isSerialnumberOdd();
     word getGameTime();
     void arm();
     void setStrike();

@@ -2,7 +2,7 @@
 #define GLOBALS_H
 
 #define deutsch
-// #define english
+//#define english
 
 #define lb_version "V0.2a"
 #define lb_game_name "HI-Tane"
@@ -18,13 +18,13 @@
 #define lb_yes "Ja"
 #define lb_gamemode_simple "Einfach"
 #define lb_gamemode_medium "Mittel "
-#define lb_gamemode_hard "Schwer "
+#define lb_gamemode_hard   "Schwer "
 #define lb_short_minutes " min"
 
 #define lb_err_invalid_wires "wires: falsche Kabel"
 
 #define lb_resolved_1 "Prima, die Bombe"
-#define lb_resolved_2 "ist entsch�rft."
+#define lb_resolved_2 "ist entsch\xE4rft."
 #define lb_new_game "neues Spiel? Ja"
 
 #define lb_striked_1 "Die Bombe"
@@ -35,6 +35,7 @@
 
 #endif
 
+// strings for english
 #ifdef english
 #define lb_welcome "Welcome"
 #define lb_start_game "start game"
@@ -46,7 +47,7 @@
 #define lb_yes "yes"
 #define lb_gamemode_simple "Easy  "
 #define lb_gamemode_medium "Medium"
-#define lb_gamemode_hard "Hard  "
+#define lb_gamemode_hard   "Hard  "
 #define lb_short_minutes " min"
 
 #define lb_err_invalid_wires "wires: invalid wire"
@@ -63,8 +64,6 @@
 
 #endif
 
-// strings for english
-
 // Menu constants
 const char mk_start_game[] PROGMEM = lb_start_game;
 const char mk_difficulty[] PROGMEM = lb_difficulty;
@@ -77,12 +76,20 @@ PGM_P const MENU_KEYS[] PROGMEM = {
     mk_difficulty,
     mk_brigthness,
     mk_gametime,
-    mk_paused};
+    mk_paused
+};
 
 const char mk_pause_return[] PROGMEM = lb_pause_return;
 const char mk_pause_reset[] PROGMEM = lb_pause_reset;
 PGM_P const PAUSE_MENU_VALUES[] PROGMEM = {
     mk_pause_return,
-    mk_pause_reset};
+    mk_pause_reset
+};
+
+const char gm_simple[] PROGMEM = lb_gamemode_simple;
+const char gm_medium[] PROGMEM = lb_gamemode_medium;
+const char gm_hard[] PROGMEM = lb_gamemode_hard;
+const char gm_num[] PROGMEM = "      ";
+const char *const GAMEMODE_NAMES[] PROGMEM = {gm_simple, gm_medium, gm_hard, gm_num};
 
 #endif

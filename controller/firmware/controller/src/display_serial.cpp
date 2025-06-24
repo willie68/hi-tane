@@ -6,7 +6,7 @@
 #define debug
 #include <debug.h>
 #include <globals.h>
-#include <game.h>
+#include <difficulty.h>
 #include <retroTerm.h>
 
 retroTerm terminal;

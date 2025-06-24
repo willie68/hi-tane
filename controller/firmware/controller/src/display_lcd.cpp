@@ -8,7 +8,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <globals.h>
-#include <game.h>
+#include <difficulty.h>
 
 const uint8_t COLUMS = 20;
 const uint8_t ROWS = 4;

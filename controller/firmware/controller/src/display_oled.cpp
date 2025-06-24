@@ -7,7 +7,7 @@
 #include <debug.h>
 #include <U8g2lib.h>
 #include <globals.h>
-#include <game.h>
+#include <difficulty.h>
 
 U8X8_SH1106_128X64_NONAME_HW_I2C oled(19, 18);
 
