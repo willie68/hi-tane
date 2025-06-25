@@ -6,7 +6,7 @@
 #include <Adafruit_SSD1306.h>
 #include <avdweb_Switch.h>
 #include <symbols.h>
-#define debug
+//#define debug
 #include <debug.h>
 #include <game.h>
 

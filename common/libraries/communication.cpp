@@ -1,7 +1,7 @@
 #include "communication.h"
 #include <SPI.h>
 #include <mcp2515.h>
-#define debug
+//#define debug
 #include <debug.h>
 
 HTCOM::HTCOM()
@@ -121,7 +121,7 @@ void HTCOM::poll()
             break;
         case MID_GAME_PAUSED:
             m_paused = true;
-            dbgOut("p:");
+            dbgOut(F("p:"));
             break;
 #ifndef HI_MODULE
         case MID_ERROR:
@@ -155,7 +155,7 @@ void HTCOM::poll()
         default:
             dbgOut(F("unk: "));
             dbgOut2(rcvModule, DEC);
-            dbgOut(":");
+            dbgOut(F(":"));
             dbgOutLn2(m_rcvCanMsg.can_id, DEC);
             break;
         };
