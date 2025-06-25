@@ -118,7 +118,7 @@ void checkBtnClick(uint8_t btn)
   if (clicked[btn])
   {
     invert(btn);
-    clicked[btn] = true;
+    clicked[btn] = false;
     display.display();
     return;
   }
