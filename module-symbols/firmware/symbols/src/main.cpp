@@ -6,7 +6,7 @@
 #include <Adafruit_SSD1306.h>
 #include <avdweb_Switch.h>
 #include <symbols.h>
-#define debug
+//#define debug
 #include <debug.h>
 #include <game.h>
 
@@ -118,7 +118,7 @@ void checkBtnClick(uint8_t btn)
   if (clicked[btn])
   {
     invert(btn);
-    clicked[btn] = true;
+    clicked[btn] = false;
     display.display();
     return;
   }

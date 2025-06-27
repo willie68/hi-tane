@@ -157,6 +157,7 @@ protected:
     can_frame m_sndCanMsg;
     can_frame m_rcvCanMsg;
     MCP2515 *m_mcp2515;
+    bool m_paused;
 
 #ifndef HI_MODULE
     void addToModuleList(byte moduleID);
@@ -166,7 +167,6 @@ protected:
     byte m_installedModules[MAX_INSTALLED_MODULES];
     byte m_stateOfModules[MAX_INSTALLED_MODULES];
 
-    bool m_paused;
 #endif
 };
 
