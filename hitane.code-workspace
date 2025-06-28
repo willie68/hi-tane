@@ -45,6 +45,10 @@
 			"path": "module-symbols/firmware/symbols"
 		},
 		{
+			"name": "needy-capacity",
+			"path": "module-needy-capacity/firmware/needy-capacity"
+		},
+		{
 			"name": "hi-tane",
 			"path": "."
 		}

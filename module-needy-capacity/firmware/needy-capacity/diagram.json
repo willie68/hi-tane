@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "author": "Wilfried Klaas",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-nano", "id": "nano", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-neopixel", "id": "rgb1", "top": -41.9, "left": 66.2, "attrs": {} },
+    {
+      "type": "wokwi-7segment",
+      "id": "sevseg1",
+      "top": -235.02,
+      "left": -52.52,
+      "attrs": { "common": "cathode" }
+    },
+    {
+      "type": "wokwi-74hc595",
+      "id": "sr1",
+      "top": -126.8,
+      "left": -109.24,
+      "rotate": 180,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-7segment",
+      "id": "sevseg2",
+      "top": -235.82,
+      "left": 34.4,
+      "attrs": { "common": "cathode" }
+    },
+    {
+      "type": "wokwi-74hc595",
+      "id": "sr2",
+      "top": -126.8,
+      "left": -22.84,
+      "rotate": 180,
+      "attrs": {}
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": 127.94,
+      "left": 48.23,
+      "attrs": { "i2cAddress": "0x3c" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 259.1,
+      "left": 99.5,
+      "rotate": 90,
+      "attrs": { "color": "red", "xray": "1" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn2",
+      "top": 259.1,
+      "left": 22.7,
+      "rotate": 90,
+      "attrs": { "color": "red", "xray": "1" }
+    }
+  ],
+  "connections": [
+    [ "nano:4", "rgb1:DIN", "green", [ "v0" ] ],
+    [ "nano:GND.2", "rgb1:VSS", "black", [ "v0" ] ],
+    [ "nano:5V", "rgb1:VDD", "red", [ "v14.4", "h57.1", "v-134.4", "h-134.4", "v19.2" ] ],
+    [ "sevseg1:A", "sr1:Q0", "green", [ "v-27.96", "h-96", "v182.4", "h66.68" ] ],
+    [ "sevseg1:B", "sr1:Q1", "green", [ "v-37.56", "h-48", "v124.8", "h19.2", "v20" ] ],
+    [ "sevseg1:C", "sr1:Q2", "green", [ "v9.6", "h-28.8" ] ],
+    [ "sevseg1:D", "sr1:Q3", "green", [ "v9.6", "h-19.2" ] ],
+    [ "sevseg1:E", "sr1:Q4", "green", [ "v0", "h-19.2" ] ],
+    [ "sevseg1:F", "sr1:Q5", "green", [ "v-18.36", "h-38.4" ] ],
+    [ "sevseg1:G", "sr1:Q6", "green", [ "v-8.76", "h-48" ] ],
+    [ "sevseg1:DP", "sr1:Q7", "green", [ "v9.6", "h-86.4" ] ],
+    [ "sevseg2:A", "sr2:Q0", "green", [ "v-18.36", "h28.8", "v163.2", "h-58.12" ] ],
+    [ "sevseg2:B", "sr2:Q1", "green", [ "v-8.76", "h9.6", "v116" ] ],
+    [ "sevseg2:C", "sr2:Q2", "green", [ "v9.6", "h-28.8" ] ],
+    [ "sevseg2:D", "sr2:Q3", "green", [ "v9.6", "h-19.2" ] ],
+    [ "sevseg2:E", "sr2:Q4", "green", [ "v0", "h-19.2" ] ],
+    [ "sevseg2:F", "sr2:Q5", "green", [ "v-18.36", "h-38.4" ] ],
+    [ "sevseg2:G", "sr2:Q6", "green", [ "v-8.76", "h-48" ] ],
+    [ "sevseg2:DP", "sr2:Q7", "green", [ "v9.6", "h-86.4" ] ],
+    [ "sr1:Q7S", "sr2:DS", "green", [ "h0.52", "v26.8", "h134.4" ] ],
+    [ "sr2:MR", "sr2:VCC", "red", [ "v17.2", "h58.12" ] ],
+    [ "sr2:MR", "sr1:VCC", "red", [ "v17.2", "h-28.28" ] ],
+    [ "sr1:VCC", "sr1:MR", "red", [ "v17.2", "h-57.08" ] ],
+    [ "sr1:GND", "sr2:GND", "black", [ "v-10.4", "h86.92" ] ],
+    [ "sr2:GND", "sr2:OE", "black", [ "v-10.4", "h-9.08", "v57.6", "h38.4" ] ],
+    [ "sr2:OE", "sr1:OE", "black", [ "v17.2", "h-76.28" ] ],
+    [ "sr2:STCP", "sr1:STCP", "#8f4814", [ "v7.6", "h-86.4" ] ],
+    [ "sr2:SHCP", "sr1:SHCP", "gold", [ "v7.6", "h-85.88" ] ],
+    [ "nano:9", "sr1:SHCP", "gold", [ "v-14.4", "h-10.1" ] ],
+    [ "nano:8", "sr1:STCP", "#8f4814", [ "v-24", "h-134.9" ] ],
+    [ "nano:7", "sr1:DS", "blue", [ "v-33.6", "h-134.9" ] ],
+    [ "nano:GND.2", "sr2:OE", "black", [ "v-72", "h-106.1" ] ],
+    [ "sr2:VCC", "nano:5V", "red", [ "v17.2", "h134.4", "v154.4", "h-57.1" ] ],
+    [ "sevseg1:COM.2", "sevseg2:COM.2", "black", [ "v-47.16", "h86.4" ] ],
+    [ "sevseg2:COM.1", "sr2:GND", "black", [ "v29.6", "h-77.32" ] ],
+    [ "nano:5V", "oled1:VCC", "red", [ "v43.2", "h-29.3" ] ],
+    [ "nano:GND.1", "oled1:GND", "black", [ "v52.8", "h-58.1" ] ],
+    [ "oled1:SCL", "nano:A5", "gold", [ "v-48", "h-9.3" ] ],
+    [ "nano:A4", "oled1:SDA", "green", [ "v33.6", "h28.3" ] ],
+    [ "btn2:1.l", "nano:5", "gray", [ "v-28.8", "h124.8", "v-217.5", "h-105.1" ] ],
+    [ "nano:6", "btn1:2.l", "blue", [ "v-14.4", "h133.9", "v240", "h-86.2" ] ],
+    [ "nano:GND.1", "btn1:1.l", "black", [ "v52.8", "h18.7", "v124.8" ] ],
+    [ "btn1:1.l", "btn2:2.l", "black", [ "v-9.6", "h-95.8" ] ]
+  ],
+  "dependencies": {}
+}
