@@ -19,8 +19,7 @@ const byte LED_PIN = 4;
 // Game framework
 Game game(ModuleTag::NEEDY_CAPACITY, LED_PIN);
 
-Switch btr = Switch(6); // Button right
-Switch btl = Switch(5); // Button left
+const byte BUTTON_PIN = 6; // Button
 
 const byte latchPin = 8; // latch pin of the 74HC595
 const byte clockPin = 9; // clock pin of the 74HC595
@@ -35,31 +34,6 @@ Shift7Segment sseg = Shift7Segment(2, dataPin, clockPin, latchPin);
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-// Language Support :-)
-// #define EN
-#define DEU
-
-#ifdef EN
-// English
-const char LB_NOTHING[] = "Nothing to do";
-const char LB_VENTGAS[] = "    VENT GAS";
-const char LB_DETONATE[] = "    DETONATE";
-const char LB_YESNO[] = "YES          NO";
-const char LB_NOYES[] = "NO          YES";
-const char LB_SOLVED[] = "   SOLVED";
-const char LB_STRIKE[] = "   STRIKE";
-#endif
-#ifdef DEU
-// English
-const char LB_NOTHING[] = "Nichts zu tun  ";
-const char LB_VENTGAS[] = " Gas ablassen? ";
-const char LB_DETONATE[] = "  Detonieren   ";
-const char LB_YESNO[] = "Ja         Nein";
-const char LB_NOYES[] = "Nein         Ja";
-const char LB_SOLVED[] = "   RICHTIG";
-const char LB_STRIKE[] = "   FALSCH";
-#endif
-
 // --- forward functions
 void initDisplay();
 void initGame();
@@ -67,16 +41,17 @@ void poll();
 void showEffekt(bool solved);
 void showNeedy();
 void processWait();
-void processUser();
-void showNumber(byte timeValue);
+void processActive();
+void showLevel(int fillLevel);
 void showDigit(byte dg, byte v, byte y);
+void showNumber(byte timeValue);
 void showSegment(byte digit, byte seg, byte y);
 
 enum NeedyState
 {
   NS_INIT,
   NS_WAIT,
-  NS_USER
+  NS_ACTIVE
 };
 
 NeedyState state = NS_INIT;
@@ -87,6 +62,7 @@ void setup()
   Serial.println("init");
   randomSeed(analogRead(0));
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
 
   initDisplay();
 
@@ -107,23 +83,27 @@ void initDisplay()
   display.clearDisplay();
 }
 
-unsigned long nextTime;
+unsigned long activeTime;
 unsigned long stimevalue;
 bool changed = true;
 byte activeButton;
 unsigned long waitSec = 10;
-const unsigned long userSec = 60;
+unsigned long userSec = 90;
+byte filllevel = 0;
 
 void initGame()
 {
   state = NS_INIT;
+  // initial wait time, after this the module starts working
   waitSec = random(180, 600);
 #ifdef debug
-  waitSec = 10;
+  waitSec = 5;
+  userSec = 30;
 #endif
   dbgOutLn("wait: ");
   dbgOutLn(waitSec);
-  nextTime = millis() + (1000 * waitSec);
+  activeTime = millis() + (1000 * waitSec);
+  filllevel = 0;
   state = NS_WAIT;
 
   display.clearDisplay();
@@ -137,13 +117,14 @@ void loop()
   poll();
   if (state == NS_WAIT)
     processWait();
-  if (state == NS_USER)
-    processUser();
+  if (state == NS_ACTIVE)
+    processActive();
 }
 
+// Wait until the module is active
 void processWait()
 {
-  word timeValue = (nextTime - millis()) / 1000;
+  word timeValue = (activeTime - millis()) / 1000;
 #ifdef debug
   if (stimevalue != timeValue)
   {
@@ -153,113 +134,68 @@ void processWait()
     showNumber(timeValue);
   }
 #endif
-  // show the minutes to the next question
-  if (btr.singleClick() || btl.singleClick())
-  {
-    byte min = timeValue / 60;
-    Serial.print(min);
-    Serial.println(F("min to wait"));
-    sseg.showNumber(min);
-    for (byte i = 0; i < 60; i++)
-    {
-      game.poll();
-      delay(50);
-    }
-    sseg.clear();
-  }
-  if (millis() >= nextTime)
+  if (millis() >= activeTime)
   {
     changed = true;
-    state = NS_USER;
-    nextTime = millis() + (1000L * userSec);
+    state = NS_ACTIVE;
+    activeTime = millis() + (1000L * userSec);
     game.sendBeep();
     game.arm();
   }
 }
-
-void processUser()
+unsigned long lastCall = 0;
+byte fillSec = 0;
+int fillLevel = 0;
+word sFillTime = 0;
+unsigned long sTime = 0;
+// now the module is active and needs always some attention
+void processActive()
 {
-  byte timeValue = (nextTime - millis()) / 1000;
-  if (stimevalue != timeValue)
+  // right button clicked
+  if ((millis() - 100) > lastCall)
   {
-    stimevalue = timeValue;
-    dbgOut(F("user tv: "));
-    dbgOutLn(timeValue);
-    sseg.showNumber(timeValue);
-    showNumber(timeValue);
-    if (timeValue <= 10)
+    lastCall = millis();
+    word fillTime = userSec - word((long(fillLevel) * long(userSec) / 100L));
+    if (sFillTime != fillTime)
     {
-      game.sendBeep();
+      sFillTime = fillTime;
+      showNumber(fillTime);
+#ifdef debug
+      dbgOut(F("fillTime: "));
+      dbgOut(fillTime);
+      dbgOut(F("fillLevel: "));
+      dbgOutLn(fillLevel);
+#endif
     }
   }
-  showNeedy();
-  // right button clicked
-  if ((btr.singleClick() && (activeButton == 1)) || (btl.singleClick() && (activeButton == 0)))
+  if (sTime < millis())
   {
-    game.setSolved();
-  }
-  // Wrong button clicked
-  if ((btr.singleClick() && (activeButton == 0)) || (btl.singleClick() && (activeButton == 1)))
-  {
-    game.setStrike();
+    sTime = millis() + 1000;
+    if (digitalRead(BUTTON_PIN))
+    {
+      fillLevel = fillLevel + byte(60L / long(userSec));
+    }
+    else
+    {
+      fillLevel = fillLevel - (3 * byte(60L / long(userSec)));
+    }
+    fillLevel = min(fillLevel, 100);
+    fillLevel = max(0, fillLevel);
+    showLevel(fillLevel);
   }
   // Time over
-  if (millis() > nextTime)
+  if (fillLevel >= 100)
   {
     game.setStrike();
-  }
-  // strike, new game
-  if (game.isState(ModuleState::STRIKED))
-  {
-    showEffekt(false);
-    for (byte i = 0; i < 60; i++)
-    {
-      game.poll();
-      delay(50);
-    }
-    initGame();
-    return;
-  }
-  // solved, new game
-  if (game.isState(ModuleState::DISARMED))
-  {
-    showEffekt(true);
-    for (byte i = 0; i < 60; i++)
-    {
-      game.poll();
-      delay(50);
-    }
-    initGame();
-  }
-}
-
-void showNeedy()
-{
-  if (changed)
-  {
     display.clearDisplay();
-    byte t = random(2);
-    byte a = random(2);
-    /*
-    if (t == 0)
-    u8x8.drawString(0, 0, LB_VENTGAS);
-    else
-    u8x8.drawString(0, 0, LB_DETONATE);
-    if (a == 0)
-    u8x8.drawString(0, 2, LB_YESNO);
-    else
-    u8x8.drawString(0, 2, LB_NOYES);
-    */
-    switch (a + t)
+    showDigit(0, 10, 0);
+    showDigit(1, 10, 0);
+    display.fillRoundRect(0, 27, 31, 100, 6, SSD1306_WHITE);
+    display.display();
+    while (true)
     {
-    case 0:
-    case 2:
-      activeButton = 0; // button left
-      break;
-    case 1:
-      activeButton = 1; // button right
+      poll();
     }
-    changed = false;
   }
 }
 
@@ -270,24 +206,6 @@ void poll()
   {
     initGame();
   }
-  btr.poll();
-  btl.poll();
-}
-
-void showEffekt(bool solved)
-{
-  sseg.clear();
-  display.clearDisplay();
-  /*
-  if (solved)
-  {
-    u8x8.drawString(2, 1, LB_SOLVED);
-  }
-  else
-  {
-    u8x8.drawString(2, 1, LB_STRIKE);
-  }
-  */
 }
 
 #define SA 0
@@ -301,7 +219,7 @@ void showEffekt(bool solved)
 
 void showNumber(byte timeValue)
 {
-  display.clearDisplay();
+  display.fillRect(0, 0, 31, 27, SSD1306_BLACK);
   byte v = timeValue;
   showDigit(1, v % 10, 0);
   v = v / 10;
@@ -420,4 +338,12 @@ void showSegment(byte digit, byte seg, byte y)
   default:
     break;
   }
+}
+
+void showLevel(int fillLevel)
+{
+  display.fillRect(0, 27, 31, 100, SSD1306_BLACK);
+  display.drawRoundRect(0, 27, 31, 100, 6, SSD1306_WHITE);
+  display.fillRoundRect(0, 127 - fillLevel, 31, int16_t(fillLevel), 6, SSD1306_WHITE);
+  display.display();
 }
