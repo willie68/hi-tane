@@ -98,7 +98,7 @@ void initGame()
   waitSec = random(180, 600);
 #ifdef debug
   waitSec = 5;
-  userSec = 30;
+//  userSec = 30;
 #endif
   dbgOutLn("wait: ");
   dbgOutLn(waitSec);
@@ -143,48 +143,48 @@ void processWait()
     game.arm();
   }
 }
+
 unsigned long lastCall = 0;
 byte fillSec = 0;
-int fillLevel = 0;
-word sFillTime = 0;
+long fillLevel = 0; // as 10000 means 100%
+const long MAX_FILL = 10000;
+byte sFillTime = 0;
 unsigned long sTime = 0;
+const unsigned long cycleTime = 100;
+const unsigned long DISCHARGE_MULTI = 5L;
 // now the module is active and needs always some attention
 void processActive()
 {
+  unsigned long actTime = millis();
   // right button clicked
-  if ((millis() - 100) > lastCall)
+  if (lastCall < actTime)
   {
-    lastCall = millis();
-    word fillTime = userSec - word((long(fillLevel) * long(userSec) / 100L));
+    lastCall = actTime + 100;;
+    byte fillTime = userSec - byte(fillLevel * long(userSec) / MAX_FILL);
     if (sFillTime != fillTime)
     {
       sFillTime = fillTime;
       showNumber(fillTime);
-#ifdef debug
-      dbgOut(F("fillTime: "));
-      dbgOut(fillTime);
-      dbgOut(F("fillLevel: "));
-      dbgOutLn(fillLevel);
-#endif
     }
   }
-  if (sTime < millis())
+  if (sTime < actTime)
   {
-    sTime = millis() + 1000;
+    sTime = actTime + cycleTime;
+    long delta = (60UL * cycleTime) / (long(userSec) * 10UL);
     if (digitalRead(BUTTON_PIN))
     {
-      fillLevel = fillLevel + byte(60L / long(userSec));
+      fillLevel = fillLevel + delta;
     }
     else
     {
-      fillLevel = fillLevel - (3 * byte(60L / long(userSec)));
+      fillLevel = fillLevel - (DISCHARGE_MULTI * delta);
     }
-    fillLevel = min(fillLevel, 100);
+    fillLevel = min(fillLevel, MAX_FILL);
     fillLevel = max(0, fillLevel);
-    showLevel(fillLevel);
+    showLevel(fillLevel / 100);
   }
   // Time over
-  if (fillLevel >= 100)
+  if (fillLevel >= MAX_FILL)
   {
     game.setStrike();
     display.clearDisplay();

@@ -30,3 +30,5 @@
 common/schematic/logs/
 
 common/schematic/BackupFiles/
+
+module-needy-gas/firmware/needy-capacity/.vscode/
