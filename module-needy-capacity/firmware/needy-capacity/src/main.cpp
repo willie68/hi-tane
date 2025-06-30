@@ -9,7 +9,7 @@
 #include <Adafruit_SSD1306.h>
 
 #define debug       // enter debug mode
-#define short_cycle // create short cycle times
+//#define short_cycle // create short cycle times
 #include <debug.h>
 #include <game.h>
 #include "indicators.h"
@@ -44,6 +44,7 @@ void showNeedy();
 void processWait();
 void processActive();
 void strike();
+void fillPoly(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, int16_t c);
 void showLevel(int fillLevel);
 void showDigit(byte dg, byte v, byte y);
 void showNumber(byte timeValue);
@@ -94,7 +95,7 @@ unsigned long activeTime;
 unsigned long stimevalue;
 bool changed = true;
 byte activeButton;
-byte waitSec = 10;
+word waitSec = 10;
 byte userSec = 90;
 byte filllevel = 0;
 long delta = 0;
@@ -103,16 +104,16 @@ void initGame()
 {
   state = NS_INIT;
   // initial wait time, after this the module starts working
-  waitSec = random(180, 600);
+  waitSec = random(60, 600);
 #ifdef short_cycle
-  waitSec = 5;
+  waitSec = 1;
   userSec = 30;
 #endif
   dbgOut(F("wait: "));
   dbgOutLn(waitSec);
-  delta = (MAX_FILL * cycleTime / (userSec * 1000L));
+  delta = (MAX_FILL * cycleTime / (userSec * 1000UL));
 
-  activeTime = millis() + (1000 * waitSec);
+  activeTime = millis() + (1000UL * waitSec);
   filllevel = 0;
   state = NS_WAIT;
 
@@ -200,6 +201,7 @@ void strike()
   display.clearDisplay();
   showDigit(0, 10, 0);
   showDigit(1, 10, 0);
+
   display.fillRoundRect(0, 27, 31, 100, 6, SSD1306_WHITE);
 
   display.fillTriangle(0, 82, 12, 76, 0, 76, SSD1306_BLACK);
@@ -213,6 +215,12 @@ void strike()
   display.display();
   sseg.showSegments(0, 0x40);
   sseg.showSegments(1, 0x40);
+}
+
+void fillPoly(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, int16_t c)
+{
+  display.fillTriangle(x0, y0, x1, y1, x2, y2, c);
+  display.fillTriangle(x0, y0, x3, y3, x2, y2, c);
 }
 
 void poll()
