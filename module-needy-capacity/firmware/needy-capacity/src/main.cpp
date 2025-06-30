@@ -8,8 +8,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define debug       // enter debug mode
-//#define short_cycle // create short cycle times
+#define debug // enter debug mode
 #include <debug.h>
 #include <game.h>
 #include "indicators.h"
@@ -99,19 +98,24 @@ word waitSec = 10;
 byte userSec = 90;
 byte filllevel = 0;
 long delta = 0;
+long dischargeDelta = 0;
 
 void initGame()
 {
   state = NS_INIT;
   // initial wait time, after this the module starts working
   waitSec = random(60, 600);
-#ifdef short_cycle
-  waitSec = 1;
-  userSec = 30;
-#endif
+  waitSec = 10;
+  // userSec = 30;
   dbgOut(F("wait: "));
   dbgOutLn(waitSec);
+
   delta = (MAX_FILL * cycleTime / (userSec * 1000UL));
+  dischargeDelta = DISCHARGE_MULTI * delta;
+  dbgOut(F("charge with: "));
+  dbgOut(delta);
+  dbgOut(F(", discharge with: "));
+  dbgOutLn(dischargeDelta);
 
   activeTime = millis() + (1000UL * waitSec);
   filllevel = 0;
@@ -127,7 +131,7 @@ void loop()
 {
   poll();
   if (state == NS_WAIT)
-    processWait();
+  processWait();
   if (state == NS_ACTIVE)
     processActive();
 }
@@ -174,17 +178,24 @@ void processActive()
       sFillTime = fillTime;
       showNumber(fillTime);
       sseg.showNumber(fillTime);
+      dbgOut(F("fillTime: "));
+      dbgOut(fillTime);
     }
     if (digitalRead(BUTTON_PIN))
     {
+      game.setPixelColor(PX_RED);
       fillLevel = fillLevel + delta;
+      dbgOut(F(", charge, "));
     }
     else
     {
-      fillLevel = fillLevel - (DISCHARGE_MULTI * delta);
+      game.setPixelColor(PX_GREEN);
+      fillLevel = fillLevel - dischargeDelta;
+      dbgOut(F(", discharge, "));
     }
     fillLevel = min(fillLevel, MAX_FILL);
     fillLevel = max(0, fillLevel);
+    dbgOutLn(fillLevel);
     showLevel(fillLevel / 100);
   }
   // Time over
