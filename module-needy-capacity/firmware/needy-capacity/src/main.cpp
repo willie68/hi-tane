@@ -8,7 +8,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-#define debug
+#define debug       // enter debug mode
+#define short_cycle // create short cycle times
 #include <debug.h>
 #include <game.h>
 #include "indicators.h"
@@ -42,6 +43,7 @@ void showEffekt(bool solved);
 void showNeedy();
 void processWait();
 void processActive();
+void strike();
 void showLevel(int fillLevel);
 void showDigit(byte dg, byte v, byte y);
 void showNumber(byte timeValue);
@@ -51,7 +53,8 @@ enum NeedyState
 {
   NS_INIT,
   NS_WAIT,
-  NS_ACTIVE
+  NS_ACTIVE,
+  NS_DONE
 };
 
 NeedyState state = NS_INIT;
@@ -83,25 +86,32 @@ void initDisplay()
   display.clearDisplay();
 }
 
+const long MAX_FILL = 10000;
+const unsigned long cycleTime = 100; // cycletime in ms
+const unsigned long DISCHARGE_MULTI = 5L;
+
 unsigned long activeTime;
 unsigned long stimevalue;
 bool changed = true;
 byte activeButton;
-unsigned long waitSec = 10;
-unsigned long userSec = 90;
+byte waitSec = 10;
+byte userSec = 90;
 byte filllevel = 0;
+long delta = 0;
 
 void initGame()
 {
   state = NS_INIT;
   // initial wait time, after this the module starts working
   waitSec = random(180, 600);
-#ifdef debug
+#ifdef short_cycle
   waitSec = 5;
-//  userSec = 30;
+  userSec = 30;
 #endif
-  dbgOutLn("wait: ");
+  dbgOut(F("wait: "));
   dbgOutLn(waitSec);
+  delta = (MAX_FILL * cycleTime / (userSec * 1000L));
+
   activeTime = millis() + (1000 * waitSec);
   filllevel = 0;
   state = NS_WAIT;
@@ -124,8 +134,8 @@ void loop()
 // Wait until the module is active
 void processWait()
 {
-  word timeValue = (activeTime - millis()) / 1000;
 #ifdef debug
+  word timeValue = (activeTime - millis()) / 1000;
   if (stimevalue != timeValue)
   {
     stimevalue = timeValue;
@@ -147,30 +157,23 @@ void processWait()
 unsigned long lastCall = 0;
 byte fillSec = 0;
 long fillLevel = 0; // as 10000 means 100%
-const long MAX_FILL = 10000;
 byte sFillTime = 0;
 unsigned long sTime = 0;
-const unsigned long cycleTime = 100;
-const unsigned long DISCHARGE_MULTI = 5L;
 // now the module is active and needs always some attention
 void processActive()
 {
   unsigned long actTime = millis();
-  // right button clicked
-  if (lastCall < actTime)
+  if (sTime < actTime)
   {
-    lastCall = actTime + 100;;
+    sTime = actTime + cycleTime;
+
     byte fillTime = userSec - byte(fillLevel * long(userSec) / MAX_FILL);
     if (sFillTime != fillTime)
     {
       sFillTime = fillTime;
       showNumber(fillTime);
+      sseg.showNumber(fillTime);
     }
-  }
-  if (sTime < actTime)
-  {
-    sTime = actTime + cycleTime;
-    long delta = (60UL * cycleTime) / (long(userSec) * 10UL);
     if (digitalRead(BUTTON_PIN))
     {
       fillLevel = fillLevel + delta;
@@ -186,17 +189,30 @@ void processActive()
   // Time over
   if (fillLevel >= MAX_FILL)
   {
-    game.setStrike();
-    display.clearDisplay();
-    showDigit(0, 10, 0);
-    showDigit(1, 10, 0);
-    display.fillRoundRect(0, 27, 31, 100, 6, SSD1306_WHITE);
-    display.display();
-    while (true)
-    {
-      poll();
-    }
+    strike();
+    state = NS_DONE;
   }
+}
+
+void strike()
+{
+  game.setStrike();
+  display.clearDisplay();
+  showDigit(0, 10, 0);
+  showDigit(1, 10, 0);
+  display.fillRoundRect(0, 27, 31, 100, 6, SSD1306_WHITE);
+
+  display.fillTriangle(0, 82, 12, 76, 0, 76, SSD1306_BLACK);
+  display.fillTriangle(0, 76, 12, 72, 12, 76, SSD1306_BLACK);
+
+  display.fillTriangle(12, 76, 20, 80, 12, 72, SSD1306_BLACK);
+  display.fillTriangle(12, 72, 20, 76, 20, 80, SSD1306_BLACK);
+
+  display.fillTriangle(20, 80, 28, 74, 20, 76, SSD1306_BLACK);
+
+  display.display();
+  sseg.showSegments(0, 0x40);
+  sseg.showSegments(1, 0x40);
 }
 
 void poll()
@@ -208,14 +224,14 @@ void poll()
   }
 }
 
-#define SA 0
-#define SB 1
-#define SC 2
-#define SD 3
-#define SE 4
-#define SF 5
-#define SG 6
-#define SP 7
+#define SEG_A 0
+#define SEG_B 1
+#define SEG_C 2
+#define SEG_D 3
+#define SEG_E 4
+#define SEG_F 5
+#define SEG_G 6
+#define SEG_P 7
 
 void showNumber(byte timeValue)
 {
@@ -233,76 +249,76 @@ void showDigit(byte dg, byte v, byte y)
   switch (v)
   {
   case 0:
-    showSegment(dg, SA, y);
-    showSegment(dg, SB, y);
-    showSegment(dg, SC, y);
-    showSegment(dg, SD, y);
-    showSegment(dg, SE, y);
-    showSegment(dg, SF, y);
+    showSegment(dg, SEG_A, y);
+    showSegment(dg, SEG_B, y);
+    showSegment(dg, SEG_C, y);
+    showSegment(dg, SEG_D, y);
+    showSegment(dg, SEG_E, y);
+    showSegment(dg, SEG_F, y);
     break;
   case 1:
-    showSegment(dg, SB, y);
-    showSegment(dg, SC, y);
+    showSegment(dg, SEG_B, y);
+    showSegment(dg, SEG_C, y);
     break;
   case 2:
-    showSegment(dg, SA, y);
-    showSegment(dg, SB, y);
-    showSegment(dg, SD, y);
-    showSegment(dg, SE, y);
-    showSegment(dg, SG, y);
+    showSegment(dg, SEG_A, y);
+    showSegment(dg, SEG_B, y);
+    showSegment(dg, SEG_D, y);
+    showSegment(dg, SEG_E, y);
+    showSegment(dg, SEG_G, y);
     break;
   case 3:
-    showSegment(dg, SA, y);
-    showSegment(dg, SB, y);
-    showSegment(dg, SC, y);
-    showSegment(dg, SD, y);
-    showSegment(dg, SG, y);
+    showSegment(dg, SEG_A, y);
+    showSegment(dg, SEG_B, y);
+    showSegment(dg, SEG_C, y);
+    showSegment(dg, SEG_D, y);
+    showSegment(dg, SEG_G, y);
     break;
   case 4:
-    showSegment(dg, SB, y);
-    showSegment(dg, SC, y);
-    showSegment(dg, SF, y);
-    showSegment(dg, SG, y);
+    showSegment(dg, SEG_B, y);
+    showSegment(dg, SEG_C, y);
+    showSegment(dg, SEG_F, y);
+    showSegment(dg, SEG_G, y);
     break;
   case 5:
-    showSegment(dg, SA, y);
-    showSegment(dg, SC, y);
-    showSegment(dg, SD, y);
-    showSegment(dg, SF, y);
-    showSegment(dg, SG, y);
+    showSegment(dg, SEG_A, y);
+    showSegment(dg, SEG_C, y);
+    showSegment(dg, SEG_D, y);
+    showSegment(dg, SEG_F, y);
+    showSegment(dg, SEG_G, y);
     break;
   case 6:
-    showSegment(dg, SA, y);
-    showSegment(dg, SC, y);
-    showSegment(dg, SD, y);
-    showSegment(dg, SE, y);
-    showSegment(dg, SF, y);
-    showSegment(dg, SG, y);
+    showSegment(dg, SEG_A, y);
+    showSegment(dg, SEG_C, y);
+    showSegment(dg, SEG_D, y);
+    showSegment(dg, SEG_E, y);
+    showSegment(dg, SEG_F, y);
+    showSegment(dg, SEG_G, y);
     break;
   case 7:
-    showSegment(dg, SA, y);
-    showSegment(dg, SB, y);
-    showSegment(dg, SC, y);
+    showSegment(dg, SEG_A, y);
+    showSegment(dg, SEG_B, y);
+    showSegment(dg, SEG_C, y);
     break;
   case 8:
-    showSegment(dg, SA, y);
-    showSegment(dg, SB, y);
-    showSegment(dg, SC, y);
-    showSegment(dg, SD, y);
-    showSegment(dg, SE, y);
-    showSegment(dg, SF, y);
-    showSegment(dg, SG, y);
+    showSegment(dg, SEG_A, y);
+    showSegment(dg, SEG_B, y);
+    showSegment(dg, SEG_C, y);
+    showSegment(dg, SEG_D, y);
+    showSegment(dg, SEG_E, y);
+    showSegment(dg, SEG_F, y);
+    showSegment(dg, SEG_G, y);
     break;
   case 9:
-    showSegment(dg, SA, y);
-    showSegment(dg, SB, y);
-    showSegment(dg, SC, y);
-    showSegment(dg, SD, y);
-    showSegment(dg, SF, y);
-    showSegment(dg, SG, y);
+    showSegment(dg, SEG_A, y);
+    showSegment(dg, SEG_B, y);
+    showSegment(dg, SEG_C, y);
+    showSegment(dg, SEG_D, y);
+    showSegment(dg, SEG_F, y);
+    showSegment(dg, SEG_G, y);
     break;
   default:
-    showSegment(dg, SG, y);
+    showSegment(dg, SEG_G, y);
     break;
   }
 }
@@ -314,25 +330,25 @@ void showSegment(byte digit, byte seg, byte y)
 
   switch (seg)
   {
-  case SA: // A
+  case SEG_A: // A
     display.drawFastHLine(x + 1, y, SG_SIZE - 2, SSD1306_WHITE);
     break;
-  case SB: // B
+  case SEG_B: // B
     display.drawFastVLine(x + SG_SIZE, y + 1, SG_SIZE - 2, SSD1306_WHITE);
     break;
-  case SC: // C
+  case SEG_C: // C
     display.drawFastVLine(x + SG_SIZE, y + 1 + SG_SIZE, SG_SIZE - 2, SSD1306_WHITE);
     break;
-  case SD: // D
+  case SEG_D: // D
     display.drawFastHLine(x + 1, y + (2 * SG_SIZE), SG_SIZE - 2, SSD1306_WHITE);
     break;
-  case SE: // E
+  case SEG_E: // E
     display.drawFastVLine(x, y + 1 + SG_SIZE, SG_SIZE - 2, SSD1306_WHITE);
     break;
-  case SF: // F
+  case SEG_F: // F
     display.drawFastVLine(x, y + 1, SG_SIZE - 2, SSD1306_WHITE);
     break;
-  case SG: // G
+  case SEG_G: // G
     display.drawFastHLine(x + 1, y + SG_SIZE, SG_SIZE - 2, SSD1306_WHITE);
     break;
   default:
