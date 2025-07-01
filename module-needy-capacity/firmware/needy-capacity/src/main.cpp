@@ -147,6 +147,7 @@ void processWait()
     dbgOut(F("wait tv: "));
     dbgOutLn(timeValue);
     showNumber(timeValue);
+    showLevel(0);
   }
 #endif
   if (millis() >= activeTime)
@@ -185,17 +186,14 @@ void processActive()
     {
       game.setPixelColor(PX_RED);
       fillLevel = fillLevel + delta;
-      dbgOut(F(", charge, "));
     }
     else
     {
       game.setPixelColor(PX_GREEN);
       fillLevel = fillLevel - dischargeDelta;
-      dbgOut(F(", discharge, "));
     }
     fillLevel = min(fillLevel, MAX_FILL);
     fillLevel = max(0, fillLevel);
-    dbgOutLn(fillLevel);
     showLevel(fillLevel / 100);
   }
   // Time over
@@ -379,6 +377,8 @@ void showLevel(int fillLevel)
 {
   display.fillRect(0, 27, 31, 100, SSD1306_BLACK);
   display.drawRoundRect(0, 27, 31, 100, 6, SSD1306_WHITE);
-  display.fillRoundRect(0, 127 - fillLevel, 31, int16_t(fillLevel), 6, SSD1306_WHITE);
+  if (fillLevel > 0) {
+    display.fillRoundRect(0, 127 - fillLevel, 31, int16_t(fillLevel), 6, SSD1306_WHITE);
+  }
   display.display();
 }
