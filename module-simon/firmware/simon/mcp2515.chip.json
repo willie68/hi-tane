@@ -1,0 +1,17 @@
+{
+  "name": "mcp2515",
+  "author": "Wilfried Klaas",
+  "pins": [
+    "VCC",
+    "GND",
+    "",
+    "",
+    "",
+    "CS",
+    "SO",
+    "SI",
+    "SCK",
+    "INT"
+  ],
+  "controls": []
+}

@@ -1,1 +1,1 @@
-copy ./wokwi/diagram_oled.json diagram.json
+copy .\wokwi\diagram_oled.json diagram.json

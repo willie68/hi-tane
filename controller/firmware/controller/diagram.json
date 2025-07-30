@@ -8,7 +8,7 @@
       "type": "wokwi-tm1637-7segment",
       "id": "sevseg1",
       "top": -9.64,
-      "left": -213.77,
+      "left": -242.57,
       "attrs": { "color": "red" }
     },
     {
@@ -46,25 +46,25 @@
     {
       "type": "wokwi-buzzer",
       "id": "bz1",
-      "top": -148.5,
-      "left": -194.7,
+      "top": -186.9,
+      "left": -290.7,
       "rotate": 270,
       "attrs": { "volume": "0.1" }
     },
     {
-      "type": "board-ssd1306",
-      "id": "oled2",
-      "top": 147.14,
-      "left": 38.63,
-      "attrs": { "i2cAddress": "0x3c" }
-    },
-    {
       "type": "wokwi-resistor",
       "id": "r1",
-      "top": -72,
-      "left": 18.65,
-      "rotate": 90,
+      "top": -159.25,
+      "left": -192,
       "attrs": { "value": "250" }
+    },
+    { "type": "chip-mcp2515", "id": "chip1", "top": -75.78, "left": -321.6, "attrs": {} },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": 156.74,
+      "left": 29.03,
+      "attrs": { "i2cAddress": "0x3c" }
     }
   ],
   "connections": [
@@ -85,12 +85,19 @@
     [ "sevseg1:GND", "bz1:1", "black", [ "h9.6", "v-144" ] ],
     [ "sevseg1:DIO", "nano:2", "blue", [ "h28.8", "v-38.4", "h125.3" ] ],
     [ "sevseg1:CLK", "nano:3", "gold", [ "h19.2", "v-38.4", "h124.8" ] ],
-    [ "nano:GND.1", "oled2:GND", "black", [ "v43.2", "h-77.3" ] ],
-    [ "nano:5V", "oled2:VCC", "red", [ "v52.8", "h-29.3" ] ],
-    [ "nano:A4", "oled2:SDA", "blue", [ "v14.4", "h18.7" ] ],
-    [ "nano:A5", "oled2:SCL", "gold", [ "v0" ] ],
-    [ "nano:9", "r1:2", "green", [ "v0" ] ],
-    [ "r1:1", "bz1:2", "green", [ "h0", "v-9.6" ] ]
+    [ "r1:2", "nano:9", "green", [ "h85.2", "v38.4", "h96.5" ] ],
+    [ "bz1:2", "r1:1", "green", [ "h0" ] ],
+    [ "nano:5V", "chip1:VCC", "red", [ "v24", "h-461.3", "v-153.6" ] ],
+    [ "nano:GND.1", "chip1:GND", "black", [ "v33.6", "h-470.9", "v-153.6" ] ],
+    [ "chip1:INT", "nano:2", "gray", [ "h21.01", "v-19.2", "h384.5" ] ],
+    [ "chip1:SCK", "nano:13", "gold", [ "h184.21", "v-9.6", "h96", "v129.6" ] ],
+    [ "chip1:SI", "nano:11", "orange", [ "h318.61", "h0", "v43.2" ] ],
+    [ "chip1:SO", "nano:12", "green", [ "h0" ] ],
+    [ "chip1:CS", "nano:10", "white", [ "h328.21", "v24" ] ],
+    [ "nano:A4", "oled1:SDA", "blue", [ "v62.4", "h76.3" ] ],
+    [ "nano:A5", "oled1:SCL", "gold", [ "v72", "h57.1" ] ],
+    [ "nano:5V", "oled1:VCC", "red", [ "v24", "h-58.1" ] ],
+    [ "nano:GND.1", "oled1:GND", "black", [ "v33.6", "h-96.5" ] ]
   ],
   "dependencies": {}
 }

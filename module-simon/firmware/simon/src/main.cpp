@@ -6,6 +6,8 @@
 #include <game.h>
 #include <button.h>
 
+#define simpleval
+
 // RGB LED
 const uint8_t LED_PIN = 4;
 const uint8_t COM_PIN = 2;
@@ -337,8 +339,12 @@ void calcValidationSchema()
       break;
     }
   }
-  dbgOut("validation: ")
-      printMX(validationSchema);
+#ifdef simpleval
+  dbgOutLn("mx_si_no");
+  validationSchema = mx_si_no;
+#endif
+  dbgOut("validation: ");
+  printMX(validationSchema);
 }
 
 void LedOn(Color color, bool on)

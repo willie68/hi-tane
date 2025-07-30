@@ -51,6 +51,10 @@
 		{
 			"name": "hi-tane",
 			"path": "."
+		},
+		{
+			"name": "arduino_test",
+			"path": "C:/Users/w.klaas/Documents/PlatformIO/Projects/arduino_test"
 		}
 	],
 	"settings": {

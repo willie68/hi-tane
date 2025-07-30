@@ -16,17 +16,14 @@
 #include <pins_arduino.h>
 #include <display.h>
 
-// 7 seg  Display
+// Hardware definitions
+// 7-Segment LED Display
 const uint8_t CLK = 3;
 const uint8_t DIO = 2;
 
-// 7-Segment LED Display
-const uint8_t TTD[] = {SEG_F | SEG_G | SEG_E | SEG_D};
-const uint8_t MND[] = {SEG_G};
+const uint8_t MND[] = {SEG_G}; // minus
 
 TM1637Display seg7 = TM1637Display(CLK, DIO);
-
-const int MAX_TIME = 90 * 60;
 
 // Encoder
 const uint8_t PIN_ENCA = 6;
@@ -80,7 +77,7 @@ void printModules();
 void showPausedMenu();
 void pixelHide();
 
-// Communication
+// Global variables
 HTCOM htcom;
 Indicators indicators;
 SerialNumber serialnumber;
@@ -93,6 +90,9 @@ Difficulty difficulty = Difficulty::SIMPLE;
 Difficulty sdiff = Difficulty::SIMPLE;
 bool started, paused;
 
+// Constants
+const int MAX_TIME = 90 * 60;
+
 void timerIsr()
 {
   // This is the Encoder's worker routine. It will physically read the hardware
@@ -100,6 +100,7 @@ void timerIsr()
   clickEnc.service();
 }
 
+// Initialisation
 void setup()
 {
   initDebug();
@@ -108,8 +109,7 @@ void setup()
   LED(1);
   dbgOutLn(F("init 7seg"));
   seg7.clear();
-  seg7.setSegments(TTD, 1, 0);
-  seg7.setBrightness(DEFAULT_BRIGHTNESS > 1);
+  seg7.setBrightness(DEFAULT_BRIGHTNESS >> 1);
 
   dbgOutLn(F("init neopixel"));
   pixel.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -198,6 +198,7 @@ void initHTCOM()
   htcom.setCtrlIndicators(indicators.Compress());
 }
 
+// Main loop
 void loop()
 {
   htcom.poll();
@@ -267,6 +268,7 @@ void calculateActGameTime()
   }
 }
 
+// Menu system
 int8_t mpv, smpv; // menu paused value
 
 void showPausedMenu()
@@ -526,6 +528,7 @@ void gt2Display()
   display.print(lb_short_minutes);
 }
 
+// other functions
 void startGame()
 {
   dbgOutLn(F("start game"));

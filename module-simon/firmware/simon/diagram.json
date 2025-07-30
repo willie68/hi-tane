@@ -91,7 +91,14 @@
       "rotate": 270,
       "attrs": { "value": "150" }
     },
-    { "type": "chip-mcp2515", "id": "chip1", "top": 116.22, "left": -91.2, "attrs": {} }
+    {
+      "type": "chip-mcp2515",
+      "id": "chip1",
+      "top": 115.78,
+      "left": -89,
+      "rotate": 180,
+      "attrs": {}
+    }
   ],
   "connections": [
     [ "nano:4", "rgb1:DIN", "green", [ "v-81.6", "h76.3", "v9.6" ] ],
@@ -117,12 +124,12 @@
     [ "r3:1", "nano:6", "orange", [ "v48", "h192" ] ],
     [ "btn1:2.l", "nano:A0", "red", [ "v13.6", "h-50.8", "v172.8", "h67.2" ] ],
     [ "btn4:2.l", "nano:A1", "green", [ "v176.8", "h285.2" ] ],
-    [ "chip1:INT", "nano:2", "gray", [ "h184.21", "v-163.2", "h-86.4" ] ],
-    [ "chip1:SCK", "nano:13", "gold", [ "h30.61", "v-38.4", "h-38.4" ] ],
-    [ "chip1:SI", "nano:11", "orange", [ "v19.2", "h-142.19", "v-182.4", "h153.6" ] ],
-    [ "chip1:SO", "nano:12", "green", [ "h-28.8", "v-163.2" ] ],
+    [ "chip1:INT", "nano:2", "gray", [ "h-66.81", "v-163.2", "h268.8" ] ],
+    [ "chip1:SCK", "nano:13", "gold", [ "h-11.41", "v-48", "h115.2" ] ],
+    [ "chip1:SI", "nano:11", "orange", [ "v-0.44", "h-40.21", "v-162.76", "h153.6" ] ],
+    [ "chip1:SO", "nano:12", "green", [ "h-28.8", "v-144", "h132.59" ] ],
     [ "chip1:CS", "nano:10", "white", [ "h-19.2", "v-163.2", "h144" ] ],
-    [ "nano:5V", "chip1:VCC", "red", [ "v48", "h-192" ] ],
+    [ "nano:5V", "chip1:VCC", "red", [ "v105.6", "h-107.8" ] ],
     [ "nano:GND.1", "chip1:GND", "black", [ "v19.2", "h-240", "v57.6" ] ]
   ],
   "dependencies": {}

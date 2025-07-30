@@ -3,3 +3,7 @@ version = 1
 firmware = '.pio/build/nanoatmega328/firmware.hex'
 elf = '.pio/build/nanoatmega328/firmware.elf'
 rfc2217ServerPort = 4000
+
+[[chip1]]
+name = 'mcp2515'
+binary = 'mcp2515.chip.c'
